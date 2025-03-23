@@ -1,5 +1,9 @@
 #pragma once
 #include "BaseGame.h"
+#include <vector>
+
+class Texture;
+
 class Game : public BaseGame
 {
 public:
@@ -22,6 +26,8 @@ public:
 	void ProcessMouseUpEvent( const SDL_MouseButtonEvent& e ) override;
 
 private:
+	// VARIABLES
+	Texture* m_Background;
 
 	// FUNCTIONS
 	void Initialize();

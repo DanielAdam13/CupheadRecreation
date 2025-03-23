@@ -1,8 +1,11 @@
 #include "pch.h"
 #include "Game.h"
+#include <iostream>
+#include "Texture.h"
 
 Game::Game( const Window& window ) 
-	:BaseGame{ window }
+	:BaseGame{ window },
+	m_Background{new Texture("Floral_fury_battle.jpg")}
 {
 	Initialize();
 }
@@ -19,6 +22,8 @@ void Game::Initialize( )
 
 void Game::Cleanup( )
 {
+	delete m_Background;
+	m_Background = nullptr;
 }
 
 void Game::Update( float elapsedSec )
@@ -38,6 +43,7 @@ void Game::Update( float elapsedSec )
 void Game::Draw( ) const
 {
 	ClearBackground( );
+	m_Background->Draw(GetViewPort());
 }
 
 void Game::ProcessKeyDownEvent( const SDL_KeyboardEvent & e )
