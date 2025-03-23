@@ -21,7 +21,7 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{c5e766a6-5f69-4ad3-a26c-6bf1935d9139}</ProjectGuid>
+    <ProjectGuid>{3e27e450-1331-4b68-acfd-6352e9080359}</ProjectGuid>
     <RootNamespace>FlowerBossCuphead</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
