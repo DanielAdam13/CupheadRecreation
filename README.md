@@ -4,15 +4,15 @@
 <br />
 <div align="center">
 
-  <h2 align="center">NAME OF CHOSEN GAME</h2>
-
+  <h2 align="center">CUPHEAD</h2>
+  
   <p align="center">
-    Short description of the game.
+    The game's main feature is making the player satisfied when beating dozens of bosses in a row, like a boss rush
     <br />
     <strong>Original game : </strong>
     <a href="https://www.google.be/"><strong>General info »</strong></a>
     ·
-    <a href="https://www.google.be/"><strong>Youtube video »<strong></a>
+    <a href="https://www.youtube.com/watch?v=Fl-Qz9YRY1A"><strong>Youtube video »<strong></a>
     <br />
     <br />
   </p>
@@ -49,9 +49,8 @@
 TODO: add screenshot 
 
 Here's why:
-TODO: describe why you chose this game 
-* reason 1
-* reason .. 
+* Cuphead is a beloved game of mine
+* Speaking about the assignment, I figured a single boss fight in cuphead would be a great way to showcase my skills 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -61,16 +60,19 @@ TODO: describe why you chose this game
 This section gives a clear and detailed overview of which parts of the original game I planned to make.
 
 ### The minimum I will most certainly develop:
-* .. 
-* .. 
+*  I will make both phases of the bossfight featuring "Cagney Carnation" - the flower bossfight in the first area of the game
+*  I will animate and code the main character cuphead
+ * I will animate and code some of the attacks of the boss such as: spawning the vegetation, extension of his head
+ * I will make the background and include correct raycast logic for the floor and the platforms
 
 ### What I will probably make as well:
-* .. 
-* .. 
+* I want to correctly code and animate the vines that spawn from the ground in the first phase
+* The spawning of the vines in the second phase
 
 ### What I plan to create if I have enough time left:
-* .. 
-* .. 
+* The super attack that cuphead gets when the player gets 5 cards 
+* Polish the animations since I'm pretty sure some of them will look clunky 
+* Include the overall score at the end when you beat the boss
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
