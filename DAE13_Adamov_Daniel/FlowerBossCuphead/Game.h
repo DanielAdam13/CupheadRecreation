@@ -27,7 +27,6 @@ public:
 
 private:
 	// VARIABLES
-	Texture* m_Background;
 
 	// FUNCTIONS
 	void Initialize();
