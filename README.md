@@ -7,10 +7,10 @@
   <h2 align="center">CUPHEAD</h2>
   
   <p align="center">
-    The game's main feature is making the player satisfied when beating dozens of bosses in a row, like a boss rush
+   Cuphead is a classic run and gun action game heavily focused on boss battles. Inspired by cartoons of the 1930s, the visuals and audio are painstakingly created with the same techniques of the era
     <br />
     <strong>Original game : </strong>
-    <a href="https://www.google.be/"><strong>General info »</strong></a>
+    <a href="https://cuphead.fandom.com/wiki/Cuphead_(video_game)"><strong>General info »</strong></a>
     ·
     <a href="https://www.youtube.com/watch?v=Fl-Qz9YRY1A"><strong>Youtube video »<strong></a>
     <br />
@@ -50,7 +50,7 @@ TODO: add screenshot
 
 Here's why:
 * Cuphead is a beloved game of mine
-* Speaking about the assignment, I figured a single boss fight in cuphead would be a great way to showcase my skills 
+* Speaking about the assignment, I figured cuphead would be a great choice to recreate since it uses camera movement a lot and has a lot of potential with enemy classes, all having different interactions.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -60,19 +60,19 @@ Here's why:
 This section gives a clear and detailed overview of which parts of the original game I planned to make.
 
 ### The minimum I will most certainly develop:
-*  I will make both phases of the bossfight featuring "Cagney Carnation" - the flower bossfight in the first area of the game
-*  I will animate and code the main character cuphead
- * I will animate and code some of the attacks of the boss such as: spawning the vegetation, extension of his head
- * I will make the background and include correct raycast logic for the floor and the platforms
+* 
+* 
+* 
+* 
 
 ### What I will probably make as well:
-* I want to correctly code and animate the vines that spawn from the ground in the first phase
-* The spawning of the vines in the second phase
+* 
+* 
 
 ### What I plan to create if I have enough time left:
-* The super attack that cuphead gets when the player gets 5 cards 
-* Polish the animations since I'm pretty sure some of them will look clunky 
-* Include the overall score at the end when you beat the boss
+* 
+* 
+* 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -146,9 +146,9 @@ Explain where you applied inheritance (mandatory).
 <!-- CONTACT -->
 ## Contact
 
-Your Name - email@student.howest.be
+Adamov Daniel - daniel.adamov@student.howest.be
 
-Project Link: [https://github.com/your_username/repo_name](https://github.com/your_username/repo_name)
+Project Link: [https://github.com/HowestDAE/dae13-DanielAdam13.git](https://github.com/HowestDAE/dae13-DanielAdam13.git)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -158,7 +158,7 @@ Project Link: [https://github.com/your_username/repo_name](https://github.com/yo
 
 Use this space to list resources you find helpful and would like to give credit to. 
 
-* [Example 1: cpp reference on std::vector](https://en.cppreference.com/w/cpp/container/vector)
+* [Sprites source](https://www.spriters-resource.com/pc_computer/cupheaddontdealwiththedevil/)
 * ..
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
