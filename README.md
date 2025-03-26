@@ -63,14 +63,15 @@ This section gives a clear and detailed overview of which parts of the original 
 ### The minimum I will most certainly develop:
 * I will make two levels - one will be a more massive level with 4 types of enemies, namely: the stationary mushroom, the small running blue guy, the flying acorn and the chomper.
 * I will make the first phase of the flower boss fight, where the boss will be fully animated with correct collisions.
-* I will add its attack where he spawns little enemies, the attack where he extends his face and the boomerang.
+* I will add its attack where he spawns little enemies, the attack where he creates the acorns and the boomerang.
+* I will animate and apply correct character controller to Cuphead + small projectiles, big attack.
 
 ### What I will probably make as well:
 * I will implement correct collision for parrying and possibly correctly make the parriable objects in both stages, namely: the spike from Run'n'Gun, the small bombs from the Flower.
-* I will add the attack where he creates 3 acorns.
+* I will add the attack where the Flower extends his face.
 
 ### What I plan to create if I have enough time left:
-* I would make the second part of the flower boss fight
+* I would make the second part of the flower boss fight.
 * 2 more enemies for the Run'n'Gun level, namely: the running flower and the stationary flower.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
