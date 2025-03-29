@@ -61,7 +61,7 @@ Here's why:
 This section gives a clear and detailed overview of which parts of the original game I planned to make.
 
 ### The minimum I will most certainly develop:
-* I will make two levels - one will be a more massive level with 4 types of enemies, namely: the stationary mushroom, the small running blue guy, the flying acorn and the chomper.
+* I will make two levels - one will be a more massive level with 4 types of enemies, namely: the stationary mushroom, the stationary flower, the flying acorn and the chomper.
 * I will make the first phase of the flower boss fight, where the boss will be fully animated with correct collisions.
 * I will add its attack where he spawns little enemies, the attack where he creates the acorns and the boomerang.
 * I will animate and apply correct character controller to Cuphead + small projectiles, big attack.
@@ -72,7 +72,7 @@ This section gives a clear and detailed overview of which parts of the original 
 
 ### What I plan to create if I have enough time left:
 * I would make the second part of the flower boss fight.
-* 2 more enemies for the Run'n'Gun level, namely: the running flower and the stationary flower.
+* 2 more enemies for the Run'n'Gun level, namely: the running flower and the small running blue guy.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
