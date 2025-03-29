@@ -3,8 +3,9 @@
 #include <iostream>
 #include "Texture.h"
 
-Game::Game( const Window& window ) 
-	:BaseGame{ window }
+Game::Game(const Window& window)
+	:BaseGame{ window },
+	m_Cuphead{ Cuphead(Vector2f{GetViewPort().width / 2, 10.f})}
 {
 	Initialize();
 }
@@ -26,20 +27,23 @@ void Game::Cleanup( )
 void Game::Update( float elapsedSec )
 {
 	// Check keyboard state
-	//const Uint8 *pStates = SDL_GetKeyboardState( nullptr );
-	//if ( pStates[SDL_SCANCODE_RIGHT] )
-	//{
-	//	std::cout << "Right arrow key is down\n";
-	//}
-	//if ( pStates[SDL_SCANCODE_LEFT] && pStates[SDL_SCANCODE_UP])
-	//{
-	//	std::cout << "Left and up arrow keys are down\n";
-	//}
+	const Uint8 *pStates = SDL_GetKeyboardState( nullptr );
+	if ( pStates[SDL_SCANCODE_RIGHT] )
+	{
+		std::cout << "Right arrow key is down\n";
+	}
+	if ( pStates[SDL_SCANCODE_LEFT] && pStates[SDL_SCANCODE_UP])
+	{
+		std::cout << "Left and up arrow keys are down\n";
+	}
+
+	m_Cuphead.Update(elapsedSec, pStates);
 }
 
 void Game::Draw( ) const
 {
 	ClearBackground( );
+	m_Cuphead.Draw();
 }
 
 void Game::ProcessKeyDownEvent( const SDL_KeyboardEvent & e )

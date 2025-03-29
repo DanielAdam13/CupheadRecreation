@@ -1,6 +1,7 @@
 #pragma once
 #include "BaseGame.h"
 #include <vector>
+#include "Cuphead.h"
 
 class Texture;
 
@@ -27,6 +28,7 @@ public:
 
 private:
 	// VARIABLES
+	Cuphead m_Cuphead;
 
 	// FUNCTIONS
 	void Initialize();
