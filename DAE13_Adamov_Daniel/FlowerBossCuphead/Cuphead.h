@@ -1,5 +1,6 @@
 #pragma once
 #include "Animator.h"
+#include <vector>
 class Texture;
 
 class Cuphead final
@@ -10,6 +11,7 @@ public:
 		idle,
 		runLeft,
 		runRight,
+		lock,
 		jump,
 		dash,
 		duck,
@@ -18,7 +20,6 @@ public:
 
 	enum class Shoot
 	{
-		idle,
 		shootUp,
 		shootDiagonalUpRight,
 		shootRight,
@@ -38,11 +39,15 @@ public:
 
 	void Draw() const;
 	void Update(float elapsedSec, const Uint8* pStates);
+	void HandleRaycast(float elapsedSec, const std::vector<Vector2f>& vertices);
 
+	int GetHealth() const;
 	
 private:
 	//MEMBER VARIABLES
 	Vector2f m_Position;
+	static float m_FrameWidth;
+	static float m_FrameHeight;
 	const float m_Speed;
 	int m_HP;
 	bool m_PlayingIntro;
@@ -55,6 +60,8 @@ private:
 	float m_AccuSec;
 	float m_MaxFrameSec;
 	int m_CurrentFrame;
+
+	Vector2f m_Velocity;
 
 	Texture* m_TextureDash;
 	Texture* m_TextureShoot;
@@ -75,7 +82,7 @@ private:
 
 	// MEMBER FUNCTIONS
 	void PlayIntro(float elapsedSec);
-	Rectf GetBounds(float frameWidth, float frameHeight) const;
+	Rectf GetBounds() const;
 
 	void IntializeTextures();
 	void DeleteTextures();

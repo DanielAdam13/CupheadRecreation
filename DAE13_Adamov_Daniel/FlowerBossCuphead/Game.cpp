@@ -2,10 +2,12 @@
 #include "Game.h"
 #include <iostream>
 #include "Texture.h"
+#include "utils.h"
 
 Game::Game(const Window& window)
 	:BaseGame{ window },
-	m_Cuphead{ Cuphead(Vector2f{GetViewPort().width / 2, 10.f})}
+	m_Cuphead{ Cuphead(Vector2f{GetViewPort().width / 2, 100.f})},
+	m_ForestBackground{new Texture("ForestFollies_Background.png")}
 {
 	Initialize();
 }
@@ -17,33 +19,44 @@ Game::~Game( )
 
 void Game::Initialize( )
 {
-	
+	m_Vertices.push_back(Vector2f{ 50.f, 10.f });
+	m_Vertices.push_back(Vector2f{ 50.f, GetViewPort().height - 10.f });
+	m_Vertices.push_back(Vector2f{ GetViewPort().width - 50.f, GetViewPort().height - 10.f });
+	m_Vertices.push_back(Vector2f{ GetViewPort().width - 50.f, 10.f });
 }
 
 void Game::Cleanup( )
 {
+	delete m_ForestBackground;
+	m_ForestBackground = nullptr;
 }
 
 void Game::Update( float elapsedSec )
 {
 	// Check keyboard state
 	const Uint8 *pStates = SDL_GetKeyboardState( nullptr );
-	if ( pStates[SDL_SCANCODE_RIGHT] )
+	/*if ( pStates[SDL_SCANCODE_RIGHT] )
 	{
 		std::cout << "Right arrow key is down\n";
 	}
 	if ( pStates[SDL_SCANCODE_LEFT] && pStates[SDL_SCANCODE_UP])
 	{
 		std::cout << "Left and up arrow keys are down\n";
-	}
+	}*/
 
 	m_Cuphead.Update(elapsedSec, pStates);
+	m_Cuphead.HandleRaycast(elapsedSec, m_Vertices);
 }
 
 void Game::Draw( ) const
 {
 	ClearBackground( );
 	m_Cuphead.Draw();
+
+	utils::SetColor(Color4f{ 1,0,1,1 });
+	utils::DrawPolygon(m_Vertices, true, 2.f);
+
+	//m_ForestBackground->Draw();
 }
 
 void Game::ProcessKeyDownEvent( const SDL_KeyboardEvent & e )

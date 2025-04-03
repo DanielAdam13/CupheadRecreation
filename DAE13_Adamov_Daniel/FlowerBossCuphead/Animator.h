@@ -2,13 +2,19 @@
 class Animator
 {
 public:
-	Animator(int& currentFrameNr);
+	Animator(int& currentFrameNr, float& accumulatedSeconds);
 
-	void LoopBetween(int firstFrame, int lastFrame, float& duration);
+	void PlayAnimation(const float maxFrameSec);
+	void PlayAnimation(const float maxFrameSec, int frameToReset);
+	void LoopBetween(int firstFrame, int lastFrame, const float duration, float maxFrameSec);
+	void LoopBetween(int firstFrame, int lastFrame, float maxFrameSec);
 	void SkipFrame(int frameToSkip);
-	void Reverse(int firstFrame, int lastFrame);
+	void ReverseAnimateBetween(int firstFrame, int lastFrame, const float maxFrameSec);
 	void ResetAtFrame(int frameToReset);
+	void Stop();
+
 private:
-	int m_FrameNr;
+	int& m_FrameNr;
+	float& m_AccuSec;
 };
 

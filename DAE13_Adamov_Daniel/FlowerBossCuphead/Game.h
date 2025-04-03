@@ -29,6 +29,8 @@ public:
 private:
 	// VARIABLES
 	Cuphead m_Cuphead;
+	std::vector<Vector2f> m_Vertices;
+	Texture* m_ForestBackground;
 
 	// FUNCTIONS
 	void Initialize();
