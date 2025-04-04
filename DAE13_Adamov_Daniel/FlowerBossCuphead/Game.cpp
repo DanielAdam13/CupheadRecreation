@@ -35,14 +35,6 @@ void Game::Update( float elapsedSec )
 {
 	// Check keyboard state
 	const Uint8 *pStates = SDL_GetKeyboardState( nullptr );
-	/*if ( pStates[SDL_SCANCODE_RIGHT] )
-	{
-		std::cout << "Right arrow key is down\n";
-	}
-	if ( pStates[SDL_SCANCODE_LEFT] && pStates[SDL_SCANCODE_UP])
-	{
-		std::cout << "Left and up arrow keys are down\n";
-	}*/
 
 	m_Cuphead.ProcessKeys(pStates);
 	m_Cuphead.AnimateCuphead(elapsedSec);

@@ -55,19 +55,17 @@ private:
 	Movement m_CupheadMovementState;
 	Shoot m_CupheadShootingState;
 
+	// important for reseting animations between each other
 	Movement m_LastMovementState;
 	Shoot m_LastShootState;
 
 	bool m_IsHit;
 
-	float m_AccuSec;
 	float m_MaxFrameSec;
 
 	Texture* m_CurrentTexture;
 	int m_CurrentColNr;
 	int m_CurrentRowNr;
-
-	int m_CurrentFrame;
 
 	Vector2f m_Velocity;
 

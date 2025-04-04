@@ -2,7 +2,7 @@
 class Animator
 {
 public:
-	Animator(int& currentFrameNr, float& accumulatedSeconds);
+	Animator();
 
 	void PlayAnimation(const float elapsedSec, const float maxFrameSec);
 	void PlayAnimation(const float elapsedSec, const float maxFrameSec, const int frameToReset);
@@ -13,8 +13,10 @@ public:
 	void Reset(int frameToReset = 0);
 	void Stop();
 
+	int GetCurrentFrame() const;
+
 private:
-	int& m_FrameNr;
+	int m_FrameNr;
 	float m_AccuSec;
 };
 

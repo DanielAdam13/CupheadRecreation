@@ -1,9 +1,9 @@
 #include "pch.h"
 #include "Animator.h"
 
-Animator::Animator(int& currentFrameNr, float& accumulatedSec)
-	: m_FrameNr{ currentFrameNr },
-	m_AccuSec{ accumulatedSec }
+Animator::Animator()
+	: m_FrameNr{ 0 },
+	m_AccuSec{ 0.f }
 {
 }
 
@@ -121,4 +121,9 @@ void Animator::Stop()
 {
 	//m_FrameNr = 0;
 	m_AccuSec = 0.f;
+}
+
+int Animator::GetCurrentFrame() const
+{
+	return m_FrameNr;
 }

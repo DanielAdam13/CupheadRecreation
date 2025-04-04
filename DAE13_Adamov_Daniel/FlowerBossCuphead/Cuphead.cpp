@@ -17,14 +17,12 @@ Cuphead::Cuphead(const Vector2f& position)
 	m_LastMovementState{ Movement::idle },
 	m_LastShootState{ Shoot::notShooting },
 	m_IsHit{ false },
-	m_AccuSec{ 0.f },
 	m_MaxFrameSec{ 0.07f },
 	m_CurrentTexture{ nullptr },
 	m_CurrentColNr{ 1 },
 	m_CurrentRowNr{ 1 },
-	m_CurrentFrame{ 0 },
 	m_Velocity{ 0.f, 0.f },
-	m_Animator{ m_CurrentFrame, m_AccuSec }
+	m_Animator{ Animator() }
 {
 	IntializeTextures();
 }
@@ -46,8 +44,8 @@ void Cuphead::Draw() const
 		
 		// we get GetBounds() by frame sizes which results in a little teleportation
 		m_CurrentTexture->Draw(GetBounds(),
-			Rectf{ 0 + (m_CurrentFrame % m_CurrentColNr) * m_FrameWidth,
-			0 + (m_CurrentFrame / m_CurrentColNr) * m_FrameHeight,
+			Rectf{ 0 + (m_Animator.GetCurrentFrame() % m_CurrentColNr) * m_FrameWidth,
+			0 + (m_Animator.GetCurrentFrame() / m_CurrentColNr) * m_FrameHeight,
 			m_FrameWidth, m_FrameHeight });
 
 		// hitbox
@@ -172,12 +170,14 @@ void Cuphead::ProcessKeys(const Uint8* pStates)
 			m_CupheadMovementState = Movement::lock;
 			m_CupheadShootingState = Shoot::shootRight;
 		}
-		// otherwise, it's idle
+
+		// --- I can add whatever key combinations I want from now on, AnimateCuphead will handle it! ---
+		
+		// if no key combination is pressed -> it's idle
 		else
 		{
 			m_CupheadMovementState = Movement::idle;
 			m_CupheadShootingState = Shoot::notShooting;
-
 		}
 	}
 }
@@ -190,9 +190,9 @@ void Cuphead::AnimateCuphead(float elapsedSec)
 		m_CurrentColNr = 7;
 		m_CurrentRowNr = 4;
 
-		m_Animator.LoopBetween(elapsedSec, 12, 19, m_MaxFrameSec, 4.f);
+		m_Animator.LoopBetween(elapsedSec, 12, 19, m_MaxFrameSec, 2.f);
 		
-		if (m_CurrentFrame > 27)
+		if (m_Animator.GetCurrentFrame() > 27)
 		{
 			m_Animator.Reset(0);
 			m_PlayingIntro = false;
@@ -201,7 +201,7 @@ void Cuphead::AnimateCuphead(float elapsedSec)
 	else
 	{
 		bool stateChanged{ (m_CupheadMovementState != m_LastMovementState) ||
-			(m_CupheadShootingState != m_LastShootState) }; // very important!!! --- using this boolean we reset the animation m_CurrentFrameNr but throught Reset() in ANimate.cpp
+			(m_CupheadShootingState != m_LastShootState) }; // very important!!! --- we use this boolean to reset all animations - we do this through Reset() in Animate.cpp
 
 
 		if (m_CupheadMovementState == Movement::idle)
@@ -218,7 +218,7 @@ void Cuphead::AnimateCuphead(float elapsedSec)
 			m_CurrentColNr = 5;
 			m_CurrentRowNr = 1;
 
-			m_Animator.ReverseAnimateBetween(elapsedSec, 0, 5, 0.07f);
+			m_Animator.ReverseAnimateBetween(elapsedSec, 0, 5, m_MaxFrameSec);
 		}
 		else if (m_CupheadShootingState == Shoot::notShooting)
 		{
@@ -266,7 +266,6 @@ void Cuphead::AnimateCuphead(float elapsedSec)
 				m_CurrentRowNr = 4;
 
 				m_Animator.LoopBetween(elapsedSec, 7, 14, m_MaxFrameSec);
-				//m_Animator.PlayAnimation(elapsedSec, m_MaxFrameSec, 15);
 				break;
 			case Cuphead::Movement::parry:
 				break;
@@ -287,27 +286,27 @@ void Cuphead::AnimateCuphead(float elapsedSec)
 				{
 				case Cuphead::Shoot::shootUp:
 					currentStartIdx = 0;
-					m_Animator.ReverseAnimateBetween(elapsedSec, 0, 4, 0.08f);
+					m_Animator.ReverseAnimateBetween(elapsedSec, 0, 4, m_MaxFrameSec);
 					break;
 				case Cuphead::Shoot::shootDiagonalUpRight:
 					currentStartIdx = 5;
-					m_Animator.ReverseAnimateBetween(elapsedSec, 5, 9, 0.08f);
+					m_Animator.ReverseAnimateBetween(elapsedSec, 5, 9, m_MaxFrameSec);
 					break;
 				case Cuphead::Shoot::shootRight:
 					currentStartIdx = 10;
-					m_Animator.ReverseAnimateBetween(elapsedSec, 10, 14, 0.08f);
+					m_Animator.ReverseAnimateBetween(elapsedSec, 10, 14, m_MaxFrameSec);
 					break;
 				case Cuphead::Shoot::shootDiagonalUpLeft:
 					currentStartIdx = 5;
-					m_Animator.ReverseAnimateBetween(elapsedSec, 5, 9, 0.08f);
+					m_Animator.ReverseAnimateBetween(elapsedSec, 5, 9, m_MaxFrameSec);
 					break;
 				case Cuphead::Shoot::shootLeft:
 					currentStartIdx = 10;
-					m_Animator.ReverseAnimateBetween(elapsedSec, 10, 14, 0.08f);
+					m_Animator.ReverseAnimateBetween(elapsedSec, 10, 14, m_MaxFrameSec);
 					break;
 				case Cuphead::Shoot::shootDown:
 					currentStartIdx = 20;
-					m_Animator.ReverseAnimateBetween(elapsedSec, 21, 25, 0.08f);
+					m_Animator.ReverseAnimateBetween(elapsedSec, 21, 25, m_MaxFrameSec);
 					break;
 				}
 
