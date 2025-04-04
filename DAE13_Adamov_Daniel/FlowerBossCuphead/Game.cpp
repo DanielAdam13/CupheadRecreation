@@ -44,7 +44,8 @@ void Game::Update( float elapsedSec )
 		std::cout << "Left and up arrow keys are down\n";
 	}*/
 
-	m_Cuphead.Update(elapsedSec, pStates);
+	m_Cuphead.ProcessKeys(pStates);
+	m_Cuphead.AnimateCuphead(elapsedSec);
 	m_Cuphead.HandleRaycast(elapsedSec, m_Vertices);
 }
 

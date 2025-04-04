@@ -20,17 +20,16 @@ public:
 
 	enum class Shoot
 	{
+		notShooting,
 		shootUp,
 		shootDiagonalUpRight,
 		shootRight,
-		shootDiagonalDownRight,
-		shootDown,
 		shootDiagonalUpLeft,
 		shootLeft,
-		shootDiagonalDownLeft,
-		specialLeft,
+		shootDown,
 		specialUp,
 		specialRight,
+		specialLeft,
 		specialDown
 	};
 
@@ -38,7 +37,8 @@ public:
 	~Cuphead();
 
 	void Draw() const;
-	void Update(float elapsedSec, const Uint8* pStates);
+	void ProcessKeys(const Uint8* pStates);
+	void AnimateCuphead(float elapsedSec);
 	void HandleRaycast(float elapsedSec, const std::vector<Vector2f>& vertices);
 
 	int GetHealth() const;
@@ -55,10 +55,18 @@ private:
 	Movement m_CupheadMovementState;
 	Shoot m_CupheadShootingState;
 
+	Movement m_LastMovementState;
+	Shoot m_LastShootState;
+
 	bool m_IsHit;
 
 	float m_AccuSec;
 	float m_MaxFrameSec;
+
+	Texture* m_CurrentTexture;
+	int m_CurrentColNr;
+	int m_CurrentRowNr;
+
 	int m_CurrentFrame;
 
 	Vector2f m_Velocity;
@@ -81,7 +89,6 @@ private:
 
 
 	// MEMBER FUNCTIONS
-	void PlayIntro(float elapsedSec);
 	Rectf GetBounds() const;
 
 	void IntializeTextures();
