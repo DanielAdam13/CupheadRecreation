@@ -6,7 +6,8 @@
 
 Game::Game(const Window& window)
 	:BaseGame{ window },
-	m_Cuphead{ Cuphead(Vector2f{GetViewPort().width / 2, 100.f})},
+	m_Cuphead{ Cuphead(Vector2f{GetViewPort().width / 2, 100.f}, false)},
+	m_Vertices{},
 	m_ForestBackground{new Texture("ForestFollies_Background.png")}
 {
 	Initialize();

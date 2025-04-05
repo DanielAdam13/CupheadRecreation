@@ -33,7 +33,7 @@ public:
 		specialDown
 	};
 
-	explicit Cuphead(const Vector2f& position);
+	explicit Cuphead(const Vector2f& position, bool playIntro);
 	~Cuphead();
 
 	void Draw() const;
@@ -59,6 +59,8 @@ private:
 	Movement m_LastMovementState;
 	Shoot m_LastShootState;
 
+	bool m_KeyPressed;
+	bool m_IsGrounded;
 	bool m_IsHit;
 
 	float m_MaxFrameSec;
