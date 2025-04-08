@@ -10,7 +10,7 @@ float Cuphead::m_FrameHeight{ 0.f };
 
 Cuphead::Cuphead(const Vector2f& position, bool playIntro)
 	: m_Position{ position },
-	m_Speed{ 100.f },
+	m_Speed{ 400.f },
 	m_HP{ 3 },
 	m_PlayingIntro{ playIntro },
 	m_CupheadMovementState{ Movement::idle },
@@ -18,6 +18,9 @@ Cuphead::Cuphead(const Vector2f& position, bool playIntro)
 	m_LastMovementState{ Movement::idle },
 	m_LastShootState{ Shoot::notShooting },
 	m_KeyPressed{ false },
+	m_IsShooting{ false },
+	m_AccuSecProjectiles{ 0.f },
+	m_ShootAngle{ 0.f },
 	m_IsGrounded{ false },
 	m_IsHit{ false },
 	m_MaxFrameSec{ 0.07f },
@@ -25,7 +28,9 @@ Cuphead::Cuphead(const Vector2f& position, bool playIntro)
 	m_CurrentColNr{ 1 },
 	m_CurrentRowNr{ 1 },
 	m_Velocity{ 0.f, 0.f },
-	m_Animator{ Animator() }
+	m_FacingAngle{ 0.f },
+	m_Animator{},
+	m_ProjectileVector{ nullptr }
 {
 	IntializeTextures();
 }
@@ -33,45 +38,92 @@ Cuphead::Cuphead(const Vector2f& position, bool playIntro)
 Cuphead::~Cuphead()
 {
 	DeleteTextures();
+
+	for (const Projectile* pProjectile : m_ProjectileVector)
+	{
+		if (pProjectile != nullptr)
+		{
+			delete pProjectile;
+		}
+		pProjectile = nullptr;
+	}
+	m_ProjectileVector.clear();
 }
 
 void Cuphead::Draw() const
 {
-
-	// we call this regardless of the state
 	if (m_CurrentTexture != nullptr)
 	{
 		// regardless of the state, it always gets the right size
 		m_FrameWidth = m_CurrentTexture->GetWidth() / m_CurrentColNr;
 		m_FrameHeight = m_CurrentTexture->GetHeight() / m_CurrentRowNr;
+		Rectf srcRect{ 0.f + (m_Animator.GetCurrentFrame() % m_CurrentColNr) * m_FrameWidth, 0.f + (m_Animator.GetCurrentFrame() / m_CurrentColNr) * m_FrameHeight,
+			m_FrameWidth, m_FrameHeight };
 		
-		// GetBounds is calculated by the mid point of each texture 
-		m_CurrentTexture->Draw(GetBounds(),
-			Rectf{ 0 + (m_Animator.GetCurrentFrame() % m_CurrentColNr) * m_FrameWidth, 0 + (m_Animator.GetCurrentFrame() / m_CurrentColNr) * m_FrameHeight, 
-			m_FrameWidth, m_FrameHeight });
+		// GetBounds is calculated by the mid point of each texture
+		glPushMatrix();
+			glTranslatef(GetBounds().left, GetBounds().bottom, 0);
+			glRotatef(m_FacingAngle, 0, 1, 0); // Open gl doesn't support rotation around Y apparently
+			m_CurrentTexture->Draw(Vector2f{ -GetBounds().width / 2, 0.f}, srcRect);
 
-		// hitbox
-		utils::SetColor(Color4f{ 1,0,0,1 });
-		utils::DrawRect(GetBounds());
+			// hitbox
+			utils::SetColor(Color4f{ 1, 0, 0, 1 });
+			utils::DrawRect(Vector2f{ -GetBounds().width / 2, 0.f }, m_FrameWidth, m_FrameHeight);
+		glPopMatrix();
 	}
 
+
+	for (const Projectile* pProjectile : m_ProjectileVector)
+	{
+		if (pProjectile != nullptr)
+		{
+			pProjectile->Draw();
+		}
+	}
 	
+}
+
+void Cuphead::Update(float elapsedSec, const Uint8* pStates, const std::vector<Vector2f>& vertices)
+{
+	// determines which key is pressed where + combinations and sets the velocity
+	ProcessKeys(pStates);
+
+	// determines the current Texture which is going to be used in Draw() + updates the current framer number
+	AnimateCuphead(elapsedSec);
+
+	// updates the postion using m_Velocity and enables collisions from an std::vector
+	HandleRaycast(elapsedSec, vertices);
+
+	// creates and updates projectiles
+	UpdateProjectiles(elapsedSec);
 }
 
 void Cuphead::ProcessKeys(const Uint8* pStates)
 {
-	if(!m_PlayingIntro)
+	if (!m_PlayingIntro)
 	{
+		// determines the whole rotation logic + enables dashing in a direction
+		UpdateFacingDirection(pStates);
+
 		m_KeyPressed = true;
+		m_IsShooting = false;
 		// if a key is clicked -> we change states
-		
+
 		// change movement and shooting state, statring with COMBINATIONS
-		
+
 		// shoot Up left
 		if (pStates[SDL_SCANCODE_Z])
 		{
 			m_CupheadMovementState = Movement::jump;
 			m_CupheadShootingState = Shoot::notShooting; // 3
+			if (pStates[SDL_SCANCODE_LEFT])
+			{
+				m_Velocity.x = -m_Speed;
+			}
+			if (pStates[SDL_SCANCODE_RIGHT])
+			{
+				m_Velocity.x = m_Speed;
+			}
 
 			if (m_IsGrounded)
 			{
@@ -87,6 +139,8 @@ void Cuphead::ProcessKeys(const Uint8* pStates)
 			{
 				m_Velocity = Vector2f{ 0.f, 0.f };
 			}
+			m_ShootAngle = 135.f;
+			m_IsShooting = true;
 		}
 		// shoot Up right
 		else if (pStates[SDL_SCANCODE_RIGHT] && pStates[SDL_SCANCODE_UP] && pStates[SDL_SCANCODE_X] && pStates[SDL_SCANCODE_C])
@@ -98,6 +152,8 @@ void Cuphead::ProcessKeys(const Uint8* pStates)
 			{
 				m_Velocity = Vector2f{ 0.f, 0.f };
 			}
+			m_ShootAngle = 45.f;
+			m_IsShooting = true;
 		}
 		// shoot left
 		else if (pStates[SDL_SCANCODE_LEFT] && pStates[SDL_SCANCODE_X] && pStates[SDL_SCANCODE_C])
@@ -109,6 +165,8 @@ void Cuphead::ProcessKeys(const Uint8* pStates)
 			{
 				m_Velocity = Vector2f{ 0.f, 0.f };
 			}
+			m_ShootAngle = 180.f;
+			m_IsShooting = true;
 		}
 		// shoot right
 		else if (pStates[SDL_SCANCODE_RIGHT] && pStates[SDL_SCANCODE_X] && pStates[SDL_SCANCODE_C])
@@ -120,6 +178,8 @@ void Cuphead::ProcessKeys(const Uint8* pStates)
 			{
 				m_Velocity = Vector2f{ 0.f, 0.f };
 			}
+			m_ShootAngle = 0.f;
+			m_IsShooting = true;
 		}
 		// run shoot up right
 		else if (pStates[SDL_SCANCODE_RIGHT] && pStates[SDL_SCANCODE_UP] && pStates[SDL_SCANCODE_X]) // ?? might change
@@ -129,8 +189,10 @@ void Cuphead::ProcessKeys(const Uint8* pStates)
 
 			if (m_IsGrounded)
 			{
-				m_Velocity = Vector2f{ 200.f, 0.f };
+				m_Velocity = Vector2f{ m_Speed, 0.f };
 			}
+			m_ShootAngle = 45.f;
+			m_IsShooting = true;
 		}
 		// run shoot up left
 		else if (pStates[SDL_SCANCODE_LEFT] && pStates[SDL_SCANCODE_UP] && pStates[SDL_SCANCODE_X]) // ?? might change
@@ -140,8 +202,10 @@ void Cuphead::ProcessKeys(const Uint8* pStates)
 
 			if (m_IsGrounded)
 			{
-				m_Velocity = Vector2f{ -200.f, 0.f };
+				m_Velocity = Vector2f{ -m_Speed, 0.f };
 			}
+			m_ShootAngle = 135.f;
+			m_IsShooting = true;
 		}
 		// run shoot left
 		else if (pStates[SDL_SCANCODE_LEFT] && pStates[SDL_SCANCODE_X])
@@ -149,10 +213,16 @@ void Cuphead::ProcessKeys(const Uint8* pStates)
 			m_CupheadMovementState = Movement::runLeft;
 			m_CupheadShootingState = Shoot::shootLeft; // 17
 
+			m_Velocity.x = -m_Speed;
+
+			// Only reset vertical velocity when grounded
 			if (m_IsGrounded)
 			{
-				m_Velocity = Vector2f{ -200.f, 0.f };
+				m_Velocity.y = 0.f;
 			}
+
+			m_ShootAngle = 180.f;
+			m_IsShooting = true;
 		}
 		// run shoot right
 		else if (pStates[SDL_SCANCODE_RIGHT] && pStates[SDL_SCANCODE_X])
@@ -160,10 +230,16 @@ void Cuphead::ProcessKeys(const Uint8* pStates)
 			m_CupheadMovementState = Movement::runRight;
 			m_CupheadShootingState = Shoot::shootRight; // 16
 
+			m_Velocity.x = m_Speed;
+
+			// Only reset vertical velocity when grounded
 			if (m_IsGrounded)
 			{
-				m_Velocity = Vector2f{ 200.f, 0.f };
+				m_Velocity.y = 0.f;
 			}
+
+			m_ShootAngle = 0.f;
+			m_IsShooting = true;
 		}
 		// shoot up
 		else if (pStates[SDL_SCANCODE_UP] && pStates[SDL_SCANCODE_X])
@@ -175,6 +251,8 @@ void Cuphead::ProcessKeys(const Uint8* pStates)
 			{
 				m_Velocity = Vector2f{ 0.f, 0.f };
 			}
+			m_ShootAngle = 90.f;
+			m_IsShooting = true;
 		}
 		// shoot down
 		else if (pStates[SDL_SCANCODE_DOWN] && pStates[SDL_SCANCODE_X])
@@ -186,6 +264,8 @@ void Cuphead::ProcessKeys(const Uint8* pStates)
 			{
 				m_Velocity = Vector2f{ 0.f, 0.f };
 			}
+			m_ShootAngle = 270.f;
+			m_IsShooting = true;
 		}
 		// then proceed with individual keys
 		else if (pStates[SDL_SCANCODE_LEFT])
@@ -193,9 +273,12 @@ void Cuphead::ProcessKeys(const Uint8* pStates)
 			m_CupheadMovementState = Movement::runLeft;
 			m_CupheadShootingState = Shoot::notShooting; // 1
 
+			m_Velocity.x = -m_Speed;
+
+			// Only reset vertical velocity when grounded
 			if (m_IsGrounded)
 			{
-				m_Velocity = Vector2f{ -200.f, 0.f };
+				m_Velocity.y = 0.f;
 			}
 		}
 		else if (pStates[SDL_SCANCODE_RIGHT])
@@ -203,9 +286,12 @@ void Cuphead::ProcessKeys(const Uint8* pStates)
 			m_CupheadMovementState = Movement::runRight;
 			m_CupheadShootingState = Shoot::notShooting; // 2
 
+			m_Velocity.x = m_Speed;
+
+			// Only reset vertical velocity when grounded
 			if (m_IsGrounded)
 			{
-				m_Velocity = Vector2f{ 200.f, 0.f };
+				m_Velocity.y = 0.f;
 			}
 		}
 		else if (pStates[SDL_SCANCODE_DOWN])
@@ -217,13 +303,21 @@ void Cuphead::ProcessKeys(const Uint8* pStates)
 			{
 				m_Velocity = Vector2f{ 0.f, 0.f };
 			}
-			
 		}
 		else if (pStates[SDL_SCANCODE_LSHIFT])
 		{
 			m_CupheadMovementState = Movement::dash;
 			m_CupheadShootingState = Shoot::notShooting; // 4
-			m_Velocity = Vector2f{ 500.f, 0.f };
+
+			// important DEFAULT direction!
+			if (m_FacingAngle == 0.f)
+			{
+				m_Velocity.x = 600.f;
+			}
+			else if (m_FacingAngle == 180.f)
+			{
+				m_Velocity.x = -600.f;
+			}
 		}
 		else if (pStates[SDL_SCANCODE_X])
 		{
@@ -234,6 +328,18 @@ void Cuphead::ProcessKeys(const Uint8* pStates)
 			{
 				m_Velocity = Vector2f{ 0.f, 0.f };
 			}
+
+			// important DEFAULT direction!
+			if (m_FacingAngle == 0.f)
+			{
+				m_ShootAngle = 0.f;
+			}
+			else if (m_FacingAngle == 180.f)
+			{
+				m_ShootAngle = 180.f;
+			}
+			
+			m_IsShooting = true;
 		}
 
 		// --- I can add whatever key combinations I want from now on, AnimateCuphead will handle it! ---
@@ -274,6 +380,7 @@ void Cuphead::AnimateCuphead(float elapsedSec)
 		bool stateChanged{ (m_CupheadMovementState != m_LastMovementState) ||
 			(m_CupheadShootingState != m_LastShootState) }; // very important!!! --- we use this boolean to reset all animations - we do this through Reset() in Animate.cpp
 
+		
 		if (m_CupheadMovementState == Movement::idle)
 		{
 			// default reseting between animations
@@ -284,11 +391,23 @@ void Cuphead::AnimateCuphead(float elapsedSec)
 				m_LastShootState = m_CupheadShootingState;
 			}
 
-			m_CurrentTexture = m_TextureIdle;
-			m_CurrentColNr = 5;
-			m_CurrentRowNr = 1;
+			if (!m_IsGrounded)
+			{
+				m_CurrentTexture = m_TextureJump;
+				m_CurrentColNr = 4;
+				m_CurrentRowNr = 2;
+				m_Animator.PlayAnimation(elapsedSec, m_MaxFrameSec, 8);
+			}
+			
+			else
+			{
+				m_CurrentTexture = m_TextureIdle;
+				m_CurrentColNr = 5;
+				m_CurrentRowNr = 1;
 
-			m_Animator.ReverseAnimateBetween(elapsedSec, 0, 5, m_MaxFrameSec);
+				m_Animator.ReverseAnimateBetween(elapsedSec, 0, 5, m_MaxFrameSec);
+			}
+			
 		}
 		else if (m_CupheadShootingState == Shoot::notShooting)
 		{
@@ -300,50 +419,68 @@ void Cuphead::AnimateCuphead(float elapsedSec)
 				m_LastShootState = m_CupheadShootingState;
 			}
 
-			switch (m_CupheadMovementState)
+			if (!m_IsGrounded && m_CupheadMovementState != Movement::jump && m_CupheadMovementState != Movement::dash)
 			{
-			case Cuphead::Movement::runLeft:
-				m_CurrentTexture = m_TextureRun;
-				m_CurrentColNr = 4;
-				m_CurrentRowNr = 4;
-
-				m_Animator.PlayAnimation(elapsedSec, m_MaxFrameSec, 16);
-				break;
-			case Cuphead::Movement::runRight:
-				m_CurrentTexture = m_TextureRun;
-				m_CurrentColNr = 4;
-				m_CurrentRowNr = 4;
-
-				m_Animator.PlayAnimation(elapsedSec, m_MaxFrameSec, 16);
-				break;
-			case Cuphead::Movement::jump:
 				m_CurrentTexture = m_TextureJump;
 				m_CurrentColNr = 4;
 				m_CurrentRowNr = 2;
-
 				m_Animator.PlayAnimation(elapsedSec, m_MaxFrameSec, 8);
-				break;
-			case Cuphead::Movement::dash:
-				m_CurrentTexture = m_TextureDash;
-				m_CurrentColNr = 4;
-				m_CurrentRowNr = 2;
-
-				m_Animator.PlayAnimation(elapsedSec, m_MaxFrameSec, 8);
-				break;
-			case Cuphead::Movement::duck:
-				m_CurrentTexture = m_TextureDuck;
-				m_CurrentColNr = 4;
-				m_CurrentRowNr = 4;
-
-				m_Animator.LoopBetween(elapsedSec, 7, 14, m_MaxFrameSec);
-				break;
-			case Cuphead::Movement::parry:
-				break;
 			}
+			else
+			{
+				switch (m_CupheadMovementState)
+				{
+				case Cuphead::Movement::runLeft:
+					m_CurrentTexture = m_TextureRun;
+					m_CurrentColNr = 4;
+					m_CurrentRowNr = 4;
+
+					m_Animator.PlayAnimation(elapsedSec, m_MaxFrameSec, 16);
+					break;
+				case Cuphead::Movement::runRight:
+					m_CurrentTexture = m_TextureRun;
+					m_CurrentColNr = 4;
+					m_CurrentRowNr = 4;
+
+					m_Animator.PlayAnimation(elapsedSec, m_MaxFrameSec, 16);
+					break;
+				case Cuphead::Movement::jump:
+					m_CurrentTexture = m_TextureJump;
+					m_CurrentColNr = 4;
+					m_CurrentRowNr = 2;
+
+					m_Animator.PlayAnimation(elapsedSec, m_MaxFrameSec, 8);
+					break;
+				case Cuphead::Movement::dash:
+					m_CurrentTexture = m_TextureDash;
+					m_CurrentColNr = 4;
+					m_CurrentRowNr = 2;
+
+					m_Animator.LoopBetween(elapsedSec, 2, 6, m_MaxFrameSec);
+					break;
+				case Cuphead::Movement::duck:
+					m_CurrentTexture = m_TextureDuck;
+					m_CurrentColNr = 4;
+					m_CurrentRowNr = 4;
+
+					m_Animator.LoopBetween(elapsedSec, 7, 14, m_MaxFrameSec);
+					break;
+				case Cuphead::Movement::parry:
+					break;
+				}
+			}
+			
 		}
 		else if (m_CupheadShootingState != Shoot::notShooting)
 		{
-			if (m_CupheadMovementState == Movement::lock)
+			if (!m_IsGrounded)
+			{
+				m_CurrentTexture = m_TextureJump;
+				m_CurrentColNr = 4;
+				m_CurrentRowNr = 2;
+				m_Animator.PlayAnimation(elapsedSec, m_MaxFrameSec, 8);
+			}
+			else if (m_CupheadMovementState == Movement::lock)
 			{
 				static int currentStartIdx{}; // static so it can track the starting index real time depending on the animation
 
@@ -375,7 +512,7 @@ void Cuphead::AnimateCuphead(float elapsedSec)
 					break;
 				case Cuphead::Shoot::shootDown:
 					currentStartIdx = 20;
-					m_Animator.ReverseAnimateBetween(elapsedSec, 21, 25, 0.08f);
+					m_Animator.ReverseAnimateBetween(elapsedSec, 20, 24, 0.08f);
 					break;
 				}
 
@@ -445,6 +582,29 @@ void Cuphead::AnimateCuphead(float elapsedSec)
 	}
 }
 
+void Cuphead::UpdateProjectiles(float elapsedSec)
+{
+	const float projectileCooldown{ 0.2f };
+
+	if (m_IsShooting)
+	{
+		m_AccuSecProjectiles += elapsedSec;
+
+		if (m_AccuSecProjectiles > projectileCooldown)
+		{
+			m_ProjectileVector.push_back(new Projectile(Vector2f{ GetBounds().left, GetBounds().bottom + GetBounds().height * 0.4f}, m_ShootAngle));
+			m_AccuSecProjectiles -= projectileCooldown;
+		}
+	}
+	for (Projectile* pProjectile : m_ProjectileVector)
+	{
+		if (pProjectile != nullptr)
+		{
+			pProjectile->Update(elapsedSec);
+		}
+	}
+}
+
 void Cuphead::HandleRaycast(float elapsedSec, const std::vector<Vector2f>& vertices)
 {
 	Vector2f firstPointY{ m_Position.x, m_Position.y + GetBounds().height };
@@ -464,13 +624,14 @@ void Cuphead::HandleRaycast(float elapsedSec, const std::vector<Vector2f>& verti
 	}
 	else
 	{
+		
+		
 		m_IsGrounded = false;
 		m_Velocity += Vector2f{ 0, -9.8f };
 	}
 
-
-	Vector2f firstPointX{ GetBounds().left, m_Position.y + GetBounds().height / 2};
-	Vector2f secondPointX{ GetBounds().left + GetBounds().width, m_Position.y + GetBounds().height / 2};
+	Vector2f firstPointX{ GetBounds().left - GetBounds().width / 2, m_Position.y + GetBounds().height / 2};
+	Vector2f secondPointX{ GetBounds().left - GetBounds().width / 2 + GetBounds().width, m_Position.y + GetBounds().height / 2};
 
 	// RIGHT collision
 	if (utils::Raycast(vertices, firstPointX, secondPointX, hitInfo))
@@ -506,7 +667,19 @@ int Cuphead::GetHealth() const // to check if dead in Game.cpp in future
 
 Rectf Cuphead::GetBounds() const
 {
-	return Rectf{ m_Position.x - m_FrameWidth / 2, m_Position.y, m_FrameWidth, m_FrameHeight };
+	return Rectf{ m_Position.x , m_Position.y, m_FrameWidth, m_FrameHeight };
+}
+
+void Cuphead::UpdateFacingDirection(const Uint8* pStates)
+{
+	if (pStates[SDL_SCANCODE_RIGHT])
+	{
+		m_FacingAngle = 0.f ;
+	}
+	else if (pStates[SDL_SCANCODE_LEFT])
+	{
+		m_FacingAngle = 180.f;
+	}
 }
 
 void Cuphead::IntializeTextures()

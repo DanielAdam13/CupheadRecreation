@@ -2,7 +2,7 @@
 class Animator
 {
 public:
-	Animator();
+	explicit Animator();
 
 	void PlayAnimation(const float elapsedSec, const float maxFrameSec);
 	void PlayAnimation(const float elapsedSec, const float maxFrameSec, const int frameToReset);

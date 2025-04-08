@@ -2,10 +2,24 @@
 #include "Animator.h"
 #include <vector>
 class Texture;
+#include "Projectile.h"
 
 class Cuphead final
 {
 public:
+	explicit Cuphead(const Vector2f& position, bool playIntro);
+	Cuphead(const Cuphead& character) = delete;
+	Cuphead& operator=(const Cuphead& rhs) = delete;
+	Cuphead(Cuphead&& character) = delete;
+	Cuphead& operator=(Cuphead&& rhs) = delete;
+	~Cuphead();
+
+	void Draw() const;
+	void Update(float elapsedSec, const Uint8* pStates, const std::vector<Vector2f>& vertices);
+
+	int GetHealth() const;
+	
+private:
 	enum class Movement
 	{
 		idle,
@@ -33,17 +47,7 @@ public:
 		specialDown
 	};
 
-	explicit Cuphead(const Vector2f& position, bool playIntro);
-	~Cuphead();
 
-	void Draw() const;
-	void ProcessKeys(const Uint8* pStates);
-	void AnimateCuphead(float elapsedSec);
-	void HandleRaycast(float elapsedSec, const std::vector<Vector2f>& vertices);
-
-	int GetHealth() const;
-	
-private:
 	//MEMBER VARIABLES
 	Vector2f m_Position;
 	static float m_FrameWidth;
@@ -60,16 +64,22 @@ private:
 	Shoot m_LastShootState;
 
 	bool m_KeyPressed;
+
+	bool m_IsShooting;
+	float m_AccuSecProjectiles;
+	float m_ShootAngle;
+
 	bool m_IsGrounded;
 	bool m_IsHit;
 
-	float m_MaxFrameSec;
+	const float m_MaxFrameSec;
 
 	Texture* m_CurrentTexture;
 	int m_CurrentColNr;
 	int m_CurrentRowNr;
 
 	Vector2f m_Velocity;
+	float m_FacingAngle;
 
 	Texture* m_TextureDash;
 	Texture* m_TextureShoot;
@@ -87,9 +97,17 @@ private:
 
 	Animator m_Animator;
 
+	std::vector<Projectile*> m_ProjectileVector; // pointers -> control over lifetime, HAS A relationship
+
 
 	// MEMBER FUNCTIONS
+	void ProcessKeys(const Uint8* pStates);
+	void AnimateCuphead(float elapsedSec);
+	void UpdateProjectiles(float elapsedSec);
+	void HandleRaycast(float elapsedSec, const std::vector<Vector2f>& vertices);
+
 	Rectf GetBounds() const;
+	void UpdateFacingDirection(const Uint8* pStates);
 
 	void IntializeTextures();
 	void DeleteTextures();

@@ -6,9 +6,9 @@
 
 Game::Game(const Window& window)
 	:BaseGame{ window },
-	m_Cuphead{ Cuphead(Vector2f{GetViewPort().width / 2, 100.f}, false)},
+	m_Cuphead{ Vector2f{GetViewPort().width / 2, 100.f}, true },
 	m_Vertices{},
-	m_ForestBackground{new Texture("ForestFollies_Background.png")}
+	m_ForestBackground{ new Texture("ForestFollies_Background.png") }
 {
 	Initialize();
 }
@@ -30,6 +30,8 @@ void Game::Cleanup( )
 {
 	delete m_ForestBackground;
 	m_ForestBackground = nullptr;
+
+	m_Vertices.clear();
 }
 
 void Game::Update( float elapsedSec )
@@ -37,9 +39,7 @@ void Game::Update( float elapsedSec )
 	// Check keyboard state
 	const Uint8 *pStates = SDL_GetKeyboardState( nullptr );
 
-	m_Cuphead.ProcessKeys(pStates);
-	m_Cuphead.AnimateCuphead(elapsedSec);
-	m_Cuphead.HandleRaycast(elapsedSec, m_Vertices);
+	m_Cuphead.Update(elapsedSec, pStates, m_Vertices);
 }
 
 void Game::Draw( ) const

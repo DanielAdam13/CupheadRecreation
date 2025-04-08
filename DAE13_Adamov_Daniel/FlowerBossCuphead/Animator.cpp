@@ -26,7 +26,6 @@ void Animator::PlayAnimation(const float elapsedSec, const float maxFrameSec, co
 	{
 		m_FrameNr++;
 		m_AccuSec -= maxFrameSec;
-		//ResetAtFrame(frameToReset);
 	}
 }
 
@@ -113,8 +112,7 @@ void Animator::ReverseAnimateBetween(const float elapsedSec, int firstFrame, int
 void Animator::Reset(int frameToReset)
 {
 	m_FrameNr = frameToReset;
-	m_AccuSec = 0.f; // ?? might change
-
+	m_AccuSec = 0.f; // full reset
 }
 
 void Animator::Stop()
