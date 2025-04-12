@@ -2,8 +2,8 @@
 #include "BaseGame.h"
 #include <vector>
 #include "Cuphead.h"
-
 class Texture;
+class Camera;
 
 class Game : public BaseGame
 {
@@ -30,7 +30,10 @@ private:
 	// VARIABLES
 	Cuphead m_Cuphead;
 	std::vector<Vector2f> m_Vertices;
-	Texture* m_ForestBackground;
+	Texture* m_ForestBackground1;
+	Texture* m_ForectBackground2;
+
+	Camera* m_PlayerCamera;
 
 	// FUNCTIONS
 	void Initialize();

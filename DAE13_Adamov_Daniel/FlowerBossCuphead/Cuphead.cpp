@@ -62,13 +62,13 @@ void Cuphead::Draw() const
 		
 		// GetBounds is calculated by the mid point of each texture
 		glPushMatrix();
-			glTranslatef(GetBounds().left, GetBounds().bottom, 0);
-			glRotatef(m_FacingAngle, 0, 1, 0); // Open gl doesn't support rotation around Y apparently
+			glTranslatef(GetBounds().left, GetBounds().bottom, 0); // This reduces the texture quality A LOT for some reason !!!
+			glRotatef(m_FacingAngle, 0, 1, 0); 
 			m_CurrentTexture->Draw(Vector2f{ -GetBounds().width / 2, 0.f}, srcRect);
 
-			// hitbox
-			utils::SetColor(Color4f{ 1, 0, 0, 1 });
-			utils::DrawRect(Vector2f{ -GetBounds().width / 2, 0.f }, m_FrameWidth, m_FrameHeight);
+		// hitbox
+		utils::SetColor(Color4f{ 1, 0, 0, 1 });
+		utils::DrawRect(Vector2f{ -GetBounds().width / 2, 0.f }, m_FrameWidth, m_FrameHeight);
 		glPopMatrix();
 	}
 
@@ -663,6 +663,11 @@ void Cuphead::HandleRaycast(float elapsedSec, const std::vector<Vector2f>& verti
 int Cuphead::GetHealth() const // to check if dead in Game.cpp in future
 {
 	return m_HP;
+}
+
+Vector2f Cuphead::GetPosition() const
+{
+	return m_Position;
 }
 
 Rectf Cuphead::GetBounds() const

@@ -18,6 +18,7 @@ public:
 	void Update(float elapsedSec, const Uint8* pStates, const std::vector<Vector2f>& vertices);
 
 	int GetHealth() const;
+	Vector2f GetPosition() const;
 	
 private:
 	enum class Movement
@@ -106,8 +107,10 @@ private:
 	void UpdateProjectiles(float elapsedSec);
 	void HandleRaycast(float elapsedSec, const std::vector<Vector2f>& vertices);
 
-	Rectf GetBounds() const;
 	void UpdateFacingDirection(const Uint8* pStates);
+
+	
+	Rectf GetBounds() const;
 
 	void IntializeTextures();
 	void DeleteTextures();
