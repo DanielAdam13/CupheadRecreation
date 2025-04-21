@@ -10,13 +10,10 @@ float Cuphead::m_FrameHeight{ 0.f };
 
 Cuphead::Cuphead(const Vector2f& position, bool playIntro)
 	: m_Position{ position },
-	m_Speed{ 400.f },
 	m_HP{ 3 },
 	m_PlayingIntro{ playIntro },
 	m_CupheadMovementState{ Movement::idle },
 	m_CupheadShootingState{ Shoot::notShooting },
-	m_LastMovementState{ Movement::idle },
-	m_LastShootState{ Shoot::notShooting },
 	m_KeyPressed{ false },
 	m_IsShooting{ false },
 	m_AccuSecProjectiles{ 0.f },
@@ -154,6 +151,7 @@ void Cuphead::ProcessKeys(const Uint8* pStates)
 		else
 		{
 			// change movement and shooting state, statring with COMBINATIONS
+			const float movementSpeed{ 400.f };
 
 			if (pStates[SDL_SCANCODE_Z])
 			{
@@ -161,11 +159,11 @@ void Cuphead::ProcessKeys(const Uint8* pStates)
 				m_CupheadShootingState = Shoot::notShooting; // 3
 				if (pStates[SDL_SCANCODE_LEFT])
 				{
-					m_Velocity.x = -m_Speed;
+					m_Velocity.x = -movementSpeed;
 				}
 				if (pStates[SDL_SCANCODE_RIGHT])
 				{
-					m_Velocity.x = m_Speed;
+					m_Velocity.x = movementSpeed;
 				}
 
 				if (m_IsGrounded)
@@ -233,7 +231,7 @@ void Cuphead::ProcessKeys(const Uint8* pStates)
 
 				if (m_IsGrounded)
 				{
-					m_Velocity = Vector2f{ m_Speed, 0.f };
+					m_Velocity = Vector2f{ movementSpeed, 0.f };
 				}
 				m_ShootAngle = 45.f;
 				m_IsShooting = true;
@@ -246,7 +244,7 @@ void Cuphead::ProcessKeys(const Uint8* pStates)
 
 				if (m_IsGrounded)
 				{
-					m_Velocity = Vector2f{ -m_Speed, 0.f };
+					m_Velocity = Vector2f{ -movementSpeed, 0.f };
 				}
 				m_ShootAngle = 135.f;
 				m_IsShooting = true;
@@ -257,7 +255,7 @@ void Cuphead::ProcessKeys(const Uint8* pStates)
 				m_CupheadMovementState = Movement::runLeft;
 				m_CupheadShootingState = Shoot::shootLeft; // 17
 
-				m_Velocity.x = -m_Speed;
+				m_Velocity.x = -movementSpeed;
 
 				// Only reset vertical velocity when grounded
 				if (m_IsGrounded)
@@ -274,7 +272,7 @@ void Cuphead::ProcessKeys(const Uint8* pStates)
 				m_CupheadMovementState = Movement::runRight;
 				m_CupheadShootingState = Shoot::shootRight; // 16
 
-				m_Velocity.x = m_Speed;
+				m_Velocity.x = movementSpeed;
 
 				// Only reset vertical velocity when grounded
 				if (m_IsGrounded)
@@ -317,7 +315,7 @@ void Cuphead::ProcessKeys(const Uint8* pStates)
 				m_CupheadMovementState = Movement::runLeft;
 				m_CupheadShootingState = Shoot::notShooting; // 1
 
-				m_Velocity.x = -m_Speed;
+				m_Velocity.x = -movementSpeed;
 
 				// Only reset vertical velocity when grounded
 				if (m_IsGrounded)
@@ -330,7 +328,7 @@ void Cuphead::ProcessKeys(const Uint8* pStates)
 				m_CupheadMovementState = Movement::runRight;
 				m_CupheadShootingState = Shoot::notShooting; // 2
 
-				m_Velocity.x = m_Speed;
+				m_Velocity.x = movementSpeed;
 
 				// Only reset vertical velocity when grounded
 				if (m_IsGrounded)
@@ -407,8 +405,12 @@ void Cuphead::AnimateCuphead(float elapsedSec)
 	}
 	else
 	{
-		bool stateChanged{ (m_CupheadMovementState != m_LastMovementState) ||
-			(m_CupheadShootingState != m_LastShootState) }; // very important!!! --- we use this boolean to reset all animations - we do this through Reset() in Animate.cpp
+		// important for reseting animations between each other
+		static Movement lastMovementState{};
+		static Shoot lastShootState{};
+
+		bool stateChanged{ (m_CupheadMovementState != lastMovementState) ||
+			(m_CupheadShootingState != lastShootState) }; // very important!!! --- we use this boolean to reset all animations - we do this through Reset() in Animate.cpp
 
 		
 		if (m_CupheadMovementState == Movement::idle)
@@ -417,8 +419,8 @@ void Cuphead::AnimateCuphead(float elapsedSec)
 			if (stateChanged)
 			{
 				m_Animator.Reset(0);
-				m_LastMovementState = m_CupheadMovementState;
-				m_LastShootState = m_CupheadShootingState;
+				lastMovementState = m_CupheadMovementState;
+				lastShootState = m_CupheadShootingState;
 			}
 
 			if (!m_IsGrounded)
@@ -445,8 +447,8 @@ void Cuphead::AnimateCuphead(float elapsedSec)
 			if (stateChanged)
 			{
 				m_Animator.Reset(0);
-				m_LastMovementState = m_CupheadMovementState;
-				m_LastShootState = m_CupheadShootingState;
+				lastMovementState = m_CupheadMovementState;
+				lastShootState = m_CupheadShootingState;
 			}
 
 			if (!m_IsGrounded && m_CupheadMovementState != Movement::jump && m_CupheadMovementState != Movement::dash)
@@ -550,8 +552,8 @@ void Cuphead::AnimateCuphead(float elapsedSec)
 				if (stateChanged)
 				{
 					m_Animator.Reset(currentStartIdx);
-					m_LastMovementState = m_CupheadMovementState;
-					m_LastShootState = m_CupheadShootingState;
+					lastMovementState = m_CupheadMovementState;
+					lastShootState = m_CupheadShootingState;
 				}
 			}
 			else if (m_CupheadMovementState == Movement::runRight)
@@ -560,8 +562,8 @@ void Cuphead::AnimateCuphead(float elapsedSec)
 				if (stateChanged)
 				{
 					m_Animator.Reset(0);
-					m_LastMovementState = m_CupheadMovementState;
-					m_LastShootState = m_CupheadShootingState;
+					lastMovementState = m_CupheadMovementState;
+					lastShootState = m_CupheadShootingState;
 				}
 
 				if (m_CupheadShootingState == Shoot::shootDiagonalUpRight)
@@ -587,8 +589,8 @@ void Cuphead::AnimateCuphead(float elapsedSec)
 				if (stateChanged)
 				{
 					m_Animator.Reset(0);
-					m_LastMovementState = m_CupheadMovementState;
-					m_LastShootState = m_CupheadShootingState;
+					lastMovementState = m_CupheadMovementState;
+					lastShootState = m_CupheadShootingState;
 				}
 
 				if (m_CupheadShootingState == Shoot::shootDiagonalUpLeft)

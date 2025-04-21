@@ -54,16 +54,11 @@ private:
 	Vector2f m_Position;
 	static float m_FrameWidth;
 	static float m_FrameHeight;
-	const float m_Speed;
 	int m_HP;
 	bool m_PlayingIntro;
 
 	Movement m_CupheadMovementState;
 	Shoot m_CupheadShootingState;
-
-	// important for reseting animations between each other
-	Movement m_LastMovementState;
-	Shoot m_LastShootState;
 
 	bool m_KeyPressed;
 
