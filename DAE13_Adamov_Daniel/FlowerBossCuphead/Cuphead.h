@@ -16,7 +16,8 @@ public:
 
 	void Draw() const;
 	void Update(float elapsedSec, const Uint8* pStates, const std::vector<Vector2f>& vertices);
-
+	
+	void StartDash();
 	int GetHealth() const;
 	Vector2f GetPosition() const;
 	
@@ -73,6 +74,14 @@ private:
 	bool m_IsGrounded;
 	bool m_IsHit;
 
+	float m_DashAccuSec;
+
+	bool m_ClickedDash;
+	bool m_IsDashing;
+	
+	const float m_DashCooldown;
+	const float m_DashDuration;
+
 	const float m_MaxFrameSec;
 
 	Texture* m_CurrentTexture;
@@ -104,8 +113,9 @@ private:
 	// MEMBER FUNCTIONS
 	void ProcessKeys(const Uint8* pStates);
 	void AnimateCuphead(float elapsedSec);
-	void UpdateProjectiles(float elapsedSec);
 	void HandleRaycast(float elapsedSec, const std::vector<Vector2f>& vertices);
+	void Dash(float elapsedSec);
+	void UpdateProjectiles(float elapsedSec);
 
 	void UpdateFacingDirection(const Uint8* pStates);
 

@@ -23,6 +23,11 @@ Cuphead::Cuphead(const Vector2f& position, bool playIntro)
 	m_ShootAngle{ 0.f },
 	m_IsGrounded{ false },
 	m_IsHit{ false },
+	m_DashAccuSec{ 0.f },
+	m_ClickedDash{ false },
+	m_IsDashing{ false },
+	m_DashCooldown{ 0.7f },
+	m_DashDuration{ 0.3f },
 	m_MaxFrameSec{ 0.07f },
 	m_CurrentTexture{ nullptr },
 	m_CurrentColNr{ 1 },
@@ -62,14 +67,19 @@ void Cuphead::Draw() const
 		
 		// GetBounds is calculated by the mid point of each texture
 		glPushMatrix();
-			glTranslatef(GetBounds().left, GetBounds().bottom, 0); // This reduces the texture quality A LOT for some reason !!!
+			glTranslatef(m_Position.x, m_Position.y, 0); // This reduces the texture quality A LOT for some reason !!!
 			glRotatef(m_FacingAngle, 0, 1, 0); 
 			m_CurrentTexture->Draw(Vector2f{ -GetBounds().width / 2, 0.f}, srcRect);
 
 		// hitbox
 		utils::SetColor(Color4f{ 1, 0, 0, 1 });
-		utils::DrawRect(Vector2f{ -GetBounds().width / 2, 0.f }, m_FrameWidth, m_FrameHeight);
+		//utils::DrawRect(Vector2f{ -GetBounds().width / 2, 0.f }, m_FrameWidth, m_FrameHeight);
 		glPopMatrix();
+
+		utils::SetColor(Color4f{ 1, 0, 0, 1 });
+		utils::DrawRect(GetBounds());
+
+		utils::FillEllipse(m_Position, 5.f, 5.f);
 	}
 
 
@@ -85,13 +95,16 @@ void Cuphead::Draw() const
 
 void Cuphead::Update(float elapsedSec, const Uint8* pStates, const std::vector<Vector2f>& vertices)
 {
+	// sets the dashing state from a key event and then processes it in ProcessKeys()...
+	Dash(elapsedSec);
+
 	// determines which key is pressed where + combinations and sets the velocity
 	ProcessKeys(pStates);
 
 	// determines the current Texture which is going to be used in Draw() + updates the current framer number
 	AnimateCuphead(elapsedSec);
 
-	// updates the postion using m_Velocity and enables collisions from an std::vector
+	// updates the postion using m_Velocity and enables collisions from a std::vector<Vector2f>
 	HandleRaycast(elapsedSec, vertices);
 
 	// creates and updates projectiles
@@ -102,258 +115,275 @@ void Cuphead::ProcessKeys(const Uint8* pStates)
 {
 	if (!m_PlayingIntro)
 	{
-		// determines the whole rotation logic + enables dashing in a direction
 		UpdateFacingDirection(pStates);
 
 		m_KeyPressed = true;
 		m_IsShooting = false;
-		// if a key is clicked -> we change states
 
-		// change movement and shooting state, statring with COMBINATIONS
-
-		// shoot Up left
-		if (pStates[SDL_SCANCODE_Z])
-		{
-			m_CupheadMovementState = Movement::jump;
-			m_CupheadShootingState = Shoot::notShooting; // 3
-			if (pStates[SDL_SCANCODE_LEFT])
-			{
-				m_Velocity.x = -m_Speed;
-			}
-			if (pStates[SDL_SCANCODE_RIGHT])
-			{
-				m_Velocity.x = m_Speed;
-			}
-
-			if (m_IsGrounded)
-			{
-				m_Velocity = Vector2f{ 0.f, 700.f };
-			}
-		}
-		else if (pStates[SDL_SCANCODE_LEFT] && pStates[SDL_SCANCODE_UP] && pStates[SDL_SCANCODE_X] && pStates[SDL_SCANCODE_C])
-		{
-			m_CupheadMovementState = Movement::lock;
-			m_CupheadShootingState = Shoot::shootDiagonalUpLeft; // 7
-
-			if (m_IsGrounded)
-			{
-				m_Velocity = Vector2f{ 0.f, 0.f };
-			}
-			m_ShootAngle = 135.f;
-			m_IsShooting = true;
-		}
-		// shoot Up right
-		else if (pStates[SDL_SCANCODE_RIGHT] && pStates[SDL_SCANCODE_UP] && pStates[SDL_SCANCODE_X] && pStates[SDL_SCANCODE_C])
-		{
-			m_CupheadMovementState = Movement::lock;
-			m_CupheadShootingState = Shoot::shootDiagonalUpRight; // 6
-
-			if (m_IsGrounded)
-			{
-				m_Velocity = Vector2f{ 0.f, 0.f };
-			}
-			m_ShootAngle = 45.f;
-			m_IsShooting = true;
-		}
-		// shoot left
-		else if (pStates[SDL_SCANCODE_LEFT] && pStates[SDL_SCANCODE_X] && pStates[SDL_SCANCODE_C])
-		{
-			m_CupheadMovementState = Movement::lock;
-			m_CupheadShootingState = Shoot::shootLeft; // 9
-
-			if (m_IsGrounded)
-			{
-				m_Velocity = Vector2f{ 0.f, 0.f };
-			}
-			m_ShootAngle = 180.f;
-			m_IsShooting = true;
-		}
-		// shoot right
-		else if (pStates[SDL_SCANCODE_RIGHT] && pStates[SDL_SCANCODE_X] && pStates[SDL_SCANCODE_C])
-		{
-			m_CupheadMovementState = Movement::lock;
-			m_CupheadShootingState = Shoot::shootRight; // 8
-
-			if (m_IsGrounded)
-			{
-				m_Velocity = Vector2f{ 0.f, 0.f };
-			}
-			m_ShootAngle = 0.f;
-			m_IsShooting = true;
-		}
-		// run shoot up right
-		else if (pStates[SDL_SCANCODE_RIGHT] && pStates[SDL_SCANCODE_UP] && pStates[SDL_SCANCODE_X]) // ?? might change
-		{
-			m_CupheadMovementState = Movement::runRight;
-			m_CupheadShootingState = Shoot::shootDiagonalUpRight; // 14
-
-			if (m_IsGrounded)
-			{
-				m_Velocity = Vector2f{ m_Speed, 0.f };
-			}
-			m_ShootAngle = 45.f;
-			m_IsShooting = true;
-		}
-		// run shoot up left
-		else if (pStates[SDL_SCANCODE_LEFT] && pStates[SDL_SCANCODE_UP] && pStates[SDL_SCANCODE_X]) // ?? might change
-		{
-			m_CupheadMovementState = Movement::runLeft;
-			m_CupheadShootingState = Shoot::shootDiagonalUpLeft; // 15
-
-			if (m_IsGrounded)
-			{
-				m_Velocity = Vector2f{ -m_Speed, 0.f };
-			}
-			m_ShootAngle = 135.f;
-			m_IsShooting = true;
-		}
-		// run shoot left
-		else if (pStates[SDL_SCANCODE_LEFT] && pStates[SDL_SCANCODE_X])
-		{
-			m_CupheadMovementState = Movement::runLeft;
-			m_CupheadShootingState = Shoot::shootLeft; // 17
-
-			m_Velocity.x = -m_Speed;
-
-			// Only reset vertical velocity when grounded
-			if (m_IsGrounded)
-			{
-				m_Velocity.y = 0.f;
-			}
-
-			m_ShootAngle = 180.f;
-			m_IsShooting = true;
-		}
-		// run shoot right
-		else if (pStates[SDL_SCANCODE_RIGHT] && pStates[SDL_SCANCODE_X])
-		{
-			m_CupheadMovementState = Movement::runRight;
-			m_CupheadShootingState = Shoot::shootRight; // 16
-
-			m_Velocity.x = m_Speed;
-
-			// Only reset vertical velocity when grounded
-			if (m_IsGrounded)
-			{
-				m_Velocity.y = 0.f;
-			}
-
-			m_ShootAngle = 0.f;
-			m_IsShooting = true;
-		}
-		// shoot up
-		else if (pStates[SDL_SCANCODE_UP] && pStates[SDL_SCANCODE_X])
-		{
-			m_CupheadMovementState = Movement::lock;
-			m_CupheadShootingState = Shoot::shootUp; // 5
-
-			if (m_IsGrounded)
-			{
-				m_Velocity = Vector2f{ 0.f, 0.f };
-			}
-			m_ShootAngle = 90.f;
-			m_IsShooting = true;
-		}
-		// shoot down
-		else if (pStates[SDL_SCANCODE_DOWN] && pStates[SDL_SCANCODE_X])
-		{
-			m_CupheadMovementState = Movement::lock;
-			m_CupheadShootingState = Shoot::shootDown; // 12
-
-			if (m_IsGrounded)
-			{
-				m_Velocity = Vector2f{ 0.f, 0.f };
-			}
-			m_ShootAngle = 270.f;
-			m_IsShooting = true;
-		}
-		// then proceed with individual keys
-		else if (pStates[SDL_SCANCODE_LEFT])
-		{
-			m_CupheadMovementState = Movement::runLeft;
-			m_CupheadShootingState = Shoot::notShooting; // 1
-
-			m_Velocity.x = -m_Speed;
-
-			// Only reset vertical velocity when grounded
-			if (m_IsGrounded)
-			{
-				m_Velocity.y = 0.f;
-			}
-		}
-		else if (pStates[SDL_SCANCODE_RIGHT])
-		{
-			m_CupheadMovementState = Movement::runRight;
-			m_CupheadShootingState = Shoot::notShooting; // 2
-
-			m_Velocity.x = m_Speed;
-
-			// Only reset vertical velocity when grounded
-			if (m_IsGrounded)
-			{
-				m_Velocity.y = 0.f;
-			}
-		}
-		else if (pStates[SDL_SCANCODE_DOWN])
-		{
-			m_CupheadMovementState = Movement::duck;
-			m_CupheadShootingState = Shoot::notShooting; // 13
-
-			if (m_IsGrounded)
-			{
-				m_Velocity = Vector2f{ 0.f, 0.f };
-			}
-		}
-		else if (pStates[SDL_SCANCODE_LSHIFT])
+		if (m_IsDashing) 
 		{
 			m_CupheadMovementState = Movement::dash;
-			m_CupheadShootingState = Shoot::notShooting; // 4
-
-			// important DEFAULT direction!
-			if (m_FacingAngle == 0.f)
-			{
-				m_Velocity.x = 600.f;
-			}
-			else if (m_FacingAngle == 180.f)
-			{
-				m_Velocity.x = -600.f;
-			}
-		}
-		else if (pStates[SDL_SCANCODE_X])
-		{
-			m_CupheadMovementState = Movement::lock;
-			m_CupheadShootingState = Shoot::shootRight;
-
-			if (m_IsGrounded)
-			{
-				m_Velocity = Vector2f{ 0.f, 0.f };
-			}
-
-			// important DEFAULT direction!
-			if (m_FacingAngle == 0.f)
-			{
-				m_ShootAngle = 0.f;
-			}
-			else if (m_FacingAngle == 180.f)
-			{
-				m_ShootAngle = 180.f;
-			}
-			
-			m_IsShooting = true;
-		}
-
-		// --- I can add whatever key combinations I want from now on, AnimateCuphead will handle it! ---
-		
-		// if no key combination is pressed -> it's idle
-		else
-		{
-			m_KeyPressed = false;
-			m_CupheadMovementState = Movement::idle;
 			m_CupheadShootingState = Shoot::notShooting;
 
-			if (m_IsGrounded)
+			if (!m_IsGrounded)
 			{
-				m_Velocity = Vector2f{ 0.f, 0.f };
+				m_Velocity.y = 0.f;
+
+				if (m_FacingAngle == 0.f)
+				{
+					m_Velocity.x = 600.f;
+				}
+				else if (m_FacingAngle == 180.f)
+				{
+					m_Velocity.x = -600.f;
+				}
+			}
+			else
+			{
+				if (m_FacingAngle == 0.f)
+				{
+					m_Velocity.x = 800.f;
+				}
+				else if (m_FacingAngle == 180.f)
+				{
+					m_Velocity.x = -800.f;
+				}
+			}
+		}
+		// determines the whole rotation logic + enables dashing in a direction
+		else
+		{
+			// change movement and shooting state, statring with COMBINATIONS
+
+			if (pStates[SDL_SCANCODE_Z])
+			{
+				m_CupheadMovementState = Movement::jump;
+				m_CupheadShootingState = Shoot::notShooting; // 3
+				if (pStates[SDL_SCANCODE_LEFT])
+				{
+					m_Velocity.x = -m_Speed;
+				}
+				if (pStates[SDL_SCANCODE_RIGHT])
+				{
+					m_Velocity.x = m_Speed;
+				}
+
+				if (m_IsGrounded)
+				{
+					m_Velocity = Vector2f{ 0.f, 700.f };
+				}
+			}
+			// shoot Up left
+			else if (pStates[SDL_SCANCODE_LEFT] && pStates[SDL_SCANCODE_UP] && pStates[SDL_SCANCODE_X] && pStates[SDL_SCANCODE_C])
+			{
+				m_CupheadMovementState = Movement::lock;
+				m_CupheadShootingState = Shoot::shootDiagonalUpLeft; // 7
+
+				if (m_IsGrounded)
+				{
+					m_Velocity = Vector2f{ 0.f, 0.f };
+				}
+				m_ShootAngle = 135.f;
+				m_IsShooting = true;
+			}
+			// shoot Up right
+			else if (pStates[SDL_SCANCODE_RIGHT] && pStates[SDL_SCANCODE_UP] && pStates[SDL_SCANCODE_X] && pStates[SDL_SCANCODE_C])
+			{
+				m_CupheadMovementState = Movement::lock;
+				m_CupheadShootingState = Shoot::shootDiagonalUpRight; // 6
+
+				if (m_IsGrounded)
+				{
+					m_Velocity = Vector2f{ 0.f, 0.f };
+				}
+				m_ShootAngle = 45.f;
+				m_IsShooting = true;
+			}
+			// shoot left
+			else if (pStates[SDL_SCANCODE_LEFT] && pStates[SDL_SCANCODE_X] && pStates[SDL_SCANCODE_C])
+			{
+				m_CupheadMovementState = Movement::lock;
+				m_CupheadShootingState = Shoot::shootLeft; // 9
+
+				if (m_IsGrounded)
+				{
+					m_Velocity = Vector2f{ 0.f, 0.f };
+				}
+				m_ShootAngle = 180.f;
+				m_IsShooting = true;
+			}
+			// shoot right
+			else if (pStates[SDL_SCANCODE_RIGHT] && pStates[SDL_SCANCODE_X] && pStates[SDL_SCANCODE_C])
+			{
+				m_CupheadMovementState = Movement::lock;
+				m_CupheadShootingState = Shoot::shootRight; // 8
+
+				if (m_IsGrounded)
+				{
+					m_Velocity = Vector2f{ 0.f, 0.f };
+				}
+				m_ShootAngle = 0.f;
+				m_IsShooting = true;
+			}
+			// run shoot up right
+			else if (pStates[SDL_SCANCODE_RIGHT] && pStates[SDL_SCANCODE_UP] && pStates[SDL_SCANCODE_X]) // ?? might change
+			{
+				m_CupheadMovementState = Movement::runRight;
+				m_CupheadShootingState = Shoot::shootDiagonalUpRight; // 14
+
+				if (m_IsGrounded)
+				{
+					m_Velocity = Vector2f{ m_Speed, 0.f };
+				}
+				m_ShootAngle = 45.f;
+				m_IsShooting = true;
+			}
+			// run shoot up left
+			else if (pStates[SDL_SCANCODE_LEFT] && pStates[SDL_SCANCODE_UP] && pStates[SDL_SCANCODE_X]) // ?? might change
+			{
+				m_CupheadMovementState = Movement::runLeft;
+				m_CupheadShootingState = Shoot::shootDiagonalUpLeft; // 15
+
+				if (m_IsGrounded)
+				{
+					m_Velocity = Vector2f{ -m_Speed, 0.f };
+				}
+				m_ShootAngle = 135.f;
+				m_IsShooting = true;
+			}
+			// run shoot left
+			else if (pStates[SDL_SCANCODE_LEFT] && pStates[SDL_SCANCODE_X])
+			{
+				m_CupheadMovementState = Movement::runLeft;
+				m_CupheadShootingState = Shoot::shootLeft; // 17
+
+				m_Velocity.x = -m_Speed;
+
+				// Only reset vertical velocity when grounded
+				if (m_IsGrounded)
+				{
+					m_Velocity.y = 0.f;
+				}
+
+				m_ShootAngle = 180.f;
+				m_IsShooting = true;
+			}
+			// run shoot right
+			else if (pStates[SDL_SCANCODE_RIGHT] && pStates[SDL_SCANCODE_X])
+			{
+				m_CupheadMovementState = Movement::runRight;
+				m_CupheadShootingState = Shoot::shootRight; // 16
+
+				m_Velocity.x = m_Speed;
+
+				// Only reset vertical velocity when grounded
+				if (m_IsGrounded)
+				{
+					m_Velocity.y = 0.f;
+				}
+
+				m_ShootAngle = 0.f;
+				m_IsShooting = true;
+			}
+			// shoot up
+			else if (pStates[SDL_SCANCODE_UP] && pStates[SDL_SCANCODE_X])
+			{
+				m_CupheadMovementState = Movement::lock;
+				m_CupheadShootingState = Shoot::shootUp; // 5
+
+				if (m_IsGrounded)
+				{
+					m_Velocity = Vector2f{ 0.f, 0.f };
+				}
+				m_ShootAngle = 90.f;
+				m_IsShooting = true;
+			}
+			// shoot down
+			else if (pStates[SDL_SCANCODE_DOWN] && pStates[SDL_SCANCODE_X])
+			{
+				m_CupheadMovementState = Movement::lock;
+				m_CupheadShootingState = Shoot::shootDown; // 12
+
+				if (m_IsGrounded)
+				{
+					m_Velocity = Vector2f{ 0.f, 0.f };
+				}
+				m_ShootAngle = 270.f;
+				m_IsShooting = true;
+			}
+			// then proceed with individual keys
+			else if (pStates[SDL_SCANCODE_LEFT])
+			{
+				m_CupheadMovementState = Movement::runLeft;
+				m_CupheadShootingState = Shoot::notShooting; // 1
+
+				m_Velocity.x = -m_Speed;
+
+				// Only reset vertical velocity when grounded
+				if (m_IsGrounded)
+				{
+					m_Velocity.y = 0.f;
+				}
+			}
+			else if (pStates[SDL_SCANCODE_RIGHT])
+			{
+				m_CupheadMovementState = Movement::runRight;
+				m_CupheadShootingState = Shoot::notShooting; // 2
+
+				m_Velocity.x = m_Speed;
+
+				// Only reset vertical velocity when grounded
+				if (m_IsGrounded)
+				{
+					m_Velocity.y = 0.f;
+				}
+			}
+			else if (pStates[SDL_SCANCODE_DOWN])
+			{
+				m_CupheadMovementState = Movement::duck;
+				m_CupheadShootingState = Shoot::notShooting; // 13
+
+				if (m_IsGrounded)
+				{
+					m_Velocity = Vector2f{ 0.f, 0.f };
+				}
+			}
+			else if (pStates[SDL_SCANCODE_X])
+			{
+				m_CupheadMovementState = Movement::lock;
+				m_CupheadShootingState = Shoot::shootRight;
+
+				if (m_IsGrounded)
+				{
+					m_Velocity = Vector2f{ 0.f, 0.f };
+				}
+
+				// important DEFAULT direction!
+				if (m_FacingAngle == 0.f)
+				{
+					m_ShootAngle = 0.f;
+				}
+				else if (m_FacingAngle == 180.f)
+				{
+					m_ShootAngle = 180.f;
+				}
+
+				m_IsShooting = true;
+			}
+
+			// --- I can add whatever key combinations I want from now on, AnimateCuphead will handle it! ---
+
+			// if no key combinations are pressed -> it's idle
+			else
+			{
+				m_KeyPressed = false;
+				m_CupheadMovementState = Movement::idle;
+				m_CupheadShootingState = Shoot::notShooting;
+
+				if (m_IsGrounded)
+				{
+					m_Velocity = Vector2f{ 0.f, 0.f };
+				}
 			}
 		}
 	}
@@ -398,7 +428,7 @@ void Cuphead::AnimateCuphead(float elapsedSec)
 				m_CurrentRowNr = 2;
 				m_Animator.PlayAnimation(elapsedSec, m_MaxFrameSec, 8);
 			}
-			
+
 			else
 			{
 				m_CurrentTexture = m_TextureIdle;
@@ -582,29 +612,6 @@ void Cuphead::AnimateCuphead(float elapsedSec)
 	}
 }
 
-void Cuphead::UpdateProjectiles(float elapsedSec)
-{
-	const float projectileCooldown{ 0.2f };
-
-	if (m_IsShooting)
-	{
-		m_AccuSecProjectiles += elapsedSec;
-
-		if (m_AccuSecProjectiles > projectileCooldown)
-		{
-			m_ProjectileVector.push_back(new Projectile(Vector2f{ GetBounds().left, GetBounds().bottom + GetBounds().height * 0.4f}, m_ShootAngle));
-			m_AccuSecProjectiles -= projectileCooldown;
-		}
-	}
-	for (Projectile* pProjectile : m_ProjectileVector)
-	{
-		if (pProjectile != nullptr)
-		{
-			pProjectile->Update(elapsedSec);
-		}
-	}
-}
-
 void Cuphead::HandleRaycast(float elapsedSec, const std::vector<Vector2f>& vertices)
 {
 	Vector2f firstPointY{ m_Position.x, m_Position.y + GetBounds().height };
@@ -618,25 +625,23 @@ void Cuphead::HandleRaycast(float elapsedSec, const std::vector<Vector2f>& verti
 		{
 			m_Velocity = Vector2f{ 0.f, 0.f };
 		}
-		
+
 		m_Position.y = hitInfo.intersectPoint.y;
 		m_IsGrounded = true;
 	}
 	else
 	{
-		
-		
 		m_IsGrounded = false;
 		m_Velocity += Vector2f{ 0, -9.8f };
 	}
 
-	Vector2f firstPointX{ GetBounds().left - GetBounds().width / 2, m_Position.y + GetBounds().height / 2};
-	Vector2f secondPointX{ GetBounds().left - GetBounds().width / 2 + GetBounds().width, m_Position.y + GetBounds().height / 2};
+	Vector2f firstPointX{ GetBounds().left, m_Position.y + GetBounds().height / 2 };
+	Vector2f secondPointX{ GetBounds().left  + GetBounds().width, m_Position.y + GetBounds().height / 2 };
 
 	// RIGHT collision
 	if (utils::Raycast(vertices, firstPointX, secondPointX, hitInfo))
 	{
-		
+
 		if (!m_KeyPressed)
 		{
 			m_Velocity.x = 0.f;
@@ -656,11 +661,67 @@ void Cuphead::HandleRaycast(float elapsedSec, const std::vector<Vector2f>& verti
 		m_Position.x = hitInfo.intersectPoint.x - (GetBounds().width / 2 * hitInfo.normal.x);
 	}
 
-
 	m_Position += m_Velocity * elapsedSec;
 }
 
-int Cuphead::GetHealth() const // to check if dead in Game.cpp in future
+void Cuphead::Dash(float elapsedSec)
+{
+	if (m_ClickedDash && m_DashAccuSec == 0.f)
+	{
+		m_IsDashing = true;
+		m_ClickedDash = false;
+	}
+
+	if (m_IsDashing)
+	{
+		m_DashAccuSec += elapsedSec;
+
+		if (m_DashAccuSec > m_DashDuration)
+		{
+			m_IsDashing = false;
+		}
+	}
+
+	if (m_DashAccuSec >= m_DashDuration && m_IsGrounded)
+	{
+		m_DashAccuSec = 0.f;
+	}
+	
+}
+
+void Cuphead::UpdateProjectiles(float elapsedSec)
+{
+	const float projectileCooldown{ 0.2f };
+
+	if (m_IsShooting)
+	{
+		m_AccuSecProjectiles += elapsedSec;
+
+		if (m_AccuSecProjectiles > projectileCooldown)
+		{
+			m_ProjectileVector.push_back(new Projectile(Vector2f{ GetBounds().left + GetBounds().width / 2, GetBounds().bottom + GetBounds().height * 0.4f}, m_ShootAngle));
+			m_AccuSecProjectiles -= projectileCooldown;
+		}
+	}
+	for (Projectile* pProjectile : m_ProjectileVector)
+	{
+		if (pProjectile != nullptr)
+		{
+			pProjectile->Update(elapsedSec);
+		}
+	}
+}
+
+void Cuphead::StartDash()
+{
+	if (!m_PlayingIntro)
+	{
+		m_ClickedDash = true;
+	}
+	
+}
+
+int Cuphead::GetHealth() const // to check if isDead in Game.cpp in future
 {
 	return m_HP;
 }
@@ -672,7 +733,7 @@ Vector2f Cuphead::GetPosition() const
 
 Rectf Cuphead::GetBounds() const
 {
-	return Rectf{ m_Position.x , m_Position.y, m_FrameWidth, m_FrameHeight };
+	return Rectf{ m_Position.x - m_FrameWidth / 2, m_Position.y, m_FrameWidth, m_FrameHeight };
 }
 
 void Cuphead::UpdateFacingDirection(const Uint8* pStates)
