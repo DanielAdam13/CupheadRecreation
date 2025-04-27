@@ -64,8 +64,8 @@ void EnemyManager::IntializeEnemies()
 	m_EnemiesVector.push_back(new Spike(m_SpikeSprite, Vector2f{ 1500.f, 250.f }, Vector2f{ 1500.f, 150.f }, Vector2f{ 1500.f, 350.f }, 250.f));
 
 	m_EnemiesVector.push_back(new BigChomper(m_ChomperSprite, Vector2f{ 1200.f, -(m_ChomperSprite->GetHeight() / 4) / 2 },
-		Vector2f{ 1200.f, -(m_ChomperSprite->GetHeight() / 4) }, Vector2f{ 1200.f, 500.f }, 600.f));
+		Vector2f{ 1200.f, -(m_ChomperSprite->GetHeight() / 4) * 1.5f }, Vector2f{ 1200.f, 500.f }, 600.f));
 
 	m_EnemiesVector.push_back(new BigChomper(m_ChomperSprite, Vector2f{ 2200.f, (m_ChomperSprite->GetHeight() / 4) / 2 },
-		Vector2f{ 2200.f, -(m_ChomperSprite->GetHeight() / 4) }, Vector2f{2200.f, 450.f}, 600.f));
+		Vector2f{ 2200.f, -(m_ChomperSprite->GetHeight() / 4) * 1.5f }, Vector2f{2200.f, 450.f}, 600.f));
 }

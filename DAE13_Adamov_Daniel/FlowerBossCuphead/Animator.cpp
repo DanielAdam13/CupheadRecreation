@@ -69,14 +69,8 @@ void Animator::LoopBetween(const float elapsedSec, int firstFrame, int lastFrame
 		if (m_FrameNr > lastFrame)
 		{
 			m_AccuSec = 0.f;
-			//m_FrameNr = 0;
 			m_FrameNr = firstFrame;
 		}
-		/*PlayAnimation(elapsedSec, maxFrameSec);
-		if (m_FrameNr > lastFrame)
-		{
-			m_FrameNr = firstFrame;
-		}*/
 	}
 }
 

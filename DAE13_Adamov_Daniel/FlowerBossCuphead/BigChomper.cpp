@@ -44,7 +44,7 @@ void BigChomper::Update(float elapsedSec)
 	}
 	else
 	{
-		if (m_Position.y >= m_HighestPoint.y - 300.f)
+		if (m_Position.y >= m_HighestPoint.y - 200.f)
 		{
 			m_Animator.LoopBetween(elapsedSec, 12, 15, 0.08f);
 		}
