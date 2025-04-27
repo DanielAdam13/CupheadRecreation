@@ -4,14 +4,17 @@
 #include "Texture.h"
 #include "utils.h"
 #include "Camera.h"
+#include "Spike.h"
+#include "BigChomper.h"
 
 Game::Game(const Window& window)
 	:BaseGame{ window },
 	m_Cuphead{ Vector2f{GetViewPort().width / 2, 100.f}, true },
 	m_Vertices{},
 	m_ForestBackground1{ new Texture("ForestFollies_Background_First.png") },
-	m_ForectBackground2{new Texture("ForestFollies_Background_Second.png")},
-	m_PlayerCamera{ new Camera(GetViewPort().width, GetViewPort().height) }
+	m_ForectBackground2{ new Texture("ForestFollies_Background_Second.png") },
+	m_PlayerCamera{ new Camera(GetViewPort().width, GetViewPort().height) },
+	m_EnemyManager{}
 {
 	Initialize();
 }
@@ -23,6 +26,7 @@ Game::~Game( )
 
 void Game::Initialize( )
 {
+	m_Vertices.reserve(20);
 	m_Vertices.push_back(Vector2f{ 50.f, 170.f });
 	m_Vertices.push_back(Vector2f{ 50.f, GetViewPort().height + 200.f });
 	m_Vertices.push_back(Vector2f{ 11800.f, GetViewPort().height + 200.f });
@@ -68,6 +72,8 @@ void Game::Update( float elapsedSec )
 	const Uint8 *pStates = SDL_GetKeyboardState( nullptr );
 
 	m_Cuphead.Update(elapsedSec, pStates, m_Vertices);
+
+	m_EnemyManager.UpdateEnemies(elapsedSec);
 }
 
 void Game::Draw( ) const
@@ -89,7 +95,11 @@ void Game::Draw( ) const
 	utils::SetColor(Color4f{ 1,0,1,1 });
 	utils::DrawPolygon(m_Vertices, true, 2.f);
 
+
+	m_EnemyManager.DrawEnemies();
+
 	m_PlayerCamera->Reset();
+	
 }
 
 void Game::ProcessKeyDownEvent( const SDL_KeyboardEvent & e )
@@ -99,6 +109,9 @@ void Game::ProcessKeyDownEvent( const SDL_KeyboardEvent & e )
 	{
 	case SDLK_LSHIFT:
 		m_Cuphead.StartDash();
+		break;
+	case SDLK_z:
+		m_Cuphead.Parry();
 		break;
 	}
 }

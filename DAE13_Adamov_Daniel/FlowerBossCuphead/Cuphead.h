@@ -18,6 +18,7 @@ public:
 	void Update(float elapsedSec, const Uint8* pStates, const std::vector<Vector2f>& vertices);
 	
 	void StartDash();
+	void Parry();
 	int GetHealth() const;
 	Vector2f GetPosition() const;
 	

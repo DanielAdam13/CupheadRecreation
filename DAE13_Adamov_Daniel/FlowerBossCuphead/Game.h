@@ -4,6 +4,7 @@
 #include "Cuphead.h"
 class Texture;
 class Camera;
+#include "EnemyManager.h"
 
 class Game : public BaseGame
 {
@@ -34,6 +35,8 @@ private:
 	Texture* m_ForectBackground2;
 
 	Camera* m_PlayerCamera;
+
+	EnemyManager m_EnemyManager;
 
 	// FUNCTIONS
 	void Initialize();

@@ -5,11 +5,10 @@
 #include "utils.h"
 
 int Projectile::m_NumProjectiles{ 0 };
-//bool Projectile::m_GameOver{ false };
 
-Texture* Projectile::ProjectileSprite()
+const Texture* Projectile::ProjectileSprite()
 {
-	static Texture* projectileSprite{ new Texture("Projectile_Loop.png") };
+	static const Texture* projectileSprite{ new Texture("Projectile_Loop.png") };
 	return projectileSprite;
 }
 
@@ -41,7 +40,7 @@ Projectile::~Projectile()
 
 void Projectile::Draw() const
 {
-	Texture* projectileTexture{ ProjectileSprite() };
+	const Texture* projectileTexture{ ProjectileSprite() };
 
 	/*projectileTexture->Draw(GetBounds(), Rectf{ 0.f + (m_ProjAnimator.GetCurrentFrame() % 4) * GetBounds().width,
 		0.f + (m_ProjAnimator.GetCurrentFrame() / 4) * GetBounds().height, GetBounds().width, GetBounds().height });*/
@@ -70,7 +69,7 @@ void Projectile::Animate(float elapsedSec)
 
 Rectf Projectile::GetBounds() const
 {
-	Texture* projectileTexture{ ProjectileSprite() };
+	const Texture* projectileTexture{ ProjectileSprite() };
 	const float frameWidth{ projectileTexture->GetWidth() / 4 };
 	const float frameHeight{ projectileTexture->GetHeight() / 2 };
 

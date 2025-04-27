@@ -35,6 +35,6 @@ private:
 	static int m_NumProjectiles;
 	//static bool m_GameOver;
 	const float m_Speed;
-	static Texture* ProjectileSprite(); // no idea if this is the correct way to do it
+	static const Texture* ProjectileSprite(); // not sure if this is the correct way to do it
 };
 

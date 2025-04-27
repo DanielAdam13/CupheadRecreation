@@ -119,8 +119,6 @@ void Cuphead::ProcessKeys(const Uint8* pStates)
 
 		if (m_IsDashing) 
 		{
-			m_CupheadMovementState = Movement::dash;
-			m_CupheadShootingState = Shoot::notShooting;
 
 			if (!m_IsGrounded)
 			{
@@ -155,21 +153,27 @@ void Cuphead::ProcessKeys(const Uint8* pStates)
 
 			if (pStates[SDL_SCANCODE_Z])
 			{
-				m_CupheadMovementState = Movement::jump;
-				m_CupheadShootingState = Shoot::notShooting; // 3
-				if (pStates[SDL_SCANCODE_LEFT])
+				if (m_CupheadMovementState != Movement::parry)
 				{
-					m_Velocity.x = -movementSpeed;
-				}
-				if (pStates[SDL_SCANCODE_RIGHT])
-				{
-					m_Velocity.x = movementSpeed;
-				}
+					m_CupheadMovementState = Movement::jump;
+					m_CupheadShootingState = Shoot::notShooting; // 3
 
-				if (m_IsGrounded)
-				{
-					m_Velocity = Vector2f{ 0.f, 700.f };
+					if (pStates[SDL_SCANCODE_LEFT])
+					{
+						m_Velocity.x = -movementSpeed;
+					}
+					if (pStates[SDL_SCANCODE_RIGHT])
+					{
+						m_Velocity.x = movementSpeed;
+					}
+
+					if (m_IsGrounded)
+					{
+						m_Velocity = Vector2f{ 0.f, 700.f };
+					}
 				}
+				
+				
 			}
 			// shoot Up left
 			else if (pStates[SDL_SCANCODE_LEFT] && pStates[SDL_SCANCODE_UP] && pStates[SDL_SCANCODE_X] && pStates[SDL_SCANCODE_C])
@@ -451,7 +455,7 @@ void Cuphead::AnimateCuphead(float elapsedSec)
 				lastShootState = m_CupheadShootingState;
 			}
 
-			if (!m_IsGrounded && m_CupheadMovementState != Movement::jump && m_CupheadMovementState != Movement::dash)
+			if (!m_IsGrounded && m_CupheadMovementState != Movement::jump && m_CupheadMovementState != Movement::dash && m_CupheadMovementState != Movement::parry)
 			{
 				m_CurrentTexture = m_TextureJump;
 				m_CurrentColNr = 4;
@@ -483,6 +487,13 @@ void Cuphead::AnimateCuphead(float elapsedSec)
 
 					m_Animator.PlayAnimation(elapsedSec, m_MaxFrameSec, 8);
 					break;
+				case Cuphead::Movement::parry:
+					m_CurrentTexture = m_TextureParry;
+					m_CurrentColNr = 4;
+					m_CurrentRowNr = 4;
+
+					m_Animator.LoopBetween(elapsedSec, 9, 16, m_MaxFrameSec);
+					break;
 				case Cuphead::Movement::dash:
 					m_CurrentTexture = m_TextureDash;
 					m_CurrentColNr = 4;
@@ -496,8 +507,6 @@ void Cuphead::AnimateCuphead(float elapsedSec)
 					m_CurrentRowNr = 4;
 
 					m_Animator.LoopBetween(elapsedSec, 7, 14, m_MaxFrameSec);
-					break;
-				case Cuphead::Movement::parry:
 					break;
 				}
 			}
@@ -719,8 +728,18 @@ void Cuphead::StartDash()
 	if (!m_PlayingIntro)
 	{
 		m_ClickedDash = true;
+		m_CupheadMovementState = Movement::dash;
+		m_CupheadShootingState = Shoot::notShooting;
 	}
-	
+}
+
+void Cuphead::Parry()
+{
+	if (!m_PlayingIntro && !m_IsGrounded)
+	{
+		m_CupheadMovementState = Movement::parry;
+		m_CupheadShootingState = Shoot::notShooting;
+	}
 }
 
 int Cuphead::GetHealth() const // to check if isDead in Game.cpp in future
