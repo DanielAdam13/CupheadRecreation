@@ -3,7 +3,6 @@
 #include <iostream>
 #include "Texture.h"
 #include "utils.h"
-#include "Camera.h"
 #include "Spike.h"
 #include "BigChomper.h"
 
@@ -13,7 +12,7 @@ Game::Game(const Window& window)
 	m_Vertices{},
 	m_ForestBackground1{ new Texture("ForestFollies_Background_First.png") },
 	m_ForectBackground2{ new Texture("ForestFollies_Background_Second.png") },
-	m_PlayerCamera{ new Camera(GetViewPort().width, GetViewPort().height) },
+	m_PlayerCamera{ GetViewPort().width, GetViewPort().height },
 	m_EnemyManager{}
 {
 	Initialize();
@@ -61,9 +60,6 @@ void Game::Cleanup( )
 	m_ForectBackground2 = nullptr;
 
 	m_Vertices.clear();
-
-	delete m_PlayerCamera;
-	m_PlayerCamera = nullptr;
 }
 
 void Game::Update( float elapsedSec )
@@ -74,13 +70,13 @@ void Game::Update( float elapsedSec )
 	m_Cuphead.Update(elapsedSec, pStates, m_Vertices);
 
 	m_EnemyManager.UpdateEnemies(elapsedSec);
+
+	m_PlayerCamera.Aim(12400.f, 760.f, m_Cuphead.GetPosition());
 }
 
 void Game::Draw( ) const
 {
 	ClearBackground( );
-
-	m_PlayerCamera->Aim(12400.f, 760.f, m_Cuphead.GetPosition());
 
 	glPushMatrix();
 		glScalef(0.66f, 0.67f, 0.f);
@@ -90,7 +86,7 @@ void Game::Draw( ) const
 
 	m_Cuphead.Draw();
 
-	m_PlayerCamera->DrawBorderOverlay(GetViewPort().height / 20);
+	m_PlayerCamera.DrawBorderOverlay(GetViewPort().height / 20);
 
 	utils::SetColor(Color4f{ 1,0,1,1 });
 	utils::DrawPolygon(m_Vertices, true, 2.f);
@@ -98,7 +94,7 @@ void Game::Draw( ) const
 
 	m_EnemyManager.DrawEnemies();
 
-	m_PlayerCamera->Reset();
+	m_PlayerCamera.Reset();
 	
 }
 

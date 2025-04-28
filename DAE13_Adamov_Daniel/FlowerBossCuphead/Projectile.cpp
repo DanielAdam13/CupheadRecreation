@@ -24,11 +24,6 @@ Projectile::Projectile(const Vector2f& spawnPos, float directionAngle, int damag
 	std::cout << "Created projectile with direction: " << directionAngle << std::endl;
 }
 
-Projectile::Projectile(const Vector2f& spawnPos, float directionAngle)
-	:Projectile::Projectile(spawnPos, directionAngle, 1)
-{
-}
-
 Projectile::~Projectile()
 {
 	m_NumProjectiles--;

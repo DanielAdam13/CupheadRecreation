@@ -20,7 +20,7 @@ void BigChomper::Draw() const
 
 	utils::SetColor(Color4f{ 1,0,0,1 });
 	utils::DrawRect(this->GetBounds());
-	utils::FillEllipse(this->m_Position, 5.f, 5.f);
+	utils::FillEllipse(m_Positon, 5.f, 5.f);
 
 	utils::SetColor(Color4f{ 0, 0, 1, 1 });
 	utils::FillEllipse(m_LowestPoint, 5.f, 5.f);
@@ -33,7 +33,7 @@ void BigChomper::Update(float elapsedSec)
 
 	if (m_Speed > 0.f)
 	{
-		if (m_Position.y <= m_HighestPoint.y - 300.f)
+		if (m_Positon.y <= m_HighestPoint.y - 300.f)
 		{
 			m_Animator.LoopBetween(elapsedSec, 0, 8, 0.07f);
 		}
@@ -44,7 +44,7 @@ void BigChomper::Update(float elapsedSec)
 	}
 	else
 	{
-		if (m_Position.y >= m_HighestPoint.y - 200.f)
+		if (m_Positon.y >= m_HighestPoint.y - 200.f)
 		{
 			m_Animator.LoopBetween(elapsedSec, 12, 15, 0.08f);
 		}
@@ -53,7 +53,6 @@ void BigChomper::Update(float elapsedSec)
 			m_Animator.LoopBetween(elapsedSec, 16, 19, 0.09f);
 		}
 	}
-	
 }
 
 Rectf BigChomper::GetBounds() const
@@ -62,5 +61,5 @@ Rectf BigChomper::GetBounds() const
 	const float frameWidth{ this->m_Texture->GetWidth() / m_SpriteColNr };
 	const float frameHeight{ this->m_Texture->GetHeight() / m_SpriteRowNr };
 
-	return Rectf(this->m_Position.x - frameWidth / 2, this->m_Position.y - frameHeight / 2, frameWidth, frameHeight);
+	return Rectf(m_Positon.x - frameWidth / 2, m_Positon.y - frameHeight / 2, frameWidth, frameHeight);
 }

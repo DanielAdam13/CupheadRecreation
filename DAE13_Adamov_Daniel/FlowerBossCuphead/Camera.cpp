@@ -42,7 +42,7 @@ void Camera::DrawBorderOverlay(float lineHeight) const
 	utils::FillRect(m_CameraPos.x, m_CameraPos.y, m_ScreenWidth, lineHeight);
 }
 
-Vector2f Camera::Reset()
+Vector2f Camera::Reset() const
 {
 	glPopMatrix();
 	return Vector2f();

@@ -15,7 +15,6 @@ Cuphead::Cuphead(const Vector2f& position, bool playIntro)
 	m_CupheadMovementState{ Movement::idle },
 	m_CupheadShootingState{ Shoot::notShooting },
 	m_KeyPressed{ false },
-	m_IsShooting{ false },
 	m_AccuSecProjectiles{ 0.f },
 	m_ShootAngle{ 0.f },
 	m_IsGrounded{ false },
@@ -36,6 +35,38 @@ Cuphead::Cuphead(const Vector2f& position, bool playIntro)
 {
 	IntializeTextures();
 }
+
+//Cuphead::Cuphead(const Cuphead& character)
+//	:m_Position{ character.m_Position },
+//	m_HP{ character.m_HP },
+//	m_PlayingIntro{ character.m_PlayingIntro },
+//	m_CupheadMovementState{ character.m_CupheadMovementState },
+//	m_CupheadShootingState{ character.m_CupheadShootingState },
+//	m_KeyPressed{ character.m_KeyPressed },
+//	m_AccuSecProjectiles{ character.m_AccuSecProjectiles },
+//	m_ShootAngle{ character.m_ShootAngle },
+//	m_IsGrounded{ character.m_IsGrounded },
+//	m_IsHit{ character.m_IsHit },
+//	m_DashAccuSec{ character.m_DashAccuSec },
+//	m_ClickedDash{ character.m_ClickedDash },
+//	m_IsDashing{ character.m_IsDashing },
+//	m_DashCooldown{ character.m_DashCooldown },
+//	m_DashDuration{ character.m_DashDuration },
+//	m_MaxFrameSec{ character.m_MaxFrameSec },
+//	m_CurrentTexture{ character.m_CurrentTexture }, //!
+//	m_CurrentColNr{ character.m_CurrentColNr },
+//	m_CurrentRowNr{ character.m_CurrentRowNr },
+//	m_Velocity{ character.m_Velocity },
+//	m_FacingAngle{ character.m_FacingAngle },
+//	m_Animator{ character.m_Animator },
+//	m_ProjectileVector{ std::vector<Projectile*>{} } //!
+//{
+//	for (size_t i{}; i < m_ProjectileVector.size(); ++i)
+//	{
+//		m_ProjectileVector[i] = character.m_ProjectileVector[i];
+//	}
+//	IntializeTextures();
+//}
 
 Cuphead::~Cuphead()
 {
@@ -115,7 +146,6 @@ void Cuphead::ProcessKeys(const Uint8* pStates)
 		UpdateFacingDirection(pStates);
 
 		m_KeyPressed = true;
-		m_IsShooting = false;
 
 		if (m_IsDashing) 
 		{
@@ -172,8 +202,6 @@ void Cuphead::ProcessKeys(const Uint8* pStates)
 						m_Velocity = Vector2f{ 0.f, 700.f };
 					}
 				}
-				
-				
 			}
 			// shoot Up left
 			else if (pStates[SDL_SCANCODE_LEFT] && pStates[SDL_SCANCODE_UP] && pStates[SDL_SCANCODE_X] && pStates[SDL_SCANCODE_C])
@@ -186,7 +214,6 @@ void Cuphead::ProcessKeys(const Uint8* pStates)
 					m_Velocity = Vector2f{ 0.f, 0.f };
 				}
 				m_ShootAngle = 135.f;
-				m_IsShooting = true;
 			}
 			// shoot Up right
 			else if (pStates[SDL_SCANCODE_RIGHT] && pStates[SDL_SCANCODE_UP] && pStates[SDL_SCANCODE_X] && pStates[SDL_SCANCODE_C])
@@ -199,7 +226,6 @@ void Cuphead::ProcessKeys(const Uint8* pStates)
 					m_Velocity = Vector2f{ 0.f, 0.f };
 				}
 				m_ShootAngle = 45.f;
-				m_IsShooting = true;
 			}
 			// shoot left
 			else if (pStates[SDL_SCANCODE_LEFT] && pStates[SDL_SCANCODE_X] && pStates[SDL_SCANCODE_C])
@@ -212,7 +238,6 @@ void Cuphead::ProcessKeys(const Uint8* pStates)
 					m_Velocity = Vector2f{ 0.f, 0.f };
 				}
 				m_ShootAngle = 180.f;
-				m_IsShooting = true;
 			}
 			// shoot right
 			else if (pStates[SDL_SCANCODE_RIGHT] && pStates[SDL_SCANCODE_X] && pStates[SDL_SCANCODE_C])
@@ -225,7 +250,6 @@ void Cuphead::ProcessKeys(const Uint8* pStates)
 					m_Velocity = Vector2f{ 0.f, 0.f };
 				}
 				m_ShootAngle = 0.f;
-				m_IsShooting = true;
 			}
 			// run shoot up right
 			else if (pStates[SDL_SCANCODE_RIGHT] && pStates[SDL_SCANCODE_UP] && pStates[SDL_SCANCODE_X]) // ?? might change
@@ -238,7 +262,6 @@ void Cuphead::ProcessKeys(const Uint8* pStates)
 					m_Velocity = Vector2f{ movementSpeed, 0.f };
 				}
 				m_ShootAngle = 45.f;
-				m_IsShooting = true;
 			}
 			// run shoot up left
 			else if (pStates[SDL_SCANCODE_LEFT] && pStates[SDL_SCANCODE_UP] && pStates[SDL_SCANCODE_X]) // ?? might change
@@ -251,7 +274,6 @@ void Cuphead::ProcessKeys(const Uint8* pStates)
 					m_Velocity = Vector2f{ -movementSpeed, 0.f };
 				}
 				m_ShootAngle = 135.f;
-				m_IsShooting = true;
 			}
 			// run shoot left
 			else if (pStates[SDL_SCANCODE_LEFT] && pStates[SDL_SCANCODE_X])
@@ -268,7 +290,6 @@ void Cuphead::ProcessKeys(const Uint8* pStates)
 				}
 
 				m_ShootAngle = 180.f;
-				m_IsShooting = true;
 			}
 			// run shoot right
 			else if (pStates[SDL_SCANCODE_RIGHT] && pStates[SDL_SCANCODE_X])
@@ -285,7 +306,6 @@ void Cuphead::ProcessKeys(const Uint8* pStates)
 				}
 
 				m_ShootAngle = 0.f;
-				m_IsShooting = true;
 			}
 			// shoot up
 			else if (pStates[SDL_SCANCODE_UP] && pStates[SDL_SCANCODE_X])
@@ -298,7 +318,6 @@ void Cuphead::ProcessKeys(const Uint8* pStates)
 					m_Velocity = Vector2f{ 0.f, 0.f };
 				}
 				m_ShootAngle = 90.f;
-				m_IsShooting = true;
 			}
 			// shoot down
 			else if (pStates[SDL_SCANCODE_DOWN] && pStates[SDL_SCANCODE_X])
@@ -311,7 +330,6 @@ void Cuphead::ProcessKeys(const Uint8* pStates)
 					m_Velocity = Vector2f{ 0.f, 0.f };
 				}
 				m_ShootAngle = 270.f;
-				m_IsShooting = true;
 			}
 			// then proceed with individual keys
 			else if (pStates[SDL_SCANCODE_LEFT])
@@ -369,8 +387,6 @@ void Cuphead::ProcessKeys(const Uint8* pStates)
 				{
 					m_ShootAngle = 180.f;
 				}
-
-				m_IsShooting = true;
 			}
 
 			// --- I can add whatever key combinations I want from now on, AnimateCuphead will handle it! ---
@@ -409,7 +425,7 @@ void Cuphead::AnimateCuphead(float elapsedSec)
 	}
 	else
 	{
-		// important for reseting animations between each other
+		// important for resetting animations between each other
 		static Movement lastMovementState{};
 		static Shoot lastShootState{};
 
@@ -492,7 +508,7 @@ void Cuphead::AnimateCuphead(float elapsedSec)
 					m_CurrentColNr = 4;
 					m_CurrentRowNr = 4;
 
-					m_Animator.LoopBetween(elapsedSec, 9, 16, m_MaxFrameSec);
+					m_Animator.LoopBetween(elapsedSec, 9, 16, 0.06f);
 					break;
 				case Cuphead::Movement::dash:
 					m_CurrentTexture = m_TextureDash;
@@ -704,7 +720,7 @@ void Cuphead::UpdateProjectiles(float elapsedSec)
 {
 	const float projectileCooldown{ 0.2f };
 
-	if (m_IsShooting)
+	if (m_CupheadShootingState != Shoot::notShooting) // if shooting in any direction
 	{
 		m_AccuSecProjectiles += elapsedSec;
 
@@ -714,6 +730,7 @@ void Cuphead::UpdateProjectiles(float elapsedSec)
 			m_AccuSecProjectiles -= projectileCooldown;
 		}
 	}
+
 	for (Projectile* pProjectile : m_ProjectileVector)
 	{
 		if (pProjectile != nullptr)

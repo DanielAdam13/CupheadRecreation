@@ -1,7 +1,8 @@
 #include "pch.h"
 #include "Enemy.h"
 
-Enemy::Enemy()
-	:m_Animator{ Animator() }
+Enemy::Enemy(const Vector2f& pos)
+	: m_Positon{ pos },
+	m_Animator{ Animator() }
 {
 }

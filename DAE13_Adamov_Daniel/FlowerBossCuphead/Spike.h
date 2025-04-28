@@ -15,8 +15,6 @@ public:
 	virtual Rectf GetBounds() const override;
 
 protected:
-	Vector2f m_Position;
-
 	const Vector2f m_LowestPoint;
 	const Vector2f m_HighestPoint;
 

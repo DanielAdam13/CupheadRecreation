@@ -9,14 +9,14 @@ class EnemyManager final
 {
 public:
 	explicit EnemyManager();
-	~EnemyManager();
-
-	EnemyManager(const EnemyManager&) = delete;
+	EnemyManager(const EnemyManager& enemyManager) = delete;
 	EnemyManager& operator=(const EnemyManager&) = delete;
+	EnemyManager(EnemyManager&& enemyManager) = delete;
+	EnemyManager& operator=(EnemyManager&& rhs) = delete;
+	~EnemyManager();
 
 	void DrawEnemies() const;
 	void UpdateEnemies(float elapsedSec);
-
 
 private:
 	std::vector<Enemy*> m_EnemiesVector;

@@ -8,7 +8,7 @@
 int EnemyManager::m_NREnemies{ 0 };
 
 EnemyManager::EnemyManager()
-	:m_ChomperSprite{ new Texture("Run'N'Gun/Sprite_Chomper.png") },
+	: m_ChomperSprite{ new Texture("Run'N'Gun/Sprite_Chomper.png") },
 	m_SpikeSprite{ new Texture("Run'N'Gun/Sprite_Spike.png") }
 {
 	IntializeEnemies();
@@ -48,10 +48,15 @@ void EnemyManager::UpdateEnemies(float elapsedSec)
 {
 	for (Enemy* pEnemy : m_EnemiesVector)
 	{
-		if (Spike* spike = dynamic_cast<Spike*>(pEnemy))
+		if (BigChomper* chomper = dynamic_cast<BigChomper*>(pEnemy))
+		{
+			chomper->Update(elapsedSec);
+		}
+		else if (Spike* spike = dynamic_cast<Spike*>(pEnemy))
 		{
 			spike->Update(elapsedSec);
 		}
+		
 	}
 }
 

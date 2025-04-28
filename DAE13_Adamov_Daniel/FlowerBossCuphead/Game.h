@@ -3,7 +3,7 @@
 #include <vector>
 #include "Cuphead.h"
 class Texture;
-class Camera;
+#include "Camera.h"
 #include "EnemyManager.h"
 
 class Game : public BaseGame
@@ -34,7 +34,7 @@ private:
 	Texture* m_ForestBackground1;
 	Texture* m_ForectBackground2;
 
-	Camera* m_PlayerCamera;
+	Camera m_PlayerCamera;
 
 	EnemyManager m_EnemyManager;
 

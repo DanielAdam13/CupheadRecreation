@@ -8,7 +8,7 @@ class Cuphead final
 {
 public:
 	explicit Cuphead(const Vector2f& position, bool playIntro);
-	Cuphead(const Cuphead& character) = delete;
+	Cuphead(const Cuphead& character) = delete; // deleted because too much work to be honest + I don't need them for now
 	Cuphead& operator=(const Cuphead& rhs) = delete;
 	Cuphead(Cuphead&& character) = delete;
 	Cuphead& operator=(Cuphead&& rhs) = delete;
@@ -63,7 +63,6 @@ private:
 
 	bool m_KeyPressed;
 
-	bool m_IsShooting;
 	float m_AccuSecProjectiles;
 	float m_ShootAngle;
 
