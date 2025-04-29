@@ -3,8 +3,9 @@
 #include <iostream>
 #include "Texture.h"
 #include "utils.h"
-#include "Spike.h"
-#include "BigChomper.h"
+#include "Camera.h"
+#include "Enemy.h"
+#include "Projectile.h"
 
 Game::Game(const Window& window)
 	:BaseGame{ window },
@@ -13,7 +14,8 @@ Game::Game(const Window& window)
 	m_ForestBackground1{ new Texture("ForestFollies_Background_First.png") },
 	m_ForectBackground2{ new Texture("ForestFollies_Background_Second.png") },
 	m_PlayerCamera{ GetViewPort().width, GetViewPort().height },
-	m_EnemyManager{}
+	m_EnemyManager{},
+	m_BulletManager{}
 {
 	Initialize();
 }
@@ -67,11 +69,27 @@ void Game::Update( float elapsedSec )
 	// Check keyboard state
 	const Uint8 *pStates = SDL_GetKeyboardState( nullptr );
 
-	m_Cuphead.Update(elapsedSec, pStates, m_Vertices);
+	m_Cuphead.Update(elapsedSec, pStates, m_Vertices, m_BulletManager);
 
-	m_EnemyManager.UpdateEnemies(elapsedSec);
+	m_EnemyManager.UpdateEnemies(elapsedSec, m_Cuphead);
 
 	m_PlayerCamera.Aim(12400.f, 760.f, m_Cuphead.GetPosition());
+
+	m_BulletManager.UpdateActiveBullets(elapsedSec, m_PlayerCamera);
+
+	for (int i{}; i < m_BulletManager.GetVectorSize(); ++i)
+	{
+		if (m_BulletManager[i] != nullptr)
+		{
+			for (int j{}; j < m_EnemyManager.GetVectorSize(); ++j)
+			{
+				if (utils::IsOverlapping(m_EnemyManager[j]->GetBounds(), m_BulletManager[i]->GetBounds()))
+				{
+					m_BulletManager.RemoveProjectile(i);
+				}
+			}
+		}
+	}
 }
 
 void Game::Draw( ) const
@@ -88,10 +106,11 @@ void Game::Draw( ) const
 
 	m_PlayerCamera.DrawBorderOverlay(GetViewPort().height / 20);
 
+	// Hitbox
 	utils::SetColor(Color4f{ 1,0,1,1 });
-	utils::DrawPolygon(m_Vertices, true, 2.f);
+	//utils::DrawPolygon(m_Vertices, true, 2.f);
 
-
+	m_BulletManager.DrawActiveBullets();
 	m_EnemyManager.DrawEnemies();
 
 	m_PlayerCamera.Reset();

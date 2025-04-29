@@ -3,6 +3,7 @@
 #include <vector>
 class Texture;
 #include "Projectile.h"
+class BulletManager;
 
 class Cuphead final
 {
@@ -15,12 +16,15 @@ public:
 	~Cuphead();
 
 	void Draw() const;
-	void Update(float elapsedSec, const Uint8* pStates, const std::vector<Vector2f>& vertices);
+	void Update(float elapsedSec, const Uint8* pStates, const std::vector<Vector2f>& vertices, BulletManager& bulletManager);
 	
 	void StartDash();
 	void Parry();
+
 	int GetHealth() const;
 	Vector2f GetPosition() const;
+
+	bool IsShooting() const;
 	
 private:
 	enum class Movement
@@ -86,6 +90,9 @@ private:
 	Vector2f m_Velocity;
 	float m_FacingAngle;
 
+	Texture* m_TexturePeaShooter;
+	Texture* m_TextureSpecialPeaShooter;
+
 	Texture* m_TextureDash;
 	Texture* m_TextureShoot;
 	Texture* m_TextureDeath;
@@ -102,15 +109,12 @@ private:
 
 	Animator m_Animator;
 
-	std::vector<Projectile*> m_ProjectileVector; // pointers -> control over lifetime, HAS A relationship
-
-
 	// MEMBER FUNCTIONS
 	void ProcessKeys(const Uint8* pStates);
 	void AnimateCuphead(float elapsedSec);
 	void HandleRaycast(float elapsedSec, const std::vector<Vector2f>& vertices);
 	void Dash(float elapsedSec);
-	void UpdateProjectiles(float elapsedSec);
+	void CreateProjectiles(float elapsedSec, BulletManager& bulletManager);
 
 	void UpdateFacingDirection(const Uint8* pStates);
 

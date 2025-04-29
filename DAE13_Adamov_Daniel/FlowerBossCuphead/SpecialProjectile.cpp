@@ -8,13 +8,9 @@ const Texture* SpecialProjectile::GetSpecialAttackSprite()
 	return specialSprite;
 }
 
-SpecialProjectile::SpecialProjectile(const Vector2f& spawnPos, float directionAngle)
-	:Projectile::Projectile(spawnPos, directionAngle, 5),
+SpecialProjectile::SpecialProjectile(Texture* sprite, const Vector2f& spawnPos, float directionAngle)
+	:Projectile::Projectile(sprite, spawnPos, directionAngle, 5),
 	m_Speed{ 900.f }
-{
-}
-
-SpecialProjectile::~SpecialProjectile()
 {
 }
 

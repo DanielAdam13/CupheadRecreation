@@ -47,3 +47,8 @@ Vector2f Camera::Reset() const
 	glPopMatrix();
 	return Vector2f();
 }
+
+Rectf Camera::GetCuurentCameraBounds() const
+{
+	return Rectf{ m_CameraPos.x, m_CameraPos.y, m_ScreenWidth, m_ScreenHeight };
+}

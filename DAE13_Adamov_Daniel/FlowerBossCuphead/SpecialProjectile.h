@@ -5,8 +5,7 @@ class Texture;
 class SpecialProjectile final : public Projectile
 {
 public:
-	explicit SpecialProjectile(const Vector2f& spawnPos, float directionAngle);
-	~SpecialProjectile() override;
+	explicit SpecialProjectile(Texture* sprite, const Vector2f& spawnPos, float directionAngle);
 	// rule of 3...
 	// rule of 5...
 

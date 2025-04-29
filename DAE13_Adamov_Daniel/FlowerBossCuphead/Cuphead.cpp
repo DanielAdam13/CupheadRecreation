@@ -4,6 +4,7 @@
 #include "Texture.h"
 #include "utils.h"
 #include "Matrix2x3.h"
+#include "BulletManager.h"
 
 float Cuphead::m_FrameWidth{ 0.f }; // static so we can adapt them in Draw()
 float Cuphead::m_FrameHeight{ 0.f };
@@ -30,8 +31,9 @@ Cuphead::Cuphead(const Vector2f& position, bool playIntro)
 	m_CurrentRowNr{ 1 },
 	m_Velocity{ 0.f, 0.f },
 	m_FacingAngle{ 0.f },
-	m_Animator{},
-	m_ProjectileVector{ nullptr }
+	m_TexturePeaShooter{ new Texture("Projectile_Loop.png") },
+	m_TextureSpecialPeaShooter{ new Texture("Projectile_Special_Loop.png") },
+	m_Animator{}
 {
 	IntializeTextures();
 }
@@ -59,28 +61,18 @@ Cuphead::Cuphead(const Vector2f& position, bool playIntro)
 //	m_Velocity{ character.m_Velocity },
 //	m_FacingAngle{ character.m_FacingAngle },
 //	m_Animator{ character.m_Animator },
-//	m_ProjectileVector{ std::vector<Projectile*>{} } //!
 //{
-//	for (size_t i{}; i < m_ProjectileVector.size(); ++i)
-//	{
-//		m_ProjectileVector[i] = character.m_ProjectileVector[i];
-//	}
 //	IntializeTextures();
 //}
 
 Cuphead::~Cuphead()
 {
 	DeleteTextures();
+	delete m_TexturePeaShooter;
+	m_TexturePeaShooter = nullptr;
 
-	for (const Projectile* pProjectile : m_ProjectileVector)
-	{
-		if (pProjectile != nullptr)
-		{
-			delete pProjectile;
-		}
-		pProjectile = nullptr;
-	}
-	m_ProjectileVector.clear();
+	delete m_TextureSpecialPeaShooter;
+	m_TextureSpecialPeaShooter = nullptr;
 }
 
 void Cuphead::Draw() const
@@ -104,24 +96,15 @@ void Cuphead::Draw() const
 		//utils::DrawRect(Vector2f{ -GetBounds().width / 2, 0.f }, m_FrameWidth, m_FrameHeight);
 		glPopMatrix();
 
+		// Hitbox
 		utils::SetColor(Color4f{ 1, 0, 0, 1 });
-		utils::DrawRect(GetBounds());
-
-		utils::FillEllipse(m_Position, 5.f, 5.f);
-	}
-
-
-	for (const Projectile* pProjectile : m_ProjectileVector)
-	{
-		if (pProjectile != nullptr)
-		{
-			pProjectile->Draw();
-		}
+		//utils::DrawRect(GetBounds());
+		//utils::FillEllipse(m_Position, 5.f, 5.f);
 	}
 	
 }
 
-void Cuphead::Update(float elapsedSec, const Uint8* pStates, const std::vector<Vector2f>& vertices)
+void Cuphead::Update(float elapsedSec, const Uint8* pStates, const std::vector<Vector2f>& vertices, BulletManager& bulletManager)
 {
 	// sets the dashing state from a key event and then processes it in ProcessKeys()...
 	Dash(elapsedSec);
@@ -135,8 +118,8 @@ void Cuphead::Update(float elapsedSec, const Uint8* pStates, const std::vector<V
 	// updates the postion using m_Velocity and enables collisions from a std::vector<Vector2f>
 	HandleRaycast(elapsedSec, vertices);
 
-	// creates and updates projectiles
-	UpdateProjectiles(elapsedSec);
+	// pushes a new projectile to BulletManager
+	CreateProjectiles(elapsedSec, bulletManager);
 }
 
 void Cuphead::ProcessKeys(const Uint8* pStates)
@@ -716,7 +699,7 @@ void Cuphead::Dash(float elapsedSec)
 	
 }
 
-void Cuphead::UpdateProjectiles(float elapsedSec)
+void Cuphead::CreateProjectiles(float elapsedSec, BulletManager& bulletManager)
 {
 	const float projectileCooldown{ 0.2f };
 
@@ -726,16 +709,9 @@ void Cuphead::UpdateProjectiles(float elapsedSec)
 
 		if (m_AccuSecProjectiles > projectileCooldown)
 		{
-			m_ProjectileVector.push_back(new Projectile(Vector2f{ GetBounds().left + GetBounds().width / 2, GetBounds().bottom + GetBounds().height * 0.4f}, m_ShootAngle));
+			bulletManager.AddProjectile(new Projectile(m_TexturePeaShooter, 
+				Vector2f{ GetBounds().left + GetBounds().width / 2, GetBounds().bottom + GetBounds().height * 0.4f }, m_ShootAngle));
 			m_AccuSecProjectiles -= projectileCooldown;
-		}
-	}
-
-	for (Projectile* pProjectile : m_ProjectileVector)
-	{
-		if (pProjectile != nullptr)
-		{
-			pProjectile->Update(elapsedSec);
 		}
 	}
 }
@@ -769,6 +745,15 @@ Vector2f Cuphead::GetPosition() const
 	return m_Position;
 }
 
+bool Cuphead::IsShooting() const
+{
+	if (m_CupheadShootingState != Shoot::notShooting)
+	{
+		return true;
+	}
+	return false;
+}
+
 Rectf Cuphead::GetBounds() const
 {
 	return Rectf{ m_Position.x - m_FrameWidth / 2, m_Position.y, m_FrameWidth, m_FrameHeight };
@@ -800,7 +785,6 @@ void Cuphead::IntializeTextures()
 	m_TextureRun = new Texture("Cuphead_Sprites/Run.png");
 	m_TextureRunShootDiagonal = new Texture("Cuphead_Sprites/Run_Shoot_Diagonal.png");
 	m_TextureRunShootStraight = new Texture("Cuphead_Sprites/Run_Shoot_Straight.png");
-	m_TextureSpecialAttack = new Texture("Cuphead_Sprites/Special_Attack_Air.png");
 }
 
 void Cuphead::DeleteTextures()
@@ -829,6 +813,4 @@ void Cuphead::DeleteTextures()
 	m_TextureRunShootDiagonal = nullptr;
 	delete m_TextureRunShootStraight;
 	m_TextureRunShootStraight = nullptr;
-	delete m_TextureSpecialAttack;
-	m_TextureSpecialAttack = nullptr;
 }

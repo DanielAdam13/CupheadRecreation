@@ -5,6 +5,7 @@
 class Texture;
 #include "Camera.h"
 #include "EnemyManager.h"
+#include "BulletManager.h"
 
 class Game : public BaseGame
 {
@@ -37,6 +38,7 @@ private:
 	Camera m_PlayerCamera;
 
 	EnemyManager m_EnemyManager;
+	BulletManager m_BulletManager;
 
 	// FUNCTIONS
 	void Initialize();

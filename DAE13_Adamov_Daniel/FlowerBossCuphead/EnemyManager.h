@@ -5,6 +5,8 @@ class Enemy;
 class Spike;
 class BigChomper;
 
+class Cuphead;
+
 class EnemyManager final
 {
 public:
@@ -16,7 +18,10 @@ public:
 	~EnemyManager();
 
 	void DrawEnemies() const;
-	void UpdateEnemies(float elapsedSec);
+	void UpdateEnemies(float elapsedSec, const Cuphead& cuphead);
+
+	Enemy* operator[](int index) const;
+	size_t GetVectorSize() const;
 
 private:
 	std::vector<Enemy*> m_EnemiesVector;

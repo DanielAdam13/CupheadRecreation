@@ -9,6 +9,8 @@ public:
 	void DrawBorderOverlay(float lineHeight) const;
 	Vector2f Reset() const;
 
+	Rectf GetCuurentCameraBounds() const;
+
 private:
 	const float m_ScreenWidth;
 	const float m_ScreenHeight;

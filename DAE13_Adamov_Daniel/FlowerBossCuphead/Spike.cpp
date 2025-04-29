@@ -21,9 +21,10 @@ void Spike::Draw() const
 
 	m_Texture->Draw(Vector2f{ this->GetBounds().left, this->GetBounds().bottom}, srcRect);
 
+	// Hitbox
 	utils::SetColor(Color4f{ 1,0,0,1 });
-	utils::DrawRect(this->GetBounds());
-	utils::FillEllipse(m_Positon, 5.f, 5.f);
+	//utils::DrawRect(this->GetBounds());
+	//utils::FillEllipse(m_Positon, 5.f, 5.f);
 }
 
 void Spike::Update(float elapsedSec)
@@ -45,7 +46,7 @@ void Spike::Bounce(float elapsedSec)
 {
 	const float midPointY{ m_LowestPoint.y + (m_HighestPoint.y - m_LowestPoint.y) / 2 };
 
-	if (m_Positon.y > m_HighestPoint.y || m_Positon.y < m_LowestPoint.y)
+	if (m_Positon.y >= m_HighestPoint.y || m_Positon.y <= m_LowestPoint.y)
 	{
 		m_Speed = -m_Speed;
 	}

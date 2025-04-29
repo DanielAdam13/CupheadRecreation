@@ -4,42 +4,20 @@
 #include <iostream>
 #include "utils.h"
 
-int Projectile::m_NumProjectiles{ 0 };
-
-const Texture* Projectile::ProjectileSprite()
-{
-	static const Texture* projectileSprite{ new Texture("Projectile_Loop.png") };
-	return projectileSprite;
-}
-
-Projectile::Projectile(const Vector2f& spawnPos, float directionAngle, int damage)
+Projectile::Projectile(Texture* sprite, const Vector2f& spawnPos, float directionAngle, int damage)
 	:m_Position{ spawnPos },
 	m_Speed{ 1200.f },
 	m_ShootDirection{ cosf(directionAngle * utils::g_Pi / 180.f), sinf(directionAngle * utils::g_Pi / 180.f) },
 	m_DirectionAngle{ directionAngle },
 	m_Damage{ damage },
-	m_ProjAnimator{}
+	m_ProjAnimator{},
+	m_Texture{ sprite }
 {
-	m_NumProjectiles++;
 	std::cout << "Created projectile with direction: " << directionAngle << std::endl;
-}
-
-Projectile::~Projectile()
-{
-	m_NumProjectiles--;
-	if (m_NumProjectiles == 0)
-	{
-		delete Projectile::ProjectileSprite();
-	}
 }
 
 void Projectile::Draw() const
 {
-	const Texture* projectileTexture{ ProjectileSprite() };
-
-	/*projectileTexture->Draw(GetBounds(), Rectf{ 0.f + (m_ProjAnimator.GetCurrentFrame() % 4) * GetBounds().width,
-		0.f + (m_ProjAnimator.GetCurrentFrame() / 4) * GetBounds().height, GetBounds().width, GetBounds().height });*/
-
 	Rectf srcRect{ 0.f + (m_ProjAnimator.GetCurrentFrame() % 4) * GetBounds().width,
 		0.f + (m_ProjAnimator.GetCurrentFrame() / 4) * GetBounds().height, GetBounds().width, GetBounds().height };
 
@@ -47,7 +25,7 @@ void Projectile::Draw() const
 		glTranslatef(m_Position.x, m_Position.y, 0);
 		glRotatef(m_DirectionAngle, 0, 0, 1);
 		glScalef(0.8f, 0.8f, 0);
-		projectileTexture->Draw(Vector2f{ -srcRect.width / 2, -srcRect.height / 2 }, srcRect);
+		m_Texture->Draw(Vector2f{ -srcRect.width / 2, -srcRect.height / 2 }, srcRect);
 	glPopMatrix();
 }
 
@@ -64,9 +42,12 @@ void Projectile::Animate(float elapsedSec)
 
 Rectf Projectile::GetBounds() const
 {
-	const Texture* projectileTexture{ ProjectileSprite() };
-	const float frameWidth{ projectileTexture->GetWidth() / 4 };
-	const float frameHeight{ projectileTexture->GetHeight() / 2 };
+	if (this != nullptr)
+	{
+		const float frameWidth{ m_Texture->GetWidth() / 4 };
+		const float frameHeight{ m_Texture->GetHeight() / 2 };
 
-	return Rectf(m_Position.x - frameWidth / 2, m_Position.y, frameWidth, frameHeight);
+		return Rectf{ m_Position.x - frameWidth / 2, m_Position.y, frameWidth, frameHeight };
+	}
+	return Rectf();
 }

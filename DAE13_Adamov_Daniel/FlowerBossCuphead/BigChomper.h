@@ -1,5 +1,6 @@
 #pragma once
 #include "Spike.h"
+
 class BigChomper final : public Spike
 {
 public:

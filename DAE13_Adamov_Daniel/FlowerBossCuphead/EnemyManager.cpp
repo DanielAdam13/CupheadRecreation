@@ -44,20 +44,22 @@ void EnemyManager::DrawEnemies() const
 	}
 }
 
-void EnemyManager::UpdateEnemies(float elapsedSec)
+void EnemyManager::UpdateEnemies(float elapsedSec, const Cuphead& cuphead)
 {
 	for (Enemy* pEnemy : m_EnemiesVector)
 	{
-		if (BigChomper* chomper = dynamic_cast<BigChomper*>(pEnemy))
-		{
-			chomper->Update(elapsedSec);
-		}
-		else if (Spike* spike = dynamic_cast<Spike*>(pEnemy))
-		{
-			spike->Update(elapsedSec);
-		}
-		
+		pEnemy->Update(elapsedSec);
 	}
+}
+
+Enemy* EnemyManager::operator[](int index) const
+{
+	return m_EnemiesVector[index];
+}
+
+size_t EnemyManager::GetVectorSize() const
+{
+	return m_EnemiesVector.size();
 }
 
 void EnemyManager::IntializeEnemies()
