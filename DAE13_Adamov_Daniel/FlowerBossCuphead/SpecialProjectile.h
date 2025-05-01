@@ -6,8 +6,6 @@ class SpecialProjectile final : public Projectile
 {
 public:
 	explicit SpecialProjectile(Texture* sprite, const Vector2f& spawnPos, float directionAngle);
-	// rule of 3...
-	// rule of 5...
 
 	virtual void Draw() const override;
 	// we will inherit Animate() as it is 

@@ -108,7 +108,7 @@ void Game::Draw( ) const
 
 	// Hitbox
 	utils::SetColor(Color4f{ 1,0,1,1 });
-	//utils::DrawPolygon(m_Vertices, true, 2.f);
+	utils::DrawPolygon(m_Vertices, true, 2.f);
 
 	m_BulletManager.DrawActiveBullets();
 	m_EnemyManager.DrawEnemies();
@@ -133,12 +133,7 @@ void Game::ProcessKeyDownEvent( const SDL_KeyboardEvent & e )
 
 void Game::ProcessKeyUpEvent( const SDL_KeyboardEvent& e )
 {
-	/*switch ( e.keysym.sym )
-	{
-	case SDLK_LSHIFT:
-		m_Cuphead.StartDash();
-		break;
-	}*/
+
 }
 
 void Game::ProcessMouseMotionEvent( const SDL_MouseMotionEvent& e )

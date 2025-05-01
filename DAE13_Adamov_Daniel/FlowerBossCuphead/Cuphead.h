@@ -25,6 +25,7 @@ public:
 	Vector2f GetPosition() const;
 
 	bool IsShooting() const;
+	bool IsParrying() const;
 	
 private:
 	enum class Movement
@@ -73,13 +74,9 @@ private:
 	bool m_IsGrounded;
 	bool m_IsHit;
 
-	float m_DashAccuSec;
-
 	bool m_ClickedDash;
 	bool m_IsDashing;
-	
-	const float m_DashCooldown;
-	const float m_DashDuration;
+	float m_DashCooldownAcuuSec;
 
 	const float m_MaxFrameSec;
 
@@ -117,8 +114,8 @@ private:
 	void CreateProjectiles(float elapsedSec, BulletManager& bulletManager);
 
 	void UpdateFacingDirection(const Uint8* pStates);
+	void ResetParry();
 
-	
 	Rectf GetBounds() const;
 
 	void IntializeTextures();

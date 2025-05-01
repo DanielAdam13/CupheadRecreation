@@ -7,19 +7,9 @@ class Projectile // not final since we have the Special attack which will inheri
 {
 public:
 	explicit Projectile(Texture* sprite, const Vector2f& spawnPos, float directionAngle, int damage = 1);
-	//virtual ~Projectile(); // needs a HUGE CHANGE. Maybe introduce a GameState class and check: if(m_GameOver) delete texture...
 
 	virtual void Draw() const;
 	virtual void Update(float elapsedSec);
-	
-	//bool HitEnemy(Enemy* pEnemy); -----> for when we have enemies............bool or void return type function, idk where to handle the damage logic yet
-	// -> either in Cuphead or Game...
-	// maybe even IF we do it in Cuphead, we can have a Projectile* CollisionAttack() const function
-	// same goes for the projectiles of enemies
-	// I have to think of a nice logic of where to handle this
-	// 
-	// 
-	// Bullet manager!! -> we won't need destructor -> rule of 0
 
 	Rectf GetBounds() const;
 
@@ -33,7 +23,7 @@ protected:
 
 	Texture* m_Texture;
 	
-	virtual void Animate(float elapsedSec);
+	void Animate(float elapsedSec);
 
 private:
 	const float m_Speed;

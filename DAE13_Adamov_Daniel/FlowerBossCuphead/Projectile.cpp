@@ -13,7 +13,7 @@ Projectile::Projectile(Texture* sprite, const Vector2f& spawnPos, float directio
 	m_ProjAnimator{},
 	m_Texture{ sprite }
 {
-	std::cout << "Created projectile with direction: " << directionAngle << std::endl;
+	std::cout << "CREATED projectile with direction: " << directionAngle << std::endl;
 }
 
 void Projectile::Draw() const

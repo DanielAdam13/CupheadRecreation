@@ -20,11 +20,9 @@ Cuphead::Cuphead(const Vector2f& position, bool playIntro)
 	m_ShootAngle{ 0.f },
 	m_IsGrounded{ false },
 	m_IsHit{ false },
-	m_DashAccuSec{ 0.f },
 	m_ClickedDash{ false },
 	m_IsDashing{ false },
-	m_DashCooldown{ 0.7f },
-	m_DashDuration{ 0.3f },
+	m_DashCooldownAcuuSec{ 0.f },
 	m_MaxFrameSec{ 0.07f },
 	m_CurrentTexture{ nullptr },
 	m_CurrentColNr{ 1 },
@@ -49,11 +47,8 @@ Cuphead::Cuphead(const Vector2f& position, bool playIntro)
 //	m_ShootAngle{ character.m_ShootAngle },
 //	m_IsGrounded{ character.m_IsGrounded },
 //	m_IsHit{ character.m_IsHit },
-//	m_DashAccuSec{ character.m_DashAccuSec },
 //	m_ClickedDash{ character.m_ClickedDash },
 //	m_IsDashing{ character.m_IsDashing },
-//	m_DashCooldown{ character.m_DashCooldown },
-//	m_DashDuration{ character.m_DashDuration },
 //	m_MaxFrameSec{ character.m_MaxFrameSec },
 //	m_CurrentTexture{ character.m_CurrentTexture }, //!
 //	m_CurrentColNr{ character.m_CurrentColNr },
@@ -91,17 +86,13 @@ void Cuphead::Draw() const
 			glRotatef(m_FacingAngle, 0, 1, 0); 
 			m_CurrentTexture->Draw(Vector2f{ -GetBounds().width / 2, 0.f}, srcRect);
 
-		// hitbox
-		utils::SetColor(Color4f{ 1, 0, 0, 1 });
-		//utils::DrawRect(Vector2f{ -GetBounds().width / 2, 0.f }, m_FrameWidth, m_FrameHeight);
 		glPopMatrix();
 
 		// Hitbox
 		utils::SetColor(Color4f{ 1, 0, 0, 1 });
-		//utils::DrawRect(GetBounds());
-		//utils::FillEllipse(m_Position, 5.f, 5.f);
+		utils::DrawRect(GetBounds());
+		utils::FillEllipse(m_Position, 5.f, 5.f);
 	}
-	
 }
 
 void Cuphead::Update(float elapsedSec, const Uint8* pStates, const std::vector<Vector2f>& vertices, BulletManager& bulletManager)
@@ -120,6 +111,9 @@ void Cuphead::Update(float elapsedSec, const Uint8* pStates, const std::vector<V
 
 	// pushes a new projectile to BulletManager
 	CreateProjectiles(elapsedSec, bulletManager);
+
+	// the parry doesn't continue going off if z is held
+	ResetParry();
 }
 
 void Cuphead::ProcessKeys(const Uint8* pStates)
@@ -166,7 +160,20 @@ void Cuphead::ProcessKeys(const Uint8* pStates)
 
 			if (pStates[SDL_SCANCODE_Z])
 			{
-				if (m_CupheadMovementState != Movement::parry)
+				// parry
+				if (m_CupheadMovementState == Movement::parry)
+				{
+					if (pStates[SDL_SCANCODE_LEFT])
+					{
+						m_Velocity.x = -movementSpeed;
+					}
+					if (pStates[SDL_SCANCODE_RIGHT])
+					{
+						m_Velocity.x = movementSpeed;
+					}
+				}
+				// jump
+				else 
 				{
 					m_CupheadMovementState = Movement::jump;
 					m_CupheadShootingState = Shoot::notShooting; // 3
@@ -426,6 +433,7 @@ void Cuphead::AnimateCuphead(float elapsedSec)
 				lastShootState = m_CupheadShootingState;
 			}
 
+			// jump animation plays if no button is pressed and in the air
 			if (!m_IsGrounded)
 			{
 				m_CurrentTexture = m_TextureJump;
@@ -454,7 +462,8 @@ void Cuphead::AnimateCuphead(float elapsedSec)
 				lastShootState = m_CupheadShootingState;
 			}
 
-			if (!m_IsGrounded && m_CupheadMovementState != Movement::jump && m_CupheadMovementState != Movement::dash && m_CupheadMovementState != Movement::parry)
+			// jumping animation is played if character is moving in the air
+			if (!m_IsGrounded && m_CupheadMovementState != Movement::dash && m_CupheadMovementState != Movement::parry)
 			{
 				m_CurrentTexture = m_TextureJump;
 				m_CurrentColNr = 4;
@@ -479,7 +488,7 @@ void Cuphead::AnimateCuphead(float elapsedSec)
 
 					m_Animator.PlayAnimation(elapsedSec, m_MaxFrameSec, 16);
 					break;
-				case Cuphead::Movement::jump:
+				case Cuphead::Movement::jump: // jumping animation is played when z is pressed
 					m_CurrentTexture = m_TextureJump;
 					m_CurrentColNr = 4;
 					m_CurrentRowNr = 2;
@@ -491,7 +500,7 @@ void Cuphead::AnimateCuphead(float elapsedSec)
 					m_CurrentColNr = 4;
 					m_CurrentRowNr = 4;
 
-					m_Animator.LoopBetween(elapsedSec, 9, 16, 0.06f);
+					m_Animator.LoopBetween(elapsedSec, 0, 7, 0.06f);
 					break;
 				case Cuphead::Movement::dash:
 					m_CurrentTexture = m_TextureDash;
@@ -509,7 +518,6 @@ void Cuphead::AnimateCuphead(float elapsedSec)
 					break;
 				}
 			}
-			
 		}
 		else if (m_CupheadShootingState != Shoot::notShooting)
 		{
@@ -642,7 +650,7 @@ void Cuphead::HandleRaycast(float elapsedSec, const std::vector<Vector2f>& verti
 	else
 	{
 		m_IsGrounded = false;
-		m_Velocity += Vector2f{ 0, -9.8f };
+		m_Velocity += Vector2f{ 0, -9.8f * 150 } * elapsedSec; // if the gravity is only -9.8f, it flies off
 	}
 
 	Vector2f firstPointX{ GetBounds().left, m_Position.y + GetBounds().height / 2 };
@@ -676,27 +684,39 @@ void Cuphead::HandleRaycast(float elapsedSec, const std::vector<Vector2f>& verti
 
 void Cuphead::Dash(float elapsedSec)
 {
-	if (m_ClickedDash && m_DashAccuSec == 0.f)
+	static float dashAccuSec{ 0.f };
+	const float dashDuration{ 0.3f };
+
+	const float dashCooldown{ 0.3f };
+
+	// dash cooldown going down
+	if (m_DashCooldownAcuuSec > 0.f)
+	{
+		m_DashCooldownAcuuSec -= elapsedSec;
+
+		if (m_DashCooldownAcuuSec < 0.f) // end of coooldown, dash available
+		{
+			m_DashCooldownAcuuSec = 0.f;
+		}
+	}
+
+	if (m_ClickedDash && dashAccuSec == 0.f) 
 	{
 		m_IsDashing = true;
 		m_ClickedDash = false;
 	}
 
-	if (m_IsDashing)
+	if (m_IsDashing) 
 	{
-		m_DashAccuSec += elapsedSec;
+		dashAccuSec += elapsedSec;
 
-		if (m_DashAccuSec > m_DashDuration)
+		if (dashAccuSec > dashDuration) // if dash reaches the end of the animation
 		{
 			m_IsDashing = false;
+			m_DashCooldownAcuuSec = dashCooldown; // -> reset the cooldown timer
+			dashAccuSec = 0.f;
 		}
 	}
-
-	if (m_DashAccuSec >= m_DashDuration && m_IsGrounded)
-	{
-		m_DashAccuSec = 0.f;
-	}
-	
 }
 
 void Cuphead::CreateProjectiles(float elapsedSec, BulletManager& bulletManager)
@@ -718,7 +738,7 @@ void Cuphead::CreateProjectiles(float elapsedSec, BulletManager& bulletManager)
 
 void Cuphead::StartDash()
 {
-	if (!m_PlayingIntro)
+	if (!m_PlayingIntro && ((m_DashCooldownAcuuSec <= 0.f && m_IsGrounded) || !m_IsGrounded))
 	{
 		m_ClickedDash = true;
 		m_CupheadMovementState = Movement::dash;
@@ -726,9 +746,9 @@ void Cuphead::StartDash()
 	}
 }
 
-void Cuphead::Parry()
+void Cuphead::Parry() // this is just for toggling the movement state
 {
-	if (!m_PlayingIntro && !m_IsGrounded)
+	if (!m_PlayingIntro && !m_IsGrounded && m_CupheadMovementState!= Movement::jump)
 	{
 		m_CupheadMovementState = Movement::parry;
 		m_CupheadShootingState = Shoot::notShooting;
@@ -747,11 +767,12 @@ Vector2f Cuphead::GetPosition() const
 
 bool Cuphead::IsShooting() const
 {
-	if (m_CupheadShootingState != Shoot::notShooting)
-	{
-		return true;
-	}
-	return false;
+	return m_CupheadShootingState != Shoot::notShooting;
+}
+
+bool Cuphead::IsParrying() const
+{
+	return m_CupheadMovementState == Movement::parry;
 }
 
 Rectf Cuphead::GetBounds() const
@@ -768,6 +789,15 @@ void Cuphead::UpdateFacingDirection(const Uint8* pStates)
 	else if (pStates[SDL_SCANCODE_LEFT])
 	{
 		m_FacingAngle = 180.f;
+	}
+}
+
+void Cuphead::ResetParry()
+{
+	if (m_IsGrounded && !m_IsDashing)
+	{
+		m_CupheadMovementState = Movement::idle;
+		m_CupheadShootingState = Shoot::notShooting;
 	}
 }
 
