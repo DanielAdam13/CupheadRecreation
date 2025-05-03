@@ -4,7 +4,8 @@
 Animator::Animator()
 	: m_FrameNr{ 0 },
 	m_AccuSec{ 0.f },
-	m_ChangeIdx{ 0 }
+	m_ChangeIdx{ 0 },
+	m_RewindTime{ 0.f }
 {
 }
 
@@ -34,7 +35,6 @@ void Animator::LoopBetween(const float elapsedSec, int firstFrame, int lastFrame
 {
 	m_AccuSec += elapsedSec;
 
-	static float m_RewindTime{ 0.f };
 	if (m_FrameNr >= firstFrame && m_FrameNr <= lastFrame && m_RewindTime <= duration)
 	{
 		if (m_AccuSec >= maxFrameSec)
@@ -115,7 +115,7 @@ void Animator::Stop()
 	m_AccuSec = 0.f;
 }
 
-int Animator::GetCurrentFrame() const
+int Animator::GetCurrentFrameNr() const
 {
 	return m_FrameNr;
 }

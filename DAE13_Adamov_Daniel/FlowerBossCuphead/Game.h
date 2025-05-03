@@ -41,6 +41,13 @@ private:
 	BulletManager m_PlayerBulletManager;
 	BulletManager m_EnemyBulletManager;
 
+	const Texture* m_SpikeSprite;
+	const Texture* m_ChomperSprite;
+
+	const Texture* m_TulipIdle;
+	const Texture* m_TulipAttack;
+	const Texture* m_TulipSeed;
+
 	// FUNCTIONS
 	void Initialize();
 	void Cleanup( );

@@ -4,7 +4,7 @@
 #include <iostream>
 #include "utils.h"
 
-Projectile::Projectile(const Texture* sprite, const Vector2f& spawnPos, float directionAngle, float speed, int damage)
+Projectile::Projectile(const Texture* sprite, const Vector2f& spawnPos, const Vector2f& playerPos, float directionAngle, float speed, int damage)
 	:m_Position{ spawnPos },
 	m_ShootDirection{ cosf(directionAngle * utils::g_Pi / 180.f), sinf(directionAngle * utils::g_Pi / 180.f) },
 	m_DirectionAngle{ directionAngle },

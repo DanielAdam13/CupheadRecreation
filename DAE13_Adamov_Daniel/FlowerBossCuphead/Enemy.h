@@ -18,6 +18,9 @@ public:
 	virtual bool Parryable() const = 0;
 	virtual Rectf GetParryHitbox() const = 0;
 
+	virtual void TakeDamage(int damage) = 0;
+	virtual int GetHealth() const = 0;
+
 protected:
 	Animator m_Animator;
 	Vector2f m_Positon;

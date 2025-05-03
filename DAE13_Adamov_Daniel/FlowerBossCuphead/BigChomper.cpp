@@ -13,8 +13,8 @@ BigChomper::BigChomper(const Texture* spriteTexture, const Vector2f& pos, const 
 
 void BigChomper::Draw() const
 {
-	Rectf srcRect{ 0.f + (m_Animator.GetCurrentFrame() % m_SpriteColNr) * this->GetBounds().width,
-	0.f + (m_Animator.GetCurrentFrame() / m_SpriteColNr) * this->GetBounds().height, this->GetBounds().width, this->GetBounds().height };
+	Rectf srcRect{ 0.f + (m_Animator.GetCurrentFrameNr() % m_SpriteColNr) * this->GetBounds().width,
+	0.f + (m_Animator.GetCurrentFrameNr() / m_SpriteColNr) * this->GetBounds().height, this->GetBounds().width, this->GetBounds().height };
 
 	this->m_Texture->Draw(Vector2f{ this->GetBounds().left, this->GetBounds().bottom }, srcRect);
 
@@ -77,4 +77,13 @@ bool BigChomper::Parryable() const
 Rectf BigChomper::GetParryHitbox() const
 {
 	return Rectf();
+}
+
+void BigChomper::TakeDamage(int damage)
+{
+}
+
+int BigChomper::GetHealth() const
+{
+	return 1;
 }

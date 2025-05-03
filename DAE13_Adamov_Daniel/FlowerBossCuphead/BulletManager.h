@@ -1,6 +1,5 @@
 #pragma once
 #include <vector>
-class Texture;
 class Projectile;
 
 class BulletManager

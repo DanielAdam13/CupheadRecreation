@@ -17,6 +17,9 @@ public:
 	virtual bool Parryable() const override;
 	virtual Rectf GetParryHitbox() const override;
 
+	virtual void TakeDamage(int damage) override;
+	virtual int GetHealth() const override;
+
 private:
 	const int m_SpriteRowNr;
 	const int m_SpriteColNr;

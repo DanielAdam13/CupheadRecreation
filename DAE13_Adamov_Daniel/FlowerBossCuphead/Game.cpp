@@ -5,6 +5,9 @@
 #include "utils.h"
 #include "Camera.h"
 #include "Enemy.h"
+#include "Spike.h"
+#include "BigChomper.h"
+#include "Tulip.h"
 #include "Projectile.h"
 
 Game::Game(const Window& window)
@@ -16,7 +19,12 @@ Game::Game(const Window& window)
 	m_Camera{ GetViewPort().width, GetViewPort().height },
 	m_EnemyManager{},
 	m_PlayerBulletManager{},
-	m_EnemyBulletManager{}
+	m_EnemyBulletManager{},
+	m_ChomperSprite{ new Texture("Run'N'Gun/Sprite_Chomper.png") },
+	m_SpikeSprite{ new Texture("Run'N'Gun/Sprite_Spike.png") },
+	m_TulipIdle{ new Texture("Run'N'Gun/Tulip/Sprite_Tulip_Idle.png") },
+	m_TulipAttack{ new Texture("Run'N'Gun/Tulip/Sprite_Tulip_Attack.png") },
+	m_TulipSeed{ new Texture("Run'N'Gun/Tulip/Sprite_Tulip_Seed.png") }
 {
 	Initialize();
 }
@@ -28,6 +36,21 @@ Game::~Game( )
 
 void Game::Initialize( )
 {
+	m_EnemyManager.AddEnemy(new Spike(m_SpikeSprite, Vector2f{ 500.f, 250.f }, Vector2f{ 500.f, 150.f }, Vector2f{ 500.f, 350.f }, 250.f));
+
+	m_EnemyManager.AddEnemy(new Spike(m_SpikeSprite, Vector2f{ 1500.f, 250.f }, Vector2f{ 1500.f, 150.f }, Vector2f{ 1500.f, 350.f }, 250.f));
+
+	m_EnemyManager.AddEnemy(new BigChomper(m_ChomperSprite, Vector2f{ 1200.f, -(m_ChomperSprite->GetHeight() / 4) / 2 },
+		Vector2f{ 1200.f, -(m_ChomperSprite->GetHeight() / 4) * 1.5f }, Vector2f{ 1200.f, 500.f }, 600.f));
+
+	m_EnemyManager.AddEnemy(new Spike(m_SpikeSprite, Vector2f{ 1700.f, 250.f }, Vector2f{ 500.f, 150.f }, Vector2f{ 500.f, 350.f }, 250.f));
+
+	m_EnemyManager.AddEnemy(new BigChomper(m_ChomperSprite, Vector2f{ 2200.f, (m_ChomperSprite->GetHeight() / 4) / 2 },
+		Vector2f{ 2200.f, -(m_ChomperSprite->GetHeight() / 4) * 1.5f }, Vector2f{ 2200.f, 450.f }, 600.f));
+
+	m_EnemyManager.AddEnemy(new Tulip(m_TulipIdle, m_TulipAttack, m_TulipSeed, Vector2f{ 3850.f, 280.f }));
+	m_EnemyManager.AddEnemy(new Tulip(m_TulipIdle, m_TulipAttack, m_TulipSeed, Vector2f{ 1000.f, 170.f }));
+
 	m_Vertices.reserve(20);
 	m_Vertices.push_back(Vector2f{ 50.f, 170.f });
 	m_Vertices.push_back(Vector2f{ 50.f, GetViewPort().height + 200.f });
@@ -38,14 +61,13 @@ void Game::Initialize( )
 
 	m_Vertices.push_back(Vector2f{ 7400.f, 230.f });
 	m_Vertices.push_back(Vector2f{ 6700.f, 500.f });
-	
 
 	m_Vertices.push_back(Vector2f{ 4000.f, 380.f });
 	m_Vertices.push_back(Vector2f{ 4000.f, 0.f });
 
 	m_Vertices.push_back(Vector2f{ 4000.f, 190.f });
-	m_Vertices.push_back(Vector2f{ 4000.f, 310.f });
-	m_Vertices.push_back(Vector2f{ 3700.f, 310.f });
+	m_Vertices.push_back(Vector2f{ 4000.f, 280.f });
+	m_Vertices.push_back(Vector2f{ 3700.f, 280.f });
 	m_Vertices.push_back(Vector2f{ 3700.f, 190.f });
 
 	m_Vertices.push_back(Vector2f{ 3200.f, 170.f });
@@ -61,6 +83,21 @@ void Game::Cleanup( )
 
 	delete m_ForectBackground2;
 	m_ForectBackground2 = nullptr;
+
+	delete m_SpikeSprite;
+	m_SpikeSprite = nullptr;
+
+	delete m_ChomperSprite;
+	m_ChomperSprite = nullptr;
+
+	delete m_TulipAttack;
+	m_TulipAttack = nullptr;
+
+	delete m_TulipIdle;
+	m_TulipIdle = nullptr;
+
+	delete m_TulipSeed;
+	m_TulipSeed = nullptr;
 
 	m_Vertices.clear();
 }
@@ -111,8 +148,9 @@ void Game::Update( float elapsedSec )
 			{
 				if (m_PlayerBulletManager[i] != nullptr)
 				{
-					if (utils::IsOverlapping(m_EnemyManager[j]->GetBounds(), m_PlayerBulletManager[i]->GetBounds()))
+					if (utils::IsOverlapping(m_EnemyManager[j]->GetBounds(), m_PlayerBulletManager[i]->GetHitbox()))
 					{
+						m_EnemyManager[j]->TakeDamage(m_PlayerBulletManager[i]->GetDamage());
 						m_PlayerBulletManager.RemoveProjectile(i);
 					}
 				}
@@ -126,6 +164,17 @@ void Game::Update( float elapsedSec )
 		if (m_EnemyManager[i] != nullptr)
 		{
 			if (utils::IsOverlapping(m_EnemyManager[i]->GetBounds(), m_Cuphead.GetBounds()) && m_Cuphead.GetHealth() > 0)
+			{
+				m_Cuphead.Hit();
+			}
+		}
+	}
+
+	for (int i{}; i < m_EnemyBulletManager.GetVectorSize(); ++i)
+	{
+		if (m_EnemyBulletManager[i] != nullptr)
+		{
+			if (utils::IsOverlapping(m_Cuphead.GetBounds(), m_EnemyBulletManager[i]->GetHitbox()))
 			{
 				m_Cuphead.Hit();
 			}

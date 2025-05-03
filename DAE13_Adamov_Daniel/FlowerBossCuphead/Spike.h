@@ -18,6 +18,9 @@ public:
 	virtual Rectf GetParryHitbox() const override;
 	virtual bool Parryable() const override;
 
+	virtual void TakeDamage(int damage) override;
+	virtual int GetHealth() const override;
+
 protected:
 	const Vector2f m_LowestPoint;
 	const Vector2f m_HighestPoint;

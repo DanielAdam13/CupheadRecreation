@@ -13,12 +13,13 @@ public:
 	void Reset(int frameToReset = 0);
 	void Stop();
 
-	int GetCurrentFrame() const;
+	int GetCurrentFrameNr() const;
 
 private:
 	int m_FrameNr;
 	float m_AccuSec;
 
 	int m_ChangeIdx;
+	float m_RewindTime;
 };
 

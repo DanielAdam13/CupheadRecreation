@@ -5,28 +5,22 @@
 #include "Cuphead.h"
 #include "utils.h"
 #include <iostream>
+#include "TulipSeed.h"
 
 float Tulip::m_CurrentFrameWidth{ 0.f };
 float Tulip::m_CurrentFrameHeight{ 0.f };
 
-Tulip::Tulip(const Texture* idleTexture, const Texture* attackTexture, const Vector2f& pos)
+Tulip::Tulip(const Texture* idleTexture, const Texture* attackTexture, const Texture* seed, const Vector2f& pos)
 	:Enemy::Enemy(pos),
 	m_Hp{ 15 },
 	m_CurrentTexture{ nullptr },
 	m_CurrentState{},
 	m_TextureIdle{ idleTexture },
 	m_TextureAttack{ attackTexture },
-	//m_TextureSeed{new Texture("Run'N'Gun/Tulip/Sprite_Tulip_Seed.png")},
-	//m_TextureExplosion{new Texture("Run'N'Gun/Tulip/Sprite_Tulip_Explosion.png")},
+	m_TextureSeed{ seed },
 	m_CurrentSpriteColNr{},
 	m_CurrentSpriteRowNr{}
 {
-}
-
-Tulip::~Tulip()
-{
-	/*delete m_TextureSeed;
-	delete m_TextureExplosion;*/
 }
 
 void Tulip::Draw() const
@@ -36,8 +30,8 @@ void Tulip::Draw() const
 		m_CurrentFrameWidth = m_CurrentTexture->GetWidth() / m_CurrentSpriteColNr;
 		m_CurrentFrameHeight = m_CurrentTexture->GetHeight() / m_CurrentSpriteRowNr;
 
-		Rectf srcRect{ 0.f + (this->m_Animator.GetCurrentFrame() % m_CurrentSpriteColNr) * m_CurrentFrameWidth,
-			0.f + (this->m_Animator.GetCurrentFrame() / m_CurrentSpriteColNr) * m_CurrentFrameHeight, m_CurrentFrameWidth, m_CurrentFrameHeight };
+		Rectf srcRect{ 0.f + (this->m_Animator.GetCurrentFrameNr() % m_CurrentSpriteColNr) * m_CurrentFrameWidth,
+			0.f + (this->m_Animator.GetCurrentFrameNr() / m_CurrentSpriteColNr) * m_CurrentFrameHeight, m_CurrentFrameWidth, m_CurrentFrameHeight };
 
 		m_CurrentTexture->Draw(Rectf{ this->GetBounds().left, this->GetBounds().bottom, m_CurrentFrameWidth * 0.75f, m_CurrentFrameHeight * 0.75f }, srcRect);
 
@@ -51,7 +45,7 @@ void Tulip::Draw() const
 void Tulip::Update(float elapsedSec, BulletManager& bulletManager, Cuphead& cuphead)
 {
 	static float animAccuSec{ 0.f };
-	const float attackAnimDuration{ 1.8f };
+	const float attackAnimDuration{ 1.5f };
 	static bool attackFinished{ false };
 
 	static float cooldownAcuuSec{ 0.f };
@@ -72,12 +66,13 @@ void Tulip::Update(float elapsedSec, BulletManager& bulletManager, Cuphead& cuph
 		}
 		else if (PlayerInRange(cuphead.GetPosition(), 500.f))
 		{
-			if (m_Animator.GetCurrentFrame() > 0)
+			if (m_Animator.GetCurrentFrameNr() > 0)
 			{
 				m_Animator.Reset(0);
 			}
 			m_CurrentState = TulipState::attack;
-			std::cout << "Switched to attack" << std::endl;
+
+			bulletManager.AddProjectile(new TulipSeed(m_TextureSeed, Vector2f{ m_Positon.x, m_Positon.y + GetBounds().height / 2 }, cuphead.GetPosition(), 0.f, 0.f, 1));
 		}
 	}
 	else if (m_CurrentState == TulipState::attack )
@@ -86,7 +81,6 @@ void Tulip::Update(float elapsedSec, BulletManager& bulletManager, Cuphead& cuph
 
 		if (animAccuSec >= attackAnimDuration)
 		{
-			std::cout << "Attack finished" << std::endl;
 			attackFinished = true;
 
 			m_CurrentState = TulipState::idle;
@@ -129,6 +123,16 @@ bool Tulip::Parryable() const
 Rectf Tulip::GetParryHitbox() const
 {
 	return Rectf();
+}
+
+void Tulip::TakeDamage(int damage)
+{
+	m_Hp -= damage;
+}
+
+int Tulip::GetHealth() const
+{
+	return m_Hp;
 }
 
 bool Tulip::PlayerInRange(const Vector2f& playerPos, float range)

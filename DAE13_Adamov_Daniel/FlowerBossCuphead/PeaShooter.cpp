@@ -4,26 +4,31 @@
 #include "utils.h"
 #include <iostream>
 
-PeaShooter::PeaShooter(const Texture* sprite, const Vector2f& spawnPos, float directionAngle, float speed, int damage)
-	: Projectile::Projectile(sprite, spawnPos, directionAngle, speed, damage)
+PeaShooter::PeaShooter(const Texture* sprite, const Vector2f& spawnPos, const Vector2f& playerPos, float directionAngle, float speed, int damage)
+	: Projectile::Projectile(sprite, spawnPos, playerPos, directionAngle, speed, damage),
+	m_FrameWidth{m_Texture->GetWidth() / 4},
+	m_FrameHeight{m_Texture->GetHeight() / 2}
 {
 	std::cout << "CREATED PeaShooter with direction: " << directionAngle << std::endl;
 }
 
 void PeaShooter::Draw() const
 {
-	Rectf srcRect{ 0.f + (m_ProjAnimator.GetCurrentFrame() % 4) * GetBounds().width,
-		0.f + (m_ProjAnimator.GetCurrentFrame() / 4) * GetBounds().height, GetBounds().width, GetBounds().height };
+	Rectf srcRect{ 0.f + (m_ProjAnimator.GetCurrentFrameNr() % 4) * GetBounds().width,
+		0.f + (m_ProjAnimator.GetCurrentFrameNr() / 4) * GetBounds().height, GetBounds().width, GetBounds().height };
 
 	glPushMatrix();
-	glTranslatef(m_Position.x, m_Position.y, 0);
-	glRotatef(m_DirectionAngle, 0, 0, 1);
-	glScalef(0.8f, 0.8f, 0);
-	m_Texture->Draw(Vector2f{ -srcRect.width / 2, -srcRect.height / 2 }, srcRect);
+		glTranslatef(m_Position.x, m_Position.y, 0);
+		glRotatef(m_DirectionAngle, 0, 0, 1);
+		glScalef(0.8f, 0.8f, 0);
+		m_Texture->Draw(Vector2f{ -srcRect.width / 2, -srcRect.height / 2 }, srcRect);
 	glPopMatrix();
+
+	utils::SetColor(Color4f{ 1,0,0,1 });
+	utils::DrawEllipse(GetHitbox().center, 15.f, 15.f);
 }
 
-void PeaShooter::Update(float elapsedSec, const std::vector<Vector2f>& vertices)
+void PeaShooter::Update(float elapsedSec)
 {
 	m_Position += m_ShootDirection * m_Speed * elapsedSec;
 }
@@ -35,12 +40,30 @@ void PeaShooter::Animate(float elapsedSec)
 
 Rectf PeaShooter::GetBounds() const
 {
-	if (this != nullptr)
-	{
-		const float frameWidth{ m_Texture->GetWidth() / 4 };
-		const float frameHeight{ m_Texture->GetHeight() / 2 };
+	return Rectf{ m_Position.x - m_FrameWidth / 2, m_Position.y, m_FrameWidth, m_FrameHeight };
+}
 
-		return Rectf{ m_Position.x - frameWidth / 2, m_Position.y, frameWidth, frameHeight };
-	}
-	return Rectf();
+Circlef PeaShooter::GetHitbox() const
+{
+	return Circlef(Vector2f{m_Position.x + m_ShootDirection.x * 20.f, m_Position.y + m_ShootDirection.y * 20.f}, 15.f);
+}
+
+bool PeaShooter::Parryable() const
+{
+	return false;
+}
+
+int PeaShooter::GetDamage() const
+{
+	return m_Damage;
+}
+
+bool PeaShooter::DissapearOnGroundImpact()
+{
+	return false;
+}
+
+bool PeaShooter::MarkedForDeletion() const
+{
+	return false;
 }

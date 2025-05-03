@@ -83,8 +83,8 @@ void Cuphead::Draw() const
 		m_FrameWidth = m_CurrentTexture->GetWidth() / m_CurrentColNr;
 		m_FrameHeight = m_CurrentTexture->GetHeight() / m_CurrentRowNr;
 
-		Rectf srcRect{ 0.f + (m_Animator.GetCurrentFrame() % m_CurrentColNr) * m_FrameWidth, 
-			0.f + (m_Animator.GetCurrentFrame() / m_CurrentColNr) * m_FrameHeight, m_FrameWidth, m_FrameHeight };
+		Rectf srcRect{ 0.f + (m_Animator.GetCurrentFrameNr() % m_CurrentColNr) * m_FrameWidth, 
+			0.f + (m_Animator.GetCurrentFrameNr() / m_CurrentColNr) * m_FrameHeight, m_FrameWidth, m_FrameHeight };
 		
 		// GetBounds is calculated by the mid point of each texture
 		glPushMatrix();
@@ -457,7 +457,7 @@ void Cuphead::AnimateCuphead(float elapsedSec)
 
 		m_Animator.LoopBetween(elapsedSec, 12, 19, m_MaxFrameSec, 2.5f);
 		
-		if (m_Animator.GetCurrentFrame() > 27)
+		if (m_Animator.GetCurrentFrameNr() > 27)
 		{
 			m_Animator.Reset(0);
 			m_PlayingIntro = false;
@@ -523,7 +523,7 @@ void Cuphead::AnimateCuphead(float elapsedSec)
 				m_CurrentColNr = 5;
 				m_CurrentRowNr = 1;
 
-				m_Animator.ReverseAnimateBetween(elapsedSec, 0, 4, m_MaxFrameSec);
+				m_Animator.ReverseAnimateBetween(elapsedSec, 0, 4, m_MaxFrameSec - 0.01f);
 			}
 			
 		}
@@ -794,20 +794,26 @@ void Cuphead::Dash(float elapsedSec)
 
 void Cuphead::CreateProjectiles(float elapsedSec, BulletManager& bulletManager) const
 {
-	static float m_AccuSecProjectiles{ 0.f };
-	const float projectileCooldown{ 0.2f };
-
-	if (m_CupheadShootingState != Shoot::notShooting) // if shooting in any direction
+	if (m_CupheadShootingState != Shoot::notShooting)
 	{
-		m_AccuSecProjectiles += elapsedSec;
-
-		if (m_AccuSecProjectiles > projectileCooldown)
+		if (m_CupheadShootingState == Shoot::shootDiagonalUpLeft || m_CupheadShootingState == Shoot::shootDiagonalUpRight || m_CupheadShootingState == Shoot::shootDown ||
+			m_CupheadShootingState == Shoot::shootLeft || m_CupheadShootingState == Shoot::shootRight || m_CupheadShootingState == Shoot::shootUp) // if shooting in any direction
 		{
-			bulletManager.AddProjectile(new PeaShooter(m_TexturePeaShooter,	
-				Vector2f{ GetBounds().left + GetBounds().width / 2, GetBounds().bottom + GetBounds().height * 0.4f }, m_ShootAngle, 1200.f, 1));
-			m_AccuSecProjectiles -= projectileCooldown;
+			static float m_AccuSecProjectiles{ 0.f };
+			const float projectileCooldown{ 0.2f };
+
+			m_AccuSecProjectiles += elapsedSec;
+
+			if (m_AccuSecProjectiles > projectileCooldown)
+			{
+				bulletManager.AddProjectile(new PeaShooter(m_TexturePeaShooter,
+					Vector2f{ GetBounds().left + GetBounds().width / 2, GetBounds().bottom + GetBounds().height * 0.4f }, {}, m_ShootAngle, 1200.f, 1));
+				m_AccuSecProjectiles -= projectileCooldown;
+			}
 		}
+		// ...
 	}
+	
 }
 
 void Cuphead::StartDash()

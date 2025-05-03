@@ -1,8 +1,6 @@
 #pragma once
 #include <vector>
-class Texture;
 class Enemy;
-
 class BulletManager;
 class Cuphead;
 
@@ -20,20 +18,12 @@ public:
 	void UpdateEnemies(float elapsedSec, const Rectf& cameraBox, BulletManager& bulletManager, Cuphead& cuphead);
 	void AnimateEnemies(float elapsedSec, const Rectf& cameraBox);
 
+	void AddEnemy(Enemy* enemy);
 	Enemy* operator[](int index) const;
+
 	size_t GetVectorSize() const;
 
 private:
 	std::vector<Enemy*> m_EnemiesVector;
-
-	const Texture* m_SpikeSprite;
-	const Texture* m_ChomperSprite;
-
-	const Texture* m_TulipIdle;
-	const Texture* m_TulipAttack;
-
-	static int m_NREnemies;
-
-	void IntializeEnemies();
 };
 

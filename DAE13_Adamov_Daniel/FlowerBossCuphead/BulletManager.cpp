@@ -1,8 +1,8 @@
 #include "pch.h"
 #include "BulletManager.h"
 #include "Projectile.h"
-#include "Texture.h"
 #include "utils.h"
+#include <iostream>
 
 BulletManager::BulletManager()
 	:m_Projectiles{ nullptr }
@@ -40,9 +40,37 @@ void BulletManager::UpdateActiveBullets(float elapsedSec, const Rectf& cameraBox
 	{
 		if (m_Projectiles[i] != nullptr)
 		{
-			if (utils::IsOverlapping(m_Projectiles[i]->GetBounds(), cameraBox))
+			if (m_Projectiles[i]->DissapearOnGroundImpact())
 			{
-				m_Projectiles[i]->Update(elapsedSec, vertices);
+				utils::HitInfo hitInfo;
+				Vector2f first{ m_Projectiles[i]->GetHitbox().center.x, m_Projectiles[i]->GetHitbox().center.y };
+				Vector2f second{ m_Projectiles[i]->GetHitbox().center.x, m_Projectiles[i]->GetHitbox().center.y + m_Projectiles[i]->GetHitbox().radius };
+				
+				if (utils::Raycast(vertices, first, second, hitInfo))
+				{
+					std::cout << "Deleted on impact" << std::endl;
+					delete m_Projectiles[i];
+					m_Projectiles[i] = nullptr;
+				}
+			}
+		}
+	}
+
+	for (size_t i{}; i < m_Projectiles.size(); ++i)
+	{
+		if (m_Projectiles[i] != nullptr)
+		{
+			if (!m_Projectiles[i]->MarkedForDeletion())
+			{
+				if (utils::IsOverlapping(Rectf{ cameraBox.left, cameraBox.bottom, cameraBox.width, cameraBox.height * 1.2f }, m_Projectiles[i]->GetHitbox())) // a bit higher than camera y
+				{
+					m_Projectiles[i]->Update(elapsedSec);
+				}
+				else
+				{
+					delete m_Projectiles[i];
+					m_Projectiles[i] = nullptr;
+				}
 			}
 			else
 			{

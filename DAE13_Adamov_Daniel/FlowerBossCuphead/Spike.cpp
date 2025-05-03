@@ -18,8 +18,8 @@ Spike::Spike(const Texture* spriteTexture, const Vector2f& pos, const Vector2f& 
 
 void Spike::Draw() const
 {
-	Rectf srcRect{ 0.f + (m_Animator.GetCurrentFrame() % m_SpriteColNr) * this->GetBounds().width,
-	0.f + (m_Animator.GetCurrentFrame() / m_SpriteColNr) * this->GetBounds().height, this->GetBounds().width, this->GetBounds().height };
+	Rectf srcRect{ 0.f + (m_Animator.GetCurrentFrameNr() % m_SpriteColNr) * this->GetBounds().width,
+	0.f + (m_Animator.GetCurrentFrameNr() / m_SpriteColNr) * this->GetBounds().height, this->GetBounds().width, this->GetBounds().height };
 
 	m_Texture->Draw(Vector2f{ this->GetBounds().left, this->GetBounds().bottom}, srcRect);
 
@@ -55,6 +55,15 @@ Rectf Spike::GetParryHitbox() const
 bool Spike::Parryable() const
 {
 	return true;
+}
+
+void Spike::TakeDamage(int damage)
+{
+}
+
+int Spike::GetHealth() const
+{
+	return 1;
 }
 
 void Spike::Bounce(float elapsedSec)
