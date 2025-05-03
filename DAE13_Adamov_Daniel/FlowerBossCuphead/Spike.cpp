@@ -3,14 +3,16 @@
 #include "Texture.h"
 #include "utils.h"
 
-Spike::Spike(Texture* spriteTexture, const Vector2f& pos, const Vector2f& lowestPoint, const Vector2f& highestPoint, float speed)
+Spike::Spike(const Texture* spriteTexture, const Vector2f& pos, const Vector2f& lowestPoint, const Vector2f& highestPoint, float speed)
 	:Enemy(pos),
 	m_LowestPoint{ lowestPoint },
 	m_HighestPoint{ highestPoint },
 	m_Speed{ speed },
 	m_Texture{ spriteTexture },
 	m_SpriteRowNr{ 2 },
-	m_SpriteColNr{ 5 }
+	m_SpriteColNr{ 5 },
+	m_FrameWidth{ spriteTexture->GetWidth() / m_SpriteColNr },
+	m_FrameHeight{ spriteTexture->GetHeight() / m_SpriteRowNr }
 {
 }
 
@@ -25,21 +27,34 @@ void Spike::Draw() const
 	utils::SetColor(Color4f{ 1,0,0,1 });
 	utils::DrawRect(this->GetBounds());
 	utils::FillEllipse(m_Positon, 5.f, 5.f);
+
+	utils::SetColor(Color4f{ 1,0,1,1 });
+	utils::DrawRect(GetParryHitbox());
 }
 
-void Spike::Update(float elapsedSec)
+void Spike::Update(float elapsedSec, BulletManager& bulletManager, Cuphead& cuphead)
+{
+	Bounce(elapsedSec);
+}
+
+void Spike::Animate(float elapsedSec)
 {
 	m_Animator.ReverseAnimateBetween(elapsedSec, 0, 5, 0.09f);
-
-	Bounce(elapsedSec);
 }
 
 Rectf Spike::GetBounds() const
 {
-	const float frameWidth{ m_Texture->GetWidth() / m_SpriteColNr };
-	const float frameHeight{ m_Texture->GetHeight() / m_SpriteRowNr };
+	return Rectf(m_Positon.x - m_FrameWidth / 2, m_Positon.y - m_FrameHeight / 2, m_FrameWidth, m_FrameHeight);
+}
 
-	return Rectf(m_Positon.x - frameWidth / 2, m_Positon.y - frameHeight / 2, frameWidth, frameHeight);
+Rectf Spike::GetParryHitbox() const
+{
+	return Rectf{ this->GetBounds().left - m_FrameWidth * 0.75f, this->GetBounds().bottom - m_FrameHeight * 0.75f, m_FrameWidth * 2.5f, m_FrameHeight * 2.5f};
+}
+
+bool Spike::Parryable() const
+{
+	return true;
 }
 
 void Spike::Bounce(float elapsedSec)

@@ -9,13 +9,14 @@
 
 Game::Game(const Window& window)
 	:BaseGame{ window },
-	m_Cuphead{ Vector2f{GetViewPort().width / 2, 100.f}, true },
+	m_Cuphead{ Vector2f{GetViewPort().width / 2, 100.f}, true, 3 },
 	m_Vertices{},
 	m_ForestBackground1{ new Texture("ForestFollies_Background_First.png") },
 	m_ForectBackground2{ new Texture("ForestFollies_Background_Second.png") },
-	m_PlayerCamera{ GetViewPort().width, GetViewPort().height },
+	m_Camera{ GetViewPort().width, GetViewPort().height },
 	m_EnemyManager{},
-	m_BulletManager{}
+	m_PlayerBulletManager{},
+	m_EnemyBulletManager{}
 {
 	Initialize();
 }
@@ -69,24 +70,64 @@ void Game::Update( float elapsedSec )
 	// Check keyboard state
 	const Uint8 *pStates = SDL_GetKeyboardState( nullptr );
 
-	m_Cuphead.Update(elapsedSec, pStates, m_Vertices, m_BulletManager);
+	// updates cuphead and pushes projectiles to player BulletManager
+	m_Cuphead.Update(elapsedSec, pStates, m_Vertices, m_PlayerBulletManager);
 
-	m_EnemyManager.UpdateEnemies(elapsedSec, m_Cuphead);
-
-	m_PlayerCamera.Aim(12400.f, 760.f, m_Cuphead.GetPosition());
-
-	m_BulletManager.UpdateActiveBullets(elapsedSec, m_PlayerCamera);
-
-	for (int i{}; i < m_BulletManager.GetVectorSize(); ++i)
+	// update enemies and enemy bullets if player is alive
+	if (m_Cuphead.GetHealth() > 0) 
 	{
-		if (m_BulletManager[i] != nullptr)
+		// update enemies and pushes projectiles to enemy BulletManager
+		m_EnemyManager.UpdateEnemies(elapsedSec, m_Camera.GetCuurentCameraBounds(), m_EnemyBulletManager, m_Cuphead);
+	
+		m_EnemyBulletManager.UpdateActiveBullets(elapsedSec, m_Camera.GetCuurentCameraBounds(), m_Vertices);
+
+		// follow player if alive
+		m_Camera.Aim(12400.f, 760.f, m_Cuphead.GetPosition());
+	}
+	else
+	{
+		// unfollow if player dead
+		m_Camera.Aim(12400.f, 760.f, m_Cuphead.GetPlaceOfDeath());
+		
+	}
+	
+	// update and animate even if player is dead
+	m_PlayerBulletManager.UpdateActiveBullets(elapsedSec, m_Camera.GetCuurentCameraBounds(), m_Vertices);
+	m_PlayerBulletManager.AnimateActiveBullets(elapsedSec);
+
+	// animate enemy bullets even if player is dead
+	m_EnemyBulletManager.AnimateActiveBullets(elapsedSec);
+	
+	// animate enemies even if player is dead
+	m_EnemyManager.AnimateEnemies(elapsedSec, m_Camera.GetCuurentCameraBounds());
+
+
+	// delete player bullets if they collide with enemy
+	for (int j{}; j < m_EnemyManager.GetVectorSize(); ++j)
+	{
+		if (m_EnemyManager[j] != nullptr)
 		{
-			for (int j{}; j < m_EnemyManager.GetVectorSize(); ++j)
+			for (int i{}; i < m_PlayerBulletManager.GetVectorSize(); ++i)
 			{
-				if (utils::IsOverlapping(m_EnemyManager[j]->GetBounds(), m_BulletManager[i]->GetBounds()))
+				if (m_PlayerBulletManager[i] != nullptr)
 				{
-					m_BulletManager.RemoveProjectile(i);
+					if (utils::IsOverlapping(m_EnemyManager[j]->GetBounds(), m_PlayerBulletManager[i]->GetBounds()))
+					{
+						m_PlayerBulletManager.RemoveProjectile(i);
+					}
 				}
+			}
+		}
+	}
+
+	// deal damage to cuphead if player collides with enemy
+	for (int i{}; i < m_EnemyManager.GetVectorSize(); ++i)
+	{
+		if (m_EnemyManager[i] != nullptr)
+		{
+			if (utils::IsOverlapping(m_EnemyManager[i]->GetBounds(), m_Cuphead.GetBounds()) && m_Cuphead.GetHealth() > 0)
+			{
+				m_Cuphead.Hit();
 			}
 		}
 	}
@@ -104,16 +145,24 @@ void Game::Draw( ) const
 
 	m_Cuphead.Draw();
 
-	m_PlayerCamera.DrawBorderOverlay(GetViewPort().height / 20);
+	m_Camera.DrawBorderOverlay(GetViewPort().height / 20);
 
 	// Hitbox
 	utils::SetColor(Color4f{ 1,0,1,1 });
 	utils::DrawPolygon(m_Vertices, true, 2.f);
 
-	m_BulletManager.DrawActiveBullets();
-	m_EnemyManager.DrawEnemies();
+	m_PlayerBulletManager.DrawActiveBullets();
+	m_EnemyBulletManager.DrawActiveBullets();
 
-	m_PlayerCamera.Reset();
+	m_EnemyManager.DrawEnemies(m_Camera.GetCuurentCameraBounds());
+
+	m_Camera.Reset();
+
+	if (m_Cuphead.GetHealth() <= 0)
+	{
+		utils::SetColor(Color4f{ 0, 0, 0, 0.5f });
+		utils::FillRect(GetViewPort());
+	}
 	
 }
 
@@ -126,7 +175,7 @@ void Game::ProcessKeyDownEvent( const SDL_KeyboardEvent & e )
 		m_Cuphead.StartDash();
 		break;
 	case SDLK_z:
-		m_Cuphead.Parry();
+		m_Cuphead.ToggleParryState();
 		break;
 	}
 }

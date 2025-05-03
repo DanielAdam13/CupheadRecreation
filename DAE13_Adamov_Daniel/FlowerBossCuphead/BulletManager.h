@@ -3,8 +3,6 @@
 class Texture;
 class Projectile;
 
-class Camera;
-
 class BulletManager
 {
 public:
@@ -16,7 +14,8 @@ public:
 	~BulletManager();
 
 	void DrawActiveBullets() const;
-	void UpdateActiveBullets(float elapsedSec, const Camera& camera);
+	void UpdateActiveBullets(float elapsedSec, const Rectf& cameraBox, const std::vector<Vector2f>& vertices);
+	void AnimateActiveBullets(float elapsedSec);
 
 	void AddProjectile(Projectile* projectile);
 	Projectile* operator[](int index) const;

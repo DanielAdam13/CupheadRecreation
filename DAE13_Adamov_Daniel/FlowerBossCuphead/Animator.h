@@ -18,5 +18,7 @@ public:
 private:
 	int m_FrameNr;
 	float m_AccuSec;
+
+	int m_ChangeIdx;
 };
 

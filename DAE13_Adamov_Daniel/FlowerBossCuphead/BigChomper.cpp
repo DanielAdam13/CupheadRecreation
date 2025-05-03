@@ -4,7 +4,7 @@
 #include "utils.h"
 
 
-BigChomper::BigChomper(Texture* spriteTexture, const Vector2f& pos, const Vector2f& lowestPoint, const Vector2f& highestPoint, float speed)
+BigChomper::BigChomper(const Texture* spriteTexture, const Vector2f& pos, const Vector2f& lowestPoint, const Vector2f& highestPoint, float speed)
 	:Spike(spriteTexture, pos, lowestPoint, highestPoint, speed),
 	m_SpriteRowNr{ 4 },
 	m_SpriteColNr{ 5 }
@@ -29,10 +29,13 @@ void BigChomper::Draw() const
 	utils::FillEllipse(m_HighestPoint, 5.f, 5.f);
 }
 
-void BigChomper::Update(float elapsedSec)
+void BigChomper::Update(float elapsedSec, BulletManager& bulletManager, Cuphead& cuphead)
 {
 	Spike::Bounce(elapsedSec);
+}
 
+void BigChomper::Animate(float elapsedSec)
+{
 	if (m_Speed > 0.f)
 	{
 		if (m_Positon.y <= m_HighestPoint.y - 300.f)
@@ -64,4 +67,14 @@ Rectf BigChomper::GetBounds() const
 	const float frameHeight{ this->m_Texture->GetHeight() / m_SpriteRowNr };
 
 	return Rectf(m_Positon.x - frameWidth / 2, m_Positon.y - frameHeight / 2, frameWidth, frameHeight);
+}
+
+bool BigChomper::Parryable() const
+{
+	return false;
+}
+
+Rectf BigChomper::GetParryHitbox() const
+{
+	return Rectf();
 }

@@ -3,7 +3,6 @@
 #include "Projectile.h"
 #include "Texture.h"
 #include "utils.h"
-#include "Camera.h"
 
 BulletManager::BulletManager()
 	:m_Projectiles{ nullptr }
@@ -35,21 +34,32 @@ void BulletManager::DrawActiveBullets() const
 	}
 }
 
-void BulletManager::UpdateActiveBullets(float elapsedSec, const Camera& camera)
+void BulletManager::UpdateActiveBullets(float elapsedSec, const Rectf& cameraBox, const std::vector<Vector2f>& vertices)
 {
 	for (size_t i{}; i < m_Projectiles.size(); ++i)
 	{
 		if (m_Projectiles[i] != nullptr)
 		{
-			if (utils::IsOverlapping(m_Projectiles[i]->GetBounds(), camera.GetCuurentCameraBounds()))
+			if (utils::IsOverlapping(m_Projectiles[i]->GetBounds(), cameraBox))
 			{
-				m_Projectiles[i]->Update(elapsedSec);
+				m_Projectiles[i]->Update(elapsedSec, vertices);
 			}
 			else
 			{
 				delete m_Projectiles[i];
 				m_Projectiles[i] = nullptr;
 			}
+		}
+	}
+}
+
+void BulletManager::AnimateActiveBullets(float elapsedSec)
+{
+	for (size_t i{}; i < m_Projectiles.size(); ++i)
+	{
+		if (m_Projectiles[i] != nullptr)
+		{
+			m_Projectiles[i]->Animate(elapsedSec);
 		}
 	}
 }

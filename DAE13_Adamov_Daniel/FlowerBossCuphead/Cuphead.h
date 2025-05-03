@@ -2,13 +2,12 @@
 #include "Animator.h"
 #include <vector>
 class Texture;
-#include "Projectile.h"
 class BulletManager;
 
 class Cuphead final
 {
 public:
-	explicit Cuphead(const Vector2f& position, bool playIntro);
+	explicit Cuphead(const Vector2f& position, bool playIntro, int hp);
 	Cuphead(const Cuphead& character) = delete; // deleted because too much work to be honest + I don't need them for now
 	Cuphead& operator=(const Cuphead& rhs) = delete;
 	Cuphead(Cuphead&& character) = delete;
@@ -19,13 +18,20 @@ public:
 	void Update(float elapsedSec, const Uint8* pStates, const std::vector<Vector2f>& vertices, BulletManager& bulletManager);
 	
 	void StartDash();
-	void Parry();
+	void ToggleParryState();
+
+	void Hit();
 
 	int GetHealth() const;
-	Vector2f GetPosition() const;
-
 	bool IsShooting() const;
 	bool IsParrying() const;
+
+	void Parry();
+
+	Vector2f GetPosition() const;
+	Rectf GetBounds() const;
+
+	Vector2f GetPlaceOfDeath() const;
 	
 private:
 	enum class Movement
@@ -61,6 +67,8 @@ private:
 	static float m_FrameWidth;
 	static float m_FrameHeight;
 	int m_HP;
+	bool m_IsAlive;
+
 	bool m_PlayingIntro;
 
 	Movement m_CupheadMovementState;
@@ -68,15 +76,17 @@ private:
 
 	bool m_KeyPressed;
 
-	float m_AccuSecProjectiles;
 	float m_ShootAngle;
 
 	bool m_IsGrounded;
 	bool m_IsHit;
+	bool m_AnimatingHit;
+	const float m_InvincibilityDuration;
 
 	bool m_ClickedDash;
 	bool m_IsDashing;
 	float m_DashCooldownAcuuSec;
+	float m_DashAnimAccuSec;
 
 	const float m_MaxFrameSec;
 
@@ -87,13 +97,16 @@ private:
 	Vector2f m_Velocity;
 	float m_FacingAngle;
 
-	Texture* m_TexturePeaShooter;
-	Texture* m_TextureSpecialPeaShooter;
+	Vector2f m_PlaceOfHit;
+
+	const Texture* m_TexturePeaShooter;
+	const Texture* m_TextureSpecialPeaShooter;
 
 	Texture* m_TextureDash;
 	Texture* m_TextureShoot;
 	Texture* m_TextureDeath;
 	Texture* m_TextureDuck;
+	Texture* m_TextureGhost;
 	Texture* m_TextureHit;
 	Texture* m_TextureIdle;
 	Texture* m_TextureIntro;
@@ -111,12 +124,13 @@ private:
 	void AnimateCuphead(float elapsedSec);
 	void HandleRaycast(float elapsedSec, const std::vector<Vector2f>& vertices);
 	void Dash(float elapsedSec);
-	void CreateProjectiles(float elapsedSec, BulletManager& bulletManager);
+	void CreateProjectiles(float elapsedSec, BulletManager& bulletManager) const;
 
 	void UpdateFacingDirection(const Uint8* pStates);
 	void ResetParry();
 
-	Rectf GetBounds() const;
+	void TakeDamage(float elapsedSec);
+	void SetDeath();
 
 	void IntializeTextures();
 	void DeleteTextures();

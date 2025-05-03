@@ -33,9 +33,6 @@
     <ClCompile Include="Projectile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SpecialProjectile.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -52,6 +49,18 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="BulletManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Tulip.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PeaShooter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SpecialPeaShooter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TulipSeed.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -71,7 +80,7 @@
     <ClInclude Include="Projectile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SpecialProjectile.h">
+    <ClInclude Include="SpecialPeaShooter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Camera.h">
@@ -90,6 +99,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="BulletManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Tulip.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PeaShooter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TulipSeed.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,5 +1,7 @@
 #pragma once
 #include "Animator.h"
+class BulletManager;
+class Cuphead;
 
 class Enemy abstract
 {
@@ -9,9 +11,13 @@ public:
 	// no need for rule of 5 since constructos and operators aren't inherited
 
 	virtual void Draw() const = 0;
-	virtual void Update(float elapsedSec) = 0;
+	virtual void Update(float elapsedSec, BulletManager& bulletManager, Cuphead& cuphead) = 0;
+	virtual void Animate(float elapsedSec) = 0;
 
 	virtual Rectf GetBounds() const = 0;
+	virtual bool Parryable() const = 0;
+	virtual Rectf GetParryHitbox() const = 0;
+
 protected:
 	Animator m_Animator;
 	Vector2f m_Positon;

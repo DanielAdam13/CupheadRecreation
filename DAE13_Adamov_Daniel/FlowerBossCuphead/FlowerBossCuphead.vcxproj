@@ -168,9 +168,12 @@ xcopy "$(SolutionDir)Resources\*.*" "$(TargetDir)" /y /d /s</Command>
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="pch.cpp" />
+    <ClCompile Include="PeaShooter.cpp" />
     <ClCompile Include="Projectile.cpp" />
-    <ClCompile Include="SpecialProjectile.cpp" />
+    <ClCompile Include="SpecialPeaShooter.cpp" />
     <ClCompile Include="Spike.cpp" />
+    <ClCompile Include="Tulip.cpp" />
+    <ClCompile Include="TulipSeed.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Animator.h" />
@@ -182,9 +185,12 @@ xcopy "$(SolutionDir)Resources\*.*" "$(TargetDir)" /y /d /s</Command>
     <ClInclude Include="EnemyManager.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="PeaShooter.h" />
     <ClInclude Include="Projectile.h" />
-    <ClInclude Include="SpecialProjectile.h" />
+    <ClInclude Include="SpecialPeaShooter.h" />
     <ClInclude Include="Spike.h" />
+    <ClInclude Include="Tulip.h" />
+    <ClInclude Include="TulipSeed.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

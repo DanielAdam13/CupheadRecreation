@@ -35,10 +35,11 @@ private:
 	Texture* m_ForestBackground1;
 	Texture* m_ForectBackground2;
 
-	Camera m_PlayerCamera;
+	Camera m_Camera;
 
 	EnemyManager m_EnemyManager;
-	BulletManager m_BulletManager;
+	BulletManager m_PlayerBulletManager;
+	BulletManager m_EnemyBulletManager;
 
 	// FUNCTIONS
 	void Initialize();

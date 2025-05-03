@@ -1,17 +1,18 @@
 #pragma once
 class Texture;
 #include "Animator.h"
-#include "Matrix2x3.h"
+#include <vector>
 
-class Projectile // not final since we have the Special attack which will inherit this class
+class Projectile abstract
 {
 public:
-	explicit Projectile(Texture* sprite, const Vector2f& spawnPos, float directionAngle, int damage = 1);
+	explicit Projectile(const Texture* sprite, const Vector2f& spawnPos, float directionAngle, float speed, int damage = 1);
 
-	virtual void Draw() const;
-	virtual void Update(float elapsedSec);
+	virtual void Draw() const = 0;
+	virtual void Update(float elapsedSec, const std::vector<Vector2f>& vertices) = 0;
+	virtual void Animate(float elapsedSec) = 0;
 
-	Rectf GetBounds() const;
+	virtual Rectf GetBounds() const = 0;
 
 protected:
 	Vector2f m_Position;
@@ -21,11 +22,10 @@ protected:
 	const int m_Damage;
 	Animator m_ProjAnimator;
 
-	Texture* m_Texture;
-	
-	void Animate(float elapsedSec);
+	const Texture* m_Texture;
+	const float m_Speed;
 
 private:
-	const float m_Speed;
+	
 };
 
