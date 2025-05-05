@@ -14,8 +14,8 @@ PeaShooter::PeaShooter(const Texture* sprite, const Vector2f& spawnPos, const Ve
 
 void PeaShooter::Draw() const
 {
-	Rectf srcRect{ 0.f + (m_ProjAnimator.GetCurrentFrameNr() % 4) * GetBounds().width,
-		0.f + (m_ProjAnimator.GetCurrentFrameNr() / 4) * GetBounds().height, GetBounds().width, GetBounds().height };
+	Rectf srcRect{ 0.f + (m_Animator.GetCurrentFrameNr() % 4) * GetBounds().width,
+		0.f + (m_Animator.GetCurrentFrameNr() / 4) * GetBounds().height, GetBounds().width, GetBounds().height };
 
 	glPushMatrix();
 		glTranslatef(m_Position.x, m_Position.y, 0);
@@ -28,14 +28,14 @@ void PeaShooter::Draw() const
 	utils::DrawEllipse(GetHitbox().center, 15.f, 15.f);
 }
 
-void PeaShooter::Update(float elapsedSec)
+void PeaShooter::Update(float elapsedSec, const std::vector<Vector2f>& vertices, BulletManager& bulletManager, Cuphead& cuphead)
 {
 	m_Position += m_ShootDirection * m_Speed * elapsedSec;
 }
 
 void PeaShooter::Animate(float elapsedSec)
 {
-	m_ProjAnimator.LoopBetween(elapsedSec, 3, 7, 0.06f);
+	m_Animator.AnimateBetweenFrames(elapsedSec, 3, 7, 0.06f);
 }
 
 Rectf PeaShooter::GetBounds() const
@@ -48,22 +48,12 @@ Circlef PeaShooter::GetHitbox() const
 	return Circlef(Vector2f{m_Position.x + m_ShootDirection.x * 20.f, m_Position.y + m_ShootDirection.y * 20.f}, 15.f);
 }
 
-bool PeaShooter::Parryable() const
-{
-	return false;
-}
-
-int PeaShooter::GetDamage() const
+int PeaShooter::Damage() const
 {
 	return m_Damage;
 }
 
-bool PeaShooter::DissapearOnGroundImpact()
-{
-	return false;
-}
-
 bool PeaShooter::MarkedForDeletion() const
 {
-	return false;
+	return m_DeleteMarker;
 }

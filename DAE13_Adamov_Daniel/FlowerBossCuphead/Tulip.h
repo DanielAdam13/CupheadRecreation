@@ -1,32 +1,27 @@
 #pragma once
-#include "Enemy.h"
+#include "Mushroom.h"
 class Texture;
 class BulletManager;
 class Cuphead;
 
-class Tulip : public Enemy
+class Tulip final : public Mushroom
 {
 public:
-	explicit Tulip(const Texture* idleTexture, const Texture* attackTexture, const Texture* seed, const Vector2f& pos);
+	explicit Tulip(const Texture* idleTexture, const Texture* attackTexture, const Texture* seed, const Texture* explosion, const Vector2f& pos, int colNr = 5, int rowNr = 4, float range = 600.f);
 
 	virtual void Draw() const override;
 	virtual void Update(float elapsedSec, BulletManager& bulletManager, Cuphead& cuphead) override;
 	virtual void Animate(float elapsedSec) override;
 
 	virtual Rectf GetBounds() const override;
-	virtual bool Parryable() const override;
-	virtual Rectf GetParryHitbox() const override;
 
 	virtual void TakeDamage(int damage) override;
 	virtual int GetHealth() const override;
-
-protected:
-	int m_Hp;
-	const Texture* m_CurrentTexture;
-
-	bool PlayerInRange(const Vector2f& playerPos, float range);
+	virtual bool MarkedForDeath() const override;
 
 private:
+	int m_Hp;
+
 	enum class TulipState 
 	{
 		idle,
@@ -34,16 +29,12 @@ private:
 	};
 
 	TulipState m_CurrentState;
-
-	const Texture* m_TextureIdle;
-	const Texture* m_TextureAttack;
 	
 	const Texture* m_TextureSeed;
+	const Texture* m_TextureExplosion;
 
-	int m_CurrentSpriteRowNr;
-	int m_CurrentSpriteColNr;
-
-	static float m_CurrentFrameWidth;
-	static float m_CurrentFrameHeight;
+	float m_AnimAccuSec;
+	bool m_AttackFinished;
+	float m_CooldownAccuSec;
 };
 

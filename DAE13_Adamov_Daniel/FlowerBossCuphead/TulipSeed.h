@@ -1,36 +1,38 @@
 #pragma once
 #include "Projectile.h"
+#include <vector>
 class Texture;
+class Cuphead;
 
 class TulipSeed final: public Projectile // Tulip's attack projectile
 {
 public:
-	explicit TulipSeed(const Texture* sprite, const Vector2f& spawnPos, const Vector2f& playerPos, float directionAngle, float speed, int damage);
+	explicit TulipSeed(const Texture* sprite, const Texture* explosion, const Vector2f& spawnPos, const Vector2f& playerPos, float directionAngle, float speed, int damage = 1);
 
 	virtual void Draw() const override;
-	virtual void Update(float elapsedSec) override;
+	virtual void Update(float elapsedSec, const std::vector<Vector2f>& vertices, BulletManager& bulletManager, Cuphead& cuphead) override;
 	virtual void Animate(float elapsedSec) override;
 
 	virtual Circlef GetHitbox() const override;
-	virtual bool Parryable() const override;
-	virtual int GetDamage() const override;
+	virtual int Damage() const override;
 
-	virtual bool DissapearOnGroundImpact() override;
 	virtual bool MarkedForDeletion() const override;
 	
 protected:
 	float m_AccuSec;
 
-
 private:
 	virtual Rectf GetBounds() const override;
 	Vector2f CalculateBezierPoint(float t) const;
+	virtual void DissapearOnGroundImpact(const std::vector<Vector2f>& vertices, BulletManager& bulletManager);
+
+	const Texture* m_ExplosionTexture;
 
 	const Vector2f m_InitialPlayerPoint;
 	const Vector2f m_StartPoint;
 	const Vector2f m_ControlPoint;
 
-	const float m_Duration;
+	const float m_BezierDuration;
 
 	float m_DelayAccuSec;
 };

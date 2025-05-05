@@ -34,28 +34,8 @@ void BulletManager::DrawActiveBullets() const
 	}
 }
 
-void BulletManager::UpdateActiveBullets(float elapsedSec, const Rectf& cameraBox, const std::vector<Vector2f>& vertices)
+void BulletManager::UpdateActiveBullets(float elapsedSec, const Rectf& cameraBox, const std::vector<Vector2f>& vertices, Cuphead& cuphead)
 {
-	for (size_t i{}; i < m_Projectiles.size(); ++i)
-	{
-		if (m_Projectiles[i] != nullptr)
-		{
-			if (m_Projectiles[i]->DissapearOnGroundImpact())
-			{
-				utils::HitInfo hitInfo;
-				Vector2f first{ m_Projectiles[i]->GetHitbox().center.x, m_Projectiles[i]->GetHitbox().center.y };
-				Vector2f second{ m_Projectiles[i]->GetHitbox().center.x, m_Projectiles[i]->GetHitbox().center.y + m_Projectiles[i]->GetHitbox().radius };
-				
-				if (utils::Raycast(vertices, first, second, hitInfo))
-				{
-					std::cout << "Deleted on impact" << std::endl;
-					delete m_Projectiles[i];
-					m_Projectiles[i] = nullptr;
-				}
-			}
-		}
-	}
-
 	for (size_t i{}; i < m_Projectiles.size(); ++i)
 	{
 		if (m_Projectiles[i] != nullptr)
@@ -64,7 +44,7 @@ void BulletManager::UpdateActiveBullets(float elapsedSec, const Rectf& cameraBox
 			{
 				if (utils::IsOverlapping(Rectf{ cameraBox.left, cameraBox.bottom, cameraBox.width, cameraBox.height * 1.2f }, m_Projectiles[i]->GetHitbox())) // a bit higher than camera y
 				{
-					m_Projectiles[i]->Update(elapsedSec);
+					m_Projectiles[i]->Update(elapsedSec, vertices, *this, cuphead);
 				}
 				else
 				{

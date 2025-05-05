@@ -47,6 +47,14 @@ private:
 	const Texture* m_TulipIdle;
 	const Texture* m_TulipAttack;
 	const Texture* m_TulipSeed;
+	const Texture* m_TulipSeedExplosion;
+
+	const Texture* m_MushroomIdle;
+	const Texture* m_MushroomAttack;
+	const Texture* m_MushroomPop;
+	const Texture* m_MushroomBoil;
+	const Texture* m_MushroomDeath;
+	const Texture* m_MushroomCloud;
 
 	// FUNCTIONS
 	void Initialize();

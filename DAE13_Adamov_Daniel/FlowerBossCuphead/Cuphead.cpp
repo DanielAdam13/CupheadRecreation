@@ -34,6 +34,7 @@ Cuphead::Cuphead(const Vector2f& position, bool playIntro, int hp)
 	m_Velocity{ 0.f, 0.f },
 	m_FacingAngle{ 0.f },
 	m_PlaceOfHit{},
+	m_Parried{ false },
 	m_TexturePeaShooter{ new Texture("Projectile_Loop.png") },
 	m_TextureSpecialPeaShooter{ new Texture("Projectile_Special_Loop.png") },
 	m_Animator{}
@@ -449,13 +450,20 @@ void Cuphead::ProcessKeys(const Uint8* pStates)
 
 void Cuphead::AnimateCuphead(float elapsedSec)
 {
+	// important for resetting animations between each other
+	static Movement lastMovementState{};
+	static Shoot lastShootState{};
+
+	bool stateChanged{ (m_CupheadMovementState != lastMovementState) || (m_CupheadShootingState != lastShootState) }; 
+	int frameToReset{ 0 };
+
 	if (m_PlayingIntro)
 	{
 		m_CurrentTexture = m_TextureIntro;
 		m_CurrentColNr = 7;
 		m_CurrentRowNr = 4;
 
-		m_Animator.LoopBetween(elapsedSec, 12, 19, m_MaxFrameSec, 2.5f);
+		m_Animator.AnimateBetweenFrames(elapsedSec, 12, 19, m_MaxFrameSec, 2.5f);
 		
 		if (m_Animator.GetCurrentFrameNr() > 27)
 		{
@@ -481,7 +489,7 @@ void Cuphead::AnimateCuphead(float elapsedSec)
 		static float animAccuSec{ 0.f };
 		animAccuSec += elapsedSec;
 
-		m_Animator.ReverseAnimateBetween(elapsedSec, 0, 5, m_MaxFrameSec + 0.01f);
+		m_Animator.BounceBetween(elapsedSec, 0, 5, m_MaxFrameSec + 0.01f);
 
 		if (animAccuSec > animDuration)
 		{
@@ -491,31 +499,15 @@ void Cuphead::AnimateCuphead(float elapsedSec)
 	}
 	else
 	{
-		// important for resetting animations between each other
-		static Movement lastMovementState{};
-		static Shoot lastShootState{};
-
-		bool stateChanged{ (m_CupheadMovementState != lastMovementState) ||
-			(m_CupheadShootingState != lastShootState) }; // very important!!! --- we use this boolean to reset all animations - we do this through Reset() in Animate.cpp
-
-		
 		if (m_CupheadMovementState == Movement::idle)
 		{
-			// default reseting between animations
-			if (stateChanged)
-			{
-				m_Animator.Reset(0);
-				lastMovementState = m_CupheadMovementState;
-				lastShootState = m_CupheadShootingState;
-			}
-
 			// jump animation plays if no button is pressed and in the air
 			if (!m_IsGrounded)
 			{
 				m_CurrentTexture = m_TextureJump;
 				m_CurrentColNr = 4;
 				m_CurrentRowNr = 2;
-				m_Animator.PlayAnimation(elapsedSec, m_MaxFrameSec - 0.01f, 8);
+				m_Animator.PlayAnimation(elapsedSec, m_MaxFrameSec - 0.01f);
 			}
 			else
 			{
@@ -523,27 +515,19 @@ void Cuphead::AnimateCuphead(float elapsedSec)
 				m_CurrentColNr = 5;
 				m_CurrentRowNr = 1;
 
-				m_Animator.ReverseAnimateBetween(elapsedSec, 0, 4, m_MaxFrameSec - 0.01f);
+				m_Animator.BounceBetween(elapsedSec, 0, 4, m_MaxFrameSec - 0.01f);
 			}
 			
 		}
 		else if (m_CupheadShootingState == Shoot::notShooting)
 		{
-			// default reseting between animations
-			if (stateChanged)
-			{
-				m_Animator.Reset(0);
-				lastMovementState = m_CupheadMovementState;
-				lastShootState = m_CupheadShootingState;
-			}
-
 			// jumping animation is played if character is moving in the air
 			if (!m_IsGrounded && m_CupheadMovementState != Movement::dash && m_CupheadMovementState != Movement::parry)
 			{
 				m_CurrentTexture = m_TextureJump;
 				m_CurrentColNr = 4;
 				m_CurrentRowNr = 2;
-				m_Animator.PlayAnimation(elapsedSec, m_MaxFrameSec - 0.01f, 8);
+				m_Animator.PlayAnimation(elapsedSec, m_MaxFrameSec - 0.01f);
 			}
 			else
 			{
@@ -575,21 +559,28 @@ void Cuphead::AnimateCuphead(float elapsedSec)
 					m_CurrentColNr = 4;
 					m_CurrentRowNr = 4;
 
-					m_Animator.LoopBetween(elapsedSec, 0, 7, m_MaxFrameSec - 0.01f);
+					if (!m_Parried)
+					{
+						m_Animator.AnimateBetweenFrames(elapsedSec, 0, 7, m_MaxFrameSec - 0.01f);
+					}
+					else
+					{
+						m_Animator.AnimateBetweenFrames(elapsedSec, 8, 15, m_MaxFrameSec - 0.01f);
+					}
 					break;
 				case Cuphead::Movement::dash:
 					m_CurrentTexture = m_TextureDash;
 					m_CurrentColNr = 4;
 					m_CurrentRowNr = 2;
 
-					m_Animator.LoopBetween(elapsedSec, 2, 6, m_MaxFrameSec);
+					m_Animator.AnimateBetweenFrames(elapsedSec, 2, 6, m_MaxFrameSec);
 					break;
 				case Cuphead::Movement::duck:
 					m_CurrentTexture = m_TextureDuck;
 					m_CurrentColNr = 4;
 					m_CurrentRowNr = 4;
 
-					m_Animator.LoopBetween(elapsedSec, 7, 14, m_MaxFrameSec);
+					m_Animator.AnimateBetweenFrames(elapsedSec, 7, 14, m_MaxFrameSec);
 					break;
 				}
 			}
@@ -605,8 +596,6 @@ void Cuphead::AnimateCuphead(float elapsedSec)
 			}
 			else if (m_CupheadMovementState == Movement::lock)
 			{
-				static int currentStartIdx{}; // static so it can track the starting index real time depending on the animation
-
 				m_CurrentTexture = m_TextureShoot;
 				m_CurrentColNr = 5;
 				m_CurrentRowNr = 5;
@@ -614,49 +603,33 @@ void Cuphead::AnimateCuphead(float elapsedSec)
 				switch (m_CupheadShootingState)
 				{
 				case Cuphead::Shoot::shootUp:
-					currentStartIdx = 0;
-					m_Animator.ReverseAnimateBetween(elapsedSec, 0, 4, m_MaxFrameSec + 0.01f);
+					frameToReset = 0;
+					m_Animator.BounceBetween(elapsedSec, 0, 4, m_MaxFrameSec + 0.01f);
 					break;
 				case Cuphead::Shoot::shootDiagonalUpRight:
-					currentStartIdx = 5;
-					m_Animator.ReverseAnimateBetween(elapsedSec, 5, 9, m_MaxFrameSec + 0.01f);
+					frameToReset = 5;
+					m_Animator.BounceBetween(elapsedSec, 5, 9, m_MaxFrameSec + 0.01f);
 					break;
 				case Cuphead::Shoot::shootRight:
-					currentStartIdx = 10;
-					m_Animator.ReverseAnimateBetween(elapsedSec, 10, 14, m_MaxFrameSec + 0.01f);
+					frameToReset = 10;
+					m_Animator.BounceBetween(elapsedSec, 10, 14, m_MaxFrameSec + 0.01f);
 					break;
 				case Cuphead::Shoot::shootDiagonalUpLeft:
-					currentStartIdx = 5;
-					m_Animator.ReverseAnimateBetween(elapsedSec, 5, 9, m_MaxFrameSec + 0.01f);
+					frameToReset = 5;
+					m_Animator.BounceBetween(elapsedSec, 5, 9, m_MaxFrameSec + 0.01f);
 					break;
 				case Cuphead::Shoot::shootLeft:
-					currentStartIdx = 10;
-					m_Animator.ReverseAnimateBetween(elapsedSec, 10, 14, m_MaxFrameSec + 0.01f);
+					frameToReset = 10;
+					m_Animator.BounceBetween(elapsedSec, 10, 14, m_MaxFrameSec + 0.01f);
 					break;
 				case Cuphead::Shoot::shootDown:
-					currentStartIdx = 20;
-					m_Animator.ReverseAnimateBetween(elapsedSec, 20, 24, m_MaxFrameSec + 0.01f);
+					frameToReset = 20;
+					m_Animator.BounceBetween(elapsedSec, 20, 24, m_MaxFrameSec + 0.01f);
 					break;
-				}
-
-				// reseting the animations to a unique index each time depending on the Shoot State
-				if (stateChanged)
-				{
-					m_Animator.Reset(currentStartIdx);
-					lastMovementState = m_CupheadMovementState;
-					lastShootState = m_CupheadShootingState;
 				}
 			}
 			else if (m_CupheadMovementState == Movement::runRight)
 			{
-				// default reseting
-				if (stateChanged)
-				{
-					m_Animator.Reset(0);
-					lastMovementState = m_CupheadMovementState;
-					lastShootState = m_CupheadShootingState;
-				}
-
 				if (m_CupheadShootingState == Shoot::shootDiagonalUpRight)
 				{
 					m_CurrentTexture = m_TextureRunShootDiagonal;
@@ -676,14 +649,6 @@ void Cuphead::AnimateCuphead(float elapsedSec)
 			}
 			else if (m_CupheadMovementState == Movement::runLeft)
 			{
-				// default reseting
-				if (stateChanged)
-				{
-					m_Animator.Reset(0);
-					lastMovementState = m_CupheadMovementState;
-					lastShootState = m_CupheadShootingState;
-				}
-
 				if (m_CupheadShootingState == Shoot::shootDiagonalUpLeft)
 				{
 					m_CurrentTexture = m_TextureRunShootDiagonal;
@@ -702,6 +667,12 @@ void Cuphead::AnimateCuphead(float elapsedSec)
 				}
 			}
 		}
+	}
+	if (stateChanged)
+	{
+		m_Animator.Reset(frameToReset);
+		lastMovementState = m_CupheadMovementState;
+		lastShootState = m_CupheadShootingState;
 	}
 }
 
@@ -851,11 +822,6 @@ int Cuphead::GetHealth() const // to check if isDead in Game.cpp in future
 	return m_HP;
 }
 
-bool Cuphead::IsShooting() const
-{
-	return m_CupheadShootingState != Shoot::notShooting;
-}
-
 bool Cuphead::IsParrying() const
 {
 	return m_CupheadMovementState == Movement::parry;
@@ -863,6 +829,7 @@ bool Cuphead::IsParrying() const
 
 void Cuphead::Parry()
 {
+	m_Parried = true;
 	m_Velocity = Vector2f{ 0.f, 700.f };
 }
 

@@ -15,16 +15,16 @@ public:
 	virtual void Animate(float elapsedSec) = 0;
 
 	virtual Rectf GetBounds() const = 0;
-	virtual bool Parryable() const = 0;
-	virtual Rectf GetParryHitbox() const = 0;
 
 	virtual void TakeDamage(int damage) = 0;
 	virtual int GetHealth() const = 0;
 
+	virtual bool MarkedForDeath() const = 0;
+
 protected:
 	Animator m_Animator;
 	Vector2f m_Positon;
-private:
-	
+
+	bool m_DeathMarker;
 };
 

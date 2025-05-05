@@ -7,6 +7,7 @@
 #include "Enemy.h"
 #include "Spike.h"
 #include "BigChomper.h"
+#include "Mushroom.h"
 #include "Tulip.h"
 #include "Projectile.h"
 
@@ -24,7 +25,14 @@ Game::Game(const Window& window)
 	m_SpikeSprite{ new Texture("Run'N'Gun/Sprite_Spike.png") },
 	m_TulipIdle{ new Texture("Run'N'Gun/Tulip/Sprite_Tulip_Idle.png") },
 	m_TulipAttack{ new Texture("Run'N'Gun/Tulip/Sprite_Tulip_Attack.png") },
-	m_TulipSeed{ new Texture("Run'N'Gun/Tulip/Sprite_Tulip_Seed.png") }
+	m_TulipSeed{ new Texture("Run'N'Gun/Tulip/Sprite_Tulip_Seed.png") },
+	m_TulipSeedExplosion{ new Texture("Run'N'Gun/Tulip/Sprite_Tulip_Explosion.png") },
+	m_MushroomIdle{ new Texture("Run'N'Gun/Mushroom/Sprite_Mushroom_Idle.png") },
+	m_MushroomAttack{ new Texture("Run'N'Gun/Mushroom/Sprite_Mushroom_Attack.png") },
+	m_MushroomPop{ new Texture("Run'N'Gun/Mushroom/Sprite_Mushroom_Pop.png") },
+	m_MushroomBoil{ new Texture("Run'N'Gun/Mushroom/Sprite_Mushroom_Boil.png") },
+	m_MushroomDeath{ new Texture("Run'N'Gun/Mushroom/Sprite_Mushroom_Death.png") },
+	m_MushroomCloud{ new Texture("Run'N'Gun/Mushroom/Sprite_Mushroom_Cloud.png") }
 {
 	Initialize();
 }
@@ -45,11 +53,14 @@ void Game::Initialize( )
 
 	m_EnemyManager.AddEnemy(new Spike(m_SpikeSprite, Vector2f{ 1700.f, 250.f }, Vector2f{ 500.f, 150.f }, Vector2f{ 500.f, 350.f }, 250.f));
 
-	m_EnemyManager.AddEnemy(new BigChomper(m_ChomperSprite, Vector2f{ 2200.f, (m_ChomperSprite->GetHeight() / 4) / 2 },
-		Vector2f{ 2200.f, -(m_ChomperSprite->GetHeight() / 4) * 1.5f }, Vector2f{ 2200.f, 450.f }, 600.f));
+	m_EnemyManager.AddEnemy(new BigChomper(m_ChomperSprite, Vector2f{ 2800.f, (m_ChomperSprite->GetHeight() / 4) / 2 },
+		Vector2f{ 2800.f, -(m_ChomperSprite->GetHeight() / 4) * 1.5f }, Vector2f{ 2800.f, 450.f }, 600.f));
 
-	m_EnemyManager.AddEnemy(new Tulip(m_TulipIdle, m_TulipAttack, m_TulipSeed, Vector2f{ 3850.f, 280.f }));
-	m_EnemyManager.AddEnemy(new Tulip(m_TulipIdle, m_TulipAttack, m_TulipSeed, Vector2f{ 1000.f, 170.f }));
+	m_EnemyManager.AddEnemy(new Tulip(m_TulipIdle, m_TulipAttack, m_TulipSeed, m_TulipSeedExplosion, Vector2f{ 3850.f, 280.f }));
+	m_EnemyManager.AddEnemy(new Tulip(m_TulipIdle, m_TulipAttack, m_TulipSeed, m_TulipSeedExplosion, Vector2f{ 1000.f, 170.f }, 5, 4, m_Camera.GetCuurentCameraBounds().width / 2));
+
+	m_EnemyManager.AddEnemy(new Mushroom(m_MushroomIdle, m_MushroomBoil, m_MushroomAttack, m_MushroomPop, m_MushroomDeath, m_MushroomCloud, Vector2f{ 2200.f, 170.f }, 
+		1, 1, m_Camera.GetCuurentCameraBounds().width / 2.5f));
 
 	m_Vertices.reserve(20);
 	m_Vertices.push_back(Vector2f{ 50.f, 170.f });
@@ -99,6 +110,22 @@ void Game::Cleanup( )
 	delete m_TulipSeed;
 	m_TulipSeed = nullptr;
 
+	delete m_TulipSeedExplosion;
+	m_TulipSeedExplosion = nullptr;
+
+	delete m_MushroomIdle;
+	m_MushroomIdle = nullptr;
+	delete m_MushroomAttack;
+	m_MushroomAttack = nullptr;
+	delete m_MushroomPop;
+	m_MushroomPop = nullptr;
+	delete m_MushroomBoil;
+	m_MushroomBoil = nullptr;
+	delete m_MushroomDeath;
+	m_MushroomDeath = nullptr;
+	delete m_MushroomCloud;
+	m_MushroomCloud = nullptr;
+
 	m_Vertices.clear();
 }
 
@@ -110,13 +137,21 @@ void Game::Update( float elapsedSec )
 	// updates cuphead and pushes projectiles to player BulletManager
 	m_Cuphead.Update(elapsedSec, pStates, m_Vertices, m_PlayerBulletManager);
 
+	m_PlayerBulletManager.AnimateActiveBullets(elapsedSec);
+
+	// animate enemy bullets even if player is dead
+	m_EnemyBulletManager.AnimateActiveBullets(elapsedSec);
+
+	// animate enemies even if player is dead
+	m_EnemyManager.AnimateEnemies(elapsedSec, m_Camera.GetCuurentCameraBounds());
+
 	// update enemies and enemy bullets if player is alive
 	if (m_Cuphead.GetHealth() > 0) 
 	{
 		// update enemies and pushes projectiles to enemy BulletManager
 		m_EnemyManager.UpdateEnemies(elapsedSec, m_Camera.GetCuurentCameraBounds(), m_EnemyBulletManager, m_Cuphead);
 	
-		m_EnemyBulletManager.UpdateActiveBullets(elapsedSec, m_Camera.GetCuurentCameraBounds(), m_Vertices);
+		m_EnemyBulletManager.UpdateActiveBullets(elapsedSec, m_Camera.GetCuurentCameraBounds(), m_Vertices, m_Cuphead);
 
 		// follow player if alive
 		m_Camera.Aim(12400.f, 760.f, m_Cuphead.GetPosition());
@@ -129,15 +164,7 @@ void Game::Update( float elapsedSec )
 	}
 	
 	// update and animate even if player is dead
-	m_PlayerBulletManager.UpdateActiveBullets(elapsedSec, m_Camera.GetCuurentCameraBounds(), m_Vertices);
-	m_PlayerBulletManager.AnimateActiveBullets(elapsedSec);
-
-	// animate enemy bullets even if player is dead
-	m_EnemyBulletManager.AnimateActiveBullets(elapsedSec);
-	
-	// animate enemies even if player is dead
-	m_EnemyManager.AnimateEnemies(elapsedSec, m_Camera.GetCuurentCameraBounds());
-
+	m_PlayerBulletManager.UpdateActiveBullets(elapsedSec, m_Camera.GetCuurentCameraBounds(), m_Vertices, m_Cuphead);
 
 	// delete player bullets if they collide with enemy
 	for (int j{}; j < m_EnemyManager.GetVectorSize(); ++j)
@@ -150,7 +177,7 @@ void Game::Update( float elapsedSec )
 				{
 					if (utils::IsOverlapping(m_EnemyManager[j]->GetBounds(), m_PlayerBulletManager[i]->GetHitbox()))
 					{
-						m_EnemyManager[j]->TakeDamage(m_PlayerBulletManager[i]->GetDamage());
+						m_EnemyManager[j]->TakeDamage(m_PlayerBulletManager[i]->Damage());
 						m_PlayerBulletManager.RemoveProjectile(i);
 					}
 				}
@@ -158,7 +185,7 @@ void Game::Update( float elapsedSec )
 		}
 	}
 
-	// deal damage to cuphead if player collides with enemy
+	// deal damage to cuphead by enemy collisions
 	for (int i{}; i < m_EnemyManager.GetVectorSize(); ++i)
 	{
 		if (m_EnemyManager[i] != nullptr)
@@ -170,6 +197,7 @@ void Game::Update( float elapsedSec )
 		}
 	}
 
+	// deal damage to cuphead by projectiles
 	for (int i{}; i < m_EnemyBulletManager.GetVectorSize(); ++i)
 	{
 		if (m_EnemyBulletManager[i] != nullptr)

@@ -43,8 +43,9 @@ void EnemyManager::UpdateEnemies(float elapsedSec, const Rectf& cameraBox, Bulle
 	{
 		if (m_EnemiesVector[i] != nullptr)
 		{
-			if (m_EnemiesVector[i]->GetHealth() <= 0)
+			if (m_EnemiesVector[i]->MarkedForDeath())
 			{
+
 				delete m_EnemiesVector[i];
 				m_EnemiesVector[i] = nullptr;
 			}
@@ -53,19 +54,6 @@ void EnemyManager::UpdateEnemies(float elapsedSec, const Rectf& cameraBox, Bulle
 				if (std::abs(m_EnemiesVector[i]->GetBounds().left - cameraBox.left) <= cameraBox.width * 1.5f)
 				{
 					m_EnemiesVector[i]->Update(elapsedSec, bulletManager, cuphead);
-				}
-
-				if (m_EnemiesVector[i]->Parryable())
-				{
-					if (cuphead.IsParrying())
-					{
-						if (utils::IsOverlapping(m_EnemiesVector[i]->GetParryHitbox(), cuphead.GetBounds()))
-						{
-							cuphead.Parry();
-							delete m_EnemiesVector[i];
-							m_EnemiesVector[i] = nullptr;
-						}
-					}
 				}
 			}
 		}

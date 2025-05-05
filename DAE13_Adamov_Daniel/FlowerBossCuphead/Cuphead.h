@@ -20,18 +20,17 @@ public:
 	void StartDash();
 	void ToggleParryState();
 
-	void Hit();
+	void Hit(); // taking damage
 
-	int GetHealth() const;
-	bool IsShooting() const;
-	bool IsParrying() const;
+	int GetHealth() const; // used for UI
+	bool IsParrying() const; // used to parry in other classes
 
-	void Parry();
+	void Parry(); // actual parry
 
 	Vector2f GetPosition() const;
 	Rectf GetBounds() const;
 
-	Vector2f GetPlaceOfDeath() const;
+	Vector2f GetPlaceOfDeath() const; // for camera reset
 	
 private:
 	enum class Movement
@@ -98,6 +97,7 @@ private:
 	float m_FacingAngle;
 
 	Vector2f m_PlaceOfHit;
+	bool m_Parried;
 
 	const Texture* m_TexturePeaShooter;
 	const Texture* m_TextureSpecialPeaShooter;

@@ -2,6 +2,7 @@
 #include "Spike.h"
 #include "Texture.h"
 #include "utils.h"
+#include "Cuphead.h"
 
 Spike::Spike(const Texture* spriteTexture, const Vector2f& pos, const Vector2f& lowestPoint, const Vector2f& highestPoint, float speed)
 	:Enemy(pos),
@@ -35,11 +36,20 @@ void Spike::Draw() const
 void Spike::Update(float elapsedSec, BulletManager& bulletManager, Cuphead& cuphead)
 {
 	Bounce(elapsedSec);
+
+	if (cuphead.IsParrying())
+	{
+		if (utils::IsOverlapping(GetParryHitbox(), cuphead.GetBounds()))
+		{
+			cuphead.Parry();
+			m_DeathMarker = true;
+		}
+	}
 }
 
 void Spike::Animate(float elapsedSec)
 {
-	m_Animator.ReverseAnimateBetween(elapsedSec, 0, 5, 0.09f);
+	m_Animator.BounceBetween(elapsedSec, 0, 5, 0.09f);
 }
 
 Rectf Spike::GetBounds() const
@@ -52,11 +62,6 @@ Rectf Spike::GetParryHitbox() const
 	return Rectf{ this->GetBounds().left - m_FrameWidth * 0.75f, this->GetBounds().bottom - m_FrameHeight * 0.75f, m_FrameWidth * 2.5f, m_FrameHeight * 2.5f};
 }
 
-bool Spike::Parryable() const
-{
-	return true;
-}
-
 void Spike::TakeDamage(int damage)
 {
 }
@@ -64,6 +69,11 @@ void Spike::TakeDamage(int damage)
 int Spike::GetHealth() const
 {
 	return 1;
+}
+
+bool Spike::MarkedForDeath() const
+{
+	return m_DeathMarker;
 }
 
 void Spike::Bounce(float elapsedSec)

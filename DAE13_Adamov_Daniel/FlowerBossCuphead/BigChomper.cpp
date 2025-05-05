@@ -40,22 +40,22 @@ void BigChomper::Animate(float elapsedSec)
 	{
 		if (m_Positon.y <= m_HighestPoint.y - 300.f)
 		{
-			m_Animator.LoopBetween(elapsedSec, 0, 8, 0.07f);
+			m_Animator.AnimateBetweenFrames(elapsedSec, 0, 8, 0.07f);
 		}
 		else
 		{
-			m_Animator.LoopBetween(elapsedSec, 9, 11, 0.07f);
+			m_Animator.AnimateBetweenFrames(elapsedSec, 9, 11, 0.07f);
 		}
 	}
 	else
 	{
 		if (m_Positon.y >= m_HighestPoint.y - 200.f)
 		{
-			m_Animator.LoopBetween(elapsedSec, 12, 15, 0.08f);
+			m_Animator.AnimateBetweenFrames(elapsedSec, 12, 15, 0.08f);
 		}
 		else
 		{
-			m_Animator.LoopBetween(elapsedSec, 16, 19, 0.09f);
+			m_Animator.AnimateBetweenFrames(elapsedSec, 16, 19, 0.09f);
 		}
 	}
 }
@@ -69,16 +69,6 @@ Rectf BigChomper::GetBounds() const
 	return Rectf(m_Positon.x - frameWidth / 2, m_Positon.y - frameHeight / 2, frameWidth, frameHeight);
 }
 
-bool BigChomper::Parryable() const
-{
-	return false;
-}
-
-Rectf BigChomper::GetParryHitbox() const
-{
-	return Rectf();
-}
-
 void BigChomper::TakeDamage(int damage)
 {
 }
@@ -86,4 +76,9 @@ void BigChomper::TakeDamage(int damage)
 int BigChomper::GetHealth() const
 {
 	return 1;
+}
+
+bool BigChomper::MarkedForDeath() const
+{
+	return m_DeathMarker;
 }

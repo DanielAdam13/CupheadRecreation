@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 class Projectile;
+class Cuphead;
 
 class BulletManager
 {
@@ -13,7 +14,7 @@ public:
 	~BulletManager();
 
 	void DrawActiveBullets() const;
-	void UpdateActiveBullets(float elapsedSec, const Rectf& cameraBox, const std::vector<Vector2f>& vertices);
+	void UpdateActiveBullets(float elapsedSec, const Rectf& cameraBox, const std::vector<Vector2f>& vertices, Cuphead& cuphead);
 	void AnimateActiveBullets(float elapsedSec);
 
 	void AddProjectile(Projectile* projectile);
@@ -21,7 +22,7 @@ public:
 
 	size_t GetVectorSize() const;
 	
-	void RemoveProjectile(int index);
+	void RemoveProjectile(int index);;
 
 private:
 	std::vector<Projectile*> m_Projectiles;

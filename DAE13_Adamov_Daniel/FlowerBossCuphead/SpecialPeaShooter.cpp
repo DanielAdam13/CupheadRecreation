@@ -13,7 +13,7 @@ void SpecialPeaShooter::Draw() const
 {
 }
 
-void SpecialPeaShooter::Update(float elapsedSec)
+void SpecialPeaShooter::Update(float elapsedSec, const std::vector<Vector2f>& vertices, BulletManager& bulletManager, Cuphead& cuphead)
 {
 }
 
@@ -31,22 +31,12 @@ Circlef SpecialPeaShooter::GetHitbox() const
 	return Circlef();
 }
 
-bool SpecialPeaShooter::Parryable() const
-{
-	return false;
-}
-
-int SpecialPeaShooter::GetDamage() const
+int SpecialPeaShooter::Damage() const
 {
 	return m_Damage;
 }
 
-bool SpecialPeaShooter::DissapearOnGroundImpact()
-{
-	return false;
-}
-
 bool SpecialPeaShooter::MarkedForDeletion() const
 {
-	return false;
+	return m_DeleteMarker;
 }

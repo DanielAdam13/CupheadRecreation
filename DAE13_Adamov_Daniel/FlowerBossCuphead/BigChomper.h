@@ -14,11 +14,11 @@ public:
 	virtual void Animate(float elapsedSec) override;
 
 	virtual Rectf GetBounds() const override;
-	virtual bool Parryable() const override;
-	virtual Rectf GetParryHitbox() const override;
 
 	virtual void TakeDamage(int damage) override;
 	virtual int GetHealth() const override;
+
+	virtual bool MarkedForDeath() const override;
 
 private:
 	const int m_SpriteRowNr;

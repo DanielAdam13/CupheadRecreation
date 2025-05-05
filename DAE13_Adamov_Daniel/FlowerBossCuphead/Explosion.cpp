@@ -2,71 +2,61 @@
 #include "Explosion.h"
 #include "Texture.h"
 #include "utils.h"
-#include <iostream>
 
 Explosion::Explosion(const Texture* sprite, const Vector2f& pos)
 	:Projectile::Projectile(sprite, pos, pos, 0, 0, 0),
 	m_FrameWidth{sprite->GetWidth() / 5},
 	m_FrameHeight{sprite->GetHeight() / 4},
 	m_AccuSec{ 0.f },
-	m_Duration{ 1.5f },
-	m_Animator{},
-	m_DeleteMarker{ false }
+	m_Duration{ 0.95f },
+	m_Animator{}
 {
-	std::cout << "Created Explosion" << std::endl;
 }
 
 void Explosion::Draw() const
 {
 	Rectf srcRect{ 0.f + (m_Animator.GetCurrentFrameNr() % 5) * m_FrameWidth,
-		0.f + (m_Animator.GetCurrentFrameNr() / 5) * m_FrameHeight, m_FrameHeight, m_FrameHeight };
+		0.f + (m_Animator.GetCurrentFrameNr() / 5) * m_FrameHeight, m_FrameWidth, m_FrameHeight };
 
-	m_Texture->Draw(m_Position, srcRect);
+	m_Texture->Draw(GetBounds(), srcRect);
 	
 	// Hitbox
 	utils::SetColor(Color4f{ 1,0,0,1 });
 	utils::DrawRect(GetBounds());
+	utils::FillEllipse(m_Position, 15.f, 15.f);
+
+	utils::SetColor(Color4f{ 1,0,1,1 });
+	utils::DrawEllipse(Ellipsef{ GetHitbox().center, GetHitbox().radius, GetHitbox().radius});
 }
 
-void Explosion::Update(float elapsedSec)
+void Explosion::Update(float elapsedSec, const std::vector<Vector2f>& vertices, BulletManager& bulletManager, Cuphead& cuphead)
 {
 	m_AccuSec += elapsedSec;
 	if (m_AccuSec >= m_Duration)
 	{
 		m_DeleteMarker = true;
-		std::cout << "Should delete explosion" << std::endl;
 		m_AccuSec -= m_Duration;
 	}
 }
 
 void Explosion::Animate(float elapsedSec)
 {
-	m_Animator.PlayAnimation(elapsedSec, 0.07f, 19);
+	m_Animator.PlayAnimation(elapsedSec, 0.05f, 19);
 }
 
 Rectf Explosion::GetBounds() const
 {
-	return Rectf(m_Position.x - m_FrameWidth / 2, m_Position.y, m_FrameWidth, m_FrameHeight);
+	return Rectf(m_Position.x - m_FrameWidth * 0.5f / 2, m_Position.y, m_FrameWidth * 0.5f, m_FrameHeight * 0.5f);
 }
 
 Circlef Explosion::GetHitbox() const
 {
-	return Circlef();
+	return Circlef(m_Position.x, m_Position.y + GetBounds().height / 2, 45.f);
 }
 
-bool Explosion::Parryable() const
-{
-	return false;
-}
-
-int Explosion::GetDamage() const
+int Explosion::Damage() const
 {
 	return m_Damage;
-}
-
-bool Explosion::DissapearOnGroundImpact()
-{
-	return false;
 }
 
 bool Explosion::MarkedForDeletion() const

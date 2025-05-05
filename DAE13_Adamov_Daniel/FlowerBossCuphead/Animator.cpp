@@ -13,7 +13,7 @@ void Animator::PlayAnimation(const float elapsedSec, const float maxFrameSec)
 {
 	m_AccuSec += elapsedSec;
 
-	if (m_AccuSec > maxFrameSec)
+	if (m_AccuSec >= maxFrameSec)
 	{
 		m_FrameNr++;
 		m_AccuSec -= maxFrameSec;
@@ -24,14 +24,30 @@ void Animator::PlayAnimation(const float elapsedSec, const float maxFrameSec, co
 {
 	m_AccuSec += elapsedSec;
 
-	if (m_AccuSec > maxFrameSec)
+	if (m_AccuSec >= maxFrameSec)
 	{
 		m_FrameNr++;
 		m_AccuSec -= maxFrameSec;
 	}
 }
 
-void Animator::LoopBetween(const float elapsedSec, int firstFrame, int lastFrame, float maxFrameSec, const float duration)
+void Animator::ReverseAnimate(const float elapsedSec, int lastFrame, float maxFrameSec)
+{
+	m_AccuSec += elapsedSec;
+
+	if (m_AccuSec >= maxFrameSec)
+	{
+		m_FrameNr--;
+		m_AccuSec -= maxFrameSec;
+	}
+
+	if (m_FrameNr <= 0)
+	{
+		m_FrameNr = 0;
+	}
+}
+
+void Animator::AnimateBetweenFrames(const float elapsedSec, int firstFrame, int lastFrame, float maxFrameSec, const float duration)
 {
 	m_AccuSec += elapsedSec;
 
@@ -58,7 +74,7 @@ void Animator::LoopBetween(const float elapsedSec, int firstFrame, int lastFrame
 	}
 }
 
-void Animator::LoopBetween(const float elapsedSec, int firstFrame, int lastFrame, float maxFrameSec)
+void Animator::AnimateBetweenFrames(const float elapsedSec, int firstFrame, int lastFrame, float maxFrameSec)
 {
 	m_AccuSec += elapsedSec;
 
@@ -83,7 +99,7 @@ void Animator::SkipFrame(int frameToSkip)
 	}
 }
 
-void Animator::ReverseAnimateBetween(const float elapsedSec, int firstFrame, int lastFrame, const float maxFrameSec)
+void Animator::BounceBetween(const float elapsedSec, int firstFrame, int lastFrame, const float maxFrameSec)
 {
 	m_AccuSec += elapsedSec;
 	

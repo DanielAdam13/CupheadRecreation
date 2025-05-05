@@ -1,7 +1,6 @@
 #pragma once
 #include "Enemy.h"
 class Texture;
-
 class BulletManager; // not used
 class Cuphead;
 
@@ -15,11 +14,11 @@ public:
 	virtual void Animate(float elapsedSec) override;
 
 	virtual Rectf GetBounds() const override;
-	virtual Rectf GetParryHitbox() const override;
-	virtual bool Parryable() const override;
 
 	virtual void TakeDamage(int damage) override;
 	virtual int GetHealth() const override;
+
+	virtual bool MarkedForDeath() const override;
 
 protected:
 	const Vector2f m_LowestPoint;
@@ -30,7 +29,8 @@ protected:
 
 	void Bounce(float elapsedSec);
 private:
-	
+
+	Rectf GetParryHitbox() const;
 	const int m_SpriteRowNr;
 	const int m_SpriteColNr;
 

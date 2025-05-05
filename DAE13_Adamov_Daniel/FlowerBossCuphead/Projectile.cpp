@@ -9,8 +9,9 @@ Projectile::Projectile(const Texture* sprite, const Vector2f& spawnPos, const Ve
 	m_ShootDirection{ cosf(directionAngle * utils::g_Pi / 180.f), sinf(directionAngle * utils::g_Pi / 180.f) },
 	m_DirectionAngle{ directionAngle },
 	m_Damage{ damage },
-	m_ProjAnimator{},
+	m_Animator{},
 	m_Texture{ sprite },
-	m_Speed{ speed }
+	m_Speed{ speed },
+	m_DeleteMarker{ false }
 {
 }

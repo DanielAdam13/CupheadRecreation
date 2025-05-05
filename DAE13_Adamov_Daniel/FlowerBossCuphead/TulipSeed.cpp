@@ -1,19 +1,20 @@
 #include "pch.h"
 #include "TulipSeed.h"
 #include "utils.h"
-#include <iostream>
 #include "Texture.h"
+#include "BulletManager.h"
+#include "Explosion.h"
 
-TulipSeed::TulipSeed(const Texture* sprite, const Vector2f& spawnPos, const Vector2f& playerPos, float directionAngle, float speed, int damage)
+TulipSeed::TulipSeed(const Texture* sprite, const Texture* explosion, const Vector2f& spawnPos, const Vector2f& playerPos, float directionAngle, float speed, int damage)
 	:Projectile::Projectile(sprite, spawnPos, playerPos, directionAngle, speed, damage),
+	m_ExplosionTexture{ explosion },
 	m_InitialPlayerPoint{ playerPos },
-	m_StartPoint{ spawnPos },
+	m_StartPoint{ m_Position },
 	m_ControlPoint{ (spawnPos + m_InitialPlayerPoint) / 2 + Vector2f{0.f, 800.f} },
-	m_Duration{ 1.5f },
+	m_BezierDuration{ 1.5f },
 	m_AccuSec{ 0.f },
 	m_DelayAccuSec{ 0.f }
 {
-	std::cout << "CREATED Tulip Seed" << std::endl;
 }
 
 void TulipSeed::Draw() const
@@ -33,17 +34,19 @@ void TulipSeed::Draw() const
 	}
 }
 
-void TulipSeed::Update(float elapsedSec) // Moving seed by bezier curve
+void TulipSeed::Update(float elapsedSec, const std::vector<Vector2f>& vertices, BulletManager& bulletManager, Cuphead& cuphead) // Moving seed by bezier curve
 {
 	m_DelayAccuSec += elapsedSec;
 
 	if (m_DelayAccuSec > 0.5f)
 	{
 		m_AccuSec += elapsedSec;
-		const float t{ m_AccuSec / m_Duration };
+		const float t{ m_AccuSec / m_BezierDuration };
 
 		m_Position = CalculateBezierPoint(t);
 	}
+
+	DissapearOnGroundImpact(vertices, bulletManager);
 }
 
 void TulipSeed::Animate(float elapsedSec)
@@ -66,24 +69,14 @@ Circlef TulipSeed::GetHitbox() const
 	return Circlef(m_Position, 30.f);
 }
 
-bool TulipSeed::Parryable() const
-{
-	return false;
-}
-
-int TulipSeed::GetDamage() const
+int TulipSeed::Damage() const
 {
 	return m_Damage;
 }
 
-bool TulipSeed::DissapearOnGroundImpact()
-{
-	return true;
-}
-
 bool TulipSeed::MarkedForDeletion() const
 {
-	return false;
+	return m_DeleteMarker;
 }
 
 Vector2f TulipSeed::CalculateBezierPoint(float t) const // Formula for bezier curve by 3 points!
@@ -91,4 +84,18 @@ Vector2f TulipSeed::CalculateBezierPoint(float t) const // Formula for bezier cu
 	const float u = 1 - t;
 	return Vector2f{ u * u * m_StartPoint.x + 2 * u * t * m_ControlPoint.x + t * t * m_InitialPlayerPoint.x,
 	u * u * m_StartPoint.y + 2 * u * t * m_ControlPoint.y + t * t * m_InitialPlayerPoint.y };
+}
+
+void TulipSeed::DissapearOnGroundImpact(const std::vector<Vector2f>& vertices, BulletManager& bulletManager)
+{
+	utils::HitInfo hitInfo;
+	Vector2f first{ this->GetHitbox().center.x,this->GetHitbox().center.y };
+	Vector2f second{ this->GetHitbox().center.x, this->GetHitbox().center.y + this->GetHitbox().radius };
+
+	if (utils::Raycast(vertices, first, second, hitInfo))
+	{
+		bulletManager.AddProjectile(new Explosion(m_ExplosionTexture, hitInfo.intersectPoint));
+
+		m_DeleteMarker = true;
+	}
 }
