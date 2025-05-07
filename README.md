@@ -7,7 +7,7 @@
   <h2 align="center">CUPHEAD</h2>
   
   <p align="center">
-   Cuphead is a classic run and gun action game heavily focused on boss battles. Inspired by cartoons of the 1930s, the visuals and audio are painstakingly created with the same techniques of the era
+   Cuphead is a classic run and gun action game heavily focused on boss battles. Inspired by cartoons of the 1930s, the visuals and audio are painstakingly created with the same techniques of the era.
     <br />
     <strong>Original game : </strong>
     <a href="https://cuphead.fandom.com/wiki/Cuphead_(video_game)"><strong>General info »</strong></a>
@@ -51,7 +51,7 @@
 
 Here's why:
 * Cuphead is a beloved game of mine
-* Speaking about the assignment, I figured cuphead would be a great choice to recreate since it uses camera movement a lot and has a lot of potential with enemy classes, all having different interactions.
+* I figured cuphead would be a great choice to recreate since it uses camera movement and has a lot of potential with enemy classes, all having different interactions.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

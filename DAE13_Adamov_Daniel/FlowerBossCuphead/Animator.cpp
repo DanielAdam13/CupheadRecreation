@@ -9,7 +9,7 @@ Animator::Animator()
 {
 }
 
-void Animator::PlayAnimation(const float elapsedSec, const float maxFrameSec)
+void Animator::PlayAnimation(float elapsedSec, float maxFrameSec)
 {
 	m_AccuSec += elapsedSec;
 
@@ -20,7 +20,7 @@ void Animator::PlayAnimation(const float elapsedSec, const float maxFrameSec)
 	}
 }
 
-void Animator::PlayAnimation(const float elapsedSec, const float maxFrameSec, const int frameToReset)
+void Animator::PlayAnimation(float elapsedSec, float maxFrameSec, int frameToReset)
 {
 	m_AccuSec += elapsedSec;
 
@@ -31,7 +31,7 @@ void Animator::PlayAnimation(const float elapsedSec, const float maxFrameSec, co
 	}
 }
 
-void Animator::ReverseAnimate(const float elapsedSec, int lastFrame, float maxFrameSec)
+void Animator::ReverseAnimate(float elapsedSec, int lastFrame, float maxFrameSec)
 {
 	m_AccuSec += elapsedSec;
 
@@ -47,7 +47,7 @@ void Animator::ReverseAnimate(const float elapsedSec, int lastFrame, float maxFr
 	}
 }
 
-void Animator::AnimateBetweenFrames(const float elapsedSec, int firstFrame, int lastFrame, float maxFrameSec, const float duration)
+void Animator::AnimateBetweenFrames(float elapsedSec, int firstFrame, int lastFrame, float maxFrameSec, float duration)
 {
 	m_AccuSec += elapsedSec;
 
@@ -74,7 +74,7 @@ void Animator::AnimateBetweenFrames(const float elapsedSec, int firstFrame, int 
 	}
 }
 
-void Animator::AnimateBetweenFrames(const float elapsedSec, int firstFrame, int lastFrame, float maxFrameSec)
+void Animator::AnimateBetweenFrames(float elapsedSec, int firstFrame, int lastFrame, float maxFrameSec)
 {
 	m_AccuSec += elapsedSec;
 
@@ -99,7 +99,7 @@ void Animator::SkipFrame(int frameToSkip)
 	}
 }
 
-void Animator::BounceBetween(const float elapsedSec, int firstFrame, int lastFrame, const float maxFrameSec)
+void Animator::BounceBetween(float elapsedSec, int firstFrame, int lastFrame, float maxFrameSec)
 {
 	m_AccuSec += elapsedSec;
 	

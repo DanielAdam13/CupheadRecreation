@@ -4,10 +4,10 @@
 #include "utils.h"
 #include <iostream>
 
-PeaShooter::PeaShooter(const Texture* sprite, const Vector2f& spawnPos, const Vector2f& playerPos, float directionAngle, float speed, int damage)
+PeaShooter::PeaShooter(const Texture* sprite, const Vector2f& spawnPos, const Vector2f& playerPos, float directionAngle, float speed, int damage, int colNr, int rowNr)
 	: Projectile::Projectile(sprite, spawnPos, playerPos, directionAngle, speed, damage),
-	m_FrameWidth{m_Texture->GetWidth() / 4},
-	m_FrameHeight{m_Texture->GetHeight() / 2}
+	m_FrameWidth{m_Texture->GetWidth() / colNr},
+	m_FrameHeight{m_Texture->GetHeight() / rowNr}
 {
 	std::cout << "CREATED PeaShooter with direction: " << directionAngle << std::endl;
 }
@@ -25,7 +25,7 @@ void PeaShooter::Draw() const
 	glPopMatrix();
 
 	utils::SetColor(Color4f{ 1,0,0,1 });
-	utils::DrawEllipse(GetHitbox().center, 15.f, 15.f);
+	utils::DrawEllipse(GetHitbox().center, GetHitbox().radius, GetHitbox().radius);
 }
 
 void PeaShooter::Update(float elapsedSec, const std::vector<Vector2f>& vertices, BulletManager& bulletManager, Cuphead& cuphead)
@@ -45,7 +45,7 @@ Rectf PeaShooter::GetBounds() const
 
 Circlef PeaShooter::GetHitbox() const
 {
-	return Circlef(Vector2f{m_Position.x + m_ShootDirection.x * 20.f, m_Position.y + m_ShootDirection.y * 20.f}, 15.f);
+	return Circlef(Vector2f{m_Position.x + m_ShootDirection.x * 25.f, m_Position.y + m_ShootDirection.y * 25.f}, m_FrameWidth / 8);
 }
 
 int PeaShooter::Damage() const

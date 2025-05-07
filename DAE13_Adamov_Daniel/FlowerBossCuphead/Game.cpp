@@ -13,7 +13,6 @@
 
 Game::Game(const Window& window)
 	:BaseGame{ window },
-	m_Cuphead{ Vector2f{GetViewPort().width / 2, 100.f}, true, 3 },
 	m_Vertices{},
 	m_ForestBackground1{ new Texture("ForestFollies_Background_First.png") },
 	m_ForectBackground2{ new Texture("ForestFollies_Background_Second.png") },
@@ -21,12 +20,15 @@ Game::Game(const Window& window)
 	m_EnemyManager{},
 	m_PlayerBulletManager{},
 	m_EnemyBulletManager{},
-	m_ChomperSprite{ new Texture("Run'N'Gun/Sprite_Chomper.png") },
+	m_PeaShooterSprite{ new Texture("Projectile_Loop.png") },
+	m_PeaSpecialSprite{ new Texture("Projectile_Special_Loop.png") },
+	m_Cuphead{ Vector2f{GetViewPort().width / 2, 100.f}, true, 3, m_PeaShooterSprite, m_PeaSpecialSprite },
 	m_SpikeSprite{ new Texture("Run'N'Gun/Sprite_Spike.png") },
+	m_ChomperSprite{ new Texture("Run'N'Gun/Sprite_Chomper.png") },
 	m_TulipIdle{ new Texture("Run'N'Gun/Tulip/Sprite_Tulip_Idle.png") },
 	m_TulipAttack{ new Texture("Run'N'Gun/Tulip/Sprite_Tulip_Attack.png") },
 	m_TulipSeed{ new Texture("Run'N'Gun/Tulip/Sprite_Tulip_Seed.png") },
-	m_TulipSeedExplosion{ new Texture("Run'N'Gun/Tulip/Sprite_Tulip_Explosion.png") },
+	m_TulipSeedExplosion{ new Texture("Run'N'Gun/Tulip/Sprite_Tulip_Explosion.png") }, // ~25 mb memory?
 	m_MushroomIdle{ new Texture("Run'N'Gun/Mushroom/Sprite_Mushroom_Idle.png") },
 	m_MushroomAttack{ new Texture("Run'N'Gun/Mushroom/Sprite_Mushroom_Attack.png") },
 	m_MushroomPop{ new Texture("Run'N'Gun/Mushroom/Sprite_Mushroom_Pop.png") },
@@ -95,6 +97,11 @@ void Game::Cleanup( )
 	delete m_ForectBackground2;
 	m_ForectBackground2 = nullptr;
 
+	delete m_PeaShooterSprite;
+	m_PeaShooterSprite = nullptr;
+	delete m_PeaSpecialSprite;
+	m_PeaSpecialSprite = nullptr;
+
 	delete m_SpikeSprite;
 	m_SpikeSprite = nullptr;
 
@@ -103,13 +110,10 @@ void Game::Cleanup( )
 
 	delete m_TulipAttack;
 	m_TulipAttack = nullptr;
-
 	delete m_TulipIdle;
 	m_TulipIdle = nullptr;
-
 	delete m_TulipSeed;
 	m_TulipSeed = nullptr;
-
 	delete m_TulipSeedExplosion;
 	m_TulipSeedExplosion = nullptr;
 

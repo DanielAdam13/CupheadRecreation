@@ -30,7 +30,6 @@ public:
 
 private:
 	// VARIABLES
-	Cuphead m_Cuphead;
 	std::vector<Vector2f> m_Vertices;
 	Texture* m_ForestBackground1;
 	Texture* m_ForectBackground2;
@@ -40,6 +39,10 @@ private:
 	EnemyManager m_EnemyManager;
 	BulletManager m_PlayerBulletManager;
 	BulletManager m_EnemyBulletManager;
+
+	const Texture* m_PeaShooterSprite;
+	const Texture* m_PeaSpecialSprite;
+	Cuphead m_Cuphead;
 
 	const Texture* m_SpikeSprite;
 	const Texture* m_ChomperSprite;

@@ -7,7 +7,7 @@ class BulletManager;
 class Cuphead final
 {
 public:
-	explicit Cuphead(const Vector2f& position, bool playIntro, int hp);
+	explicit Cuphead(const Vector2f& position, bool playIntro, int hp, const Texture* peaShooter, const Texture* peaSpecial);
 	Cuphead(const Cuphead& character) = delete; // deleted because too much work to be honest + I don't need them for now
 	Cuphead& operator=(const Cuphead& rhs) = delete;
 	Cuphead(Cuphead&& character) = delete;
@@ -63,17 +63,21 @@ private:
 
 	//MEMBER VARIABLES
 	Vector2f m_Position;
-	static float m_FrameWidth;
-	static float m_FrameHeight;
 	int m_HP;
 	bool m_IsAlive;
+	float m_FrameWidth;
+	float m_FrameHeight;
 
 	bool m_PlayingIntro;
 
 	Movement m_CupheadMovementState;
 	Shoot m_CupheadShootingState;
 
+	Movement m_LastMovementState;
+	Shoot m_LastShootState;
+
 	bool m_KeyPressed;
+	int m_FrameToResetAnimation;
 
 	float m_ShootAngle;
 
@@ -89,12 +93,14 @@ private:
 
 	const float m_MaxFrameSec;
 
-	Texture* m_CurrentTexture;
+	const Texture* m_CurrentTexture;
 	int m_CurrentColNr;
 	int m_CurrentRowNr;
 
 	Vector2f m_Velocity;
 	float m_FacingAngle;
+	bool m_SpecialAllowed;
+	bool m_FiringSpecial;
 
 	Vector2f m_PlaceOfHit;
 	bool m_Parried;
@@ -104,6 +110,7 @@ private:
 
 	Texture* m_TextureDash;
 	Texture* m_TextureShoot;
+	Texture* m_TextureShootSpecial;
 	Texture* m_TextureDeath;
 	Texture* m_TextureDuck;
 	Texture* m_TextureGhost;
@@ -115,23 +122,23 @@ private:
 	Texture* m_TextureRun;
 	Texture* m_TextureRunShootDiagonal;
 	Texture* m_TextureRunShootStraight;
-	Texture* m_TextureSpecialAttack;
 
 	Animator m_Animator;
 
 	// MEMBER FUNCTIONS
 	void ProcessKeys(const Uint8* pStates);
 	void AnimateCuphead(float elapsedSec);
+	void ResetAnimation(int frameToReset);
 	void HandleRaycast(float elapsedSec, const std::vector<Vector2f>& vertices);
 	void Dash(float elapsedSec);
-	void CreateProjectiles(float elapsedSec, BulletManager& bulletManager) const;
+	void CreateProjectiles(float elapsedSec, BulletManager& bulletManager);
 
 	void UpdateFacingDirection(const Uint8* pStates);
 	void ResetParry();
 
 	void TakeDamage(float elapsedSec);
 	void SetDeath();
-
+	
 	void IntializeTextures();
 	void DeleteTextures();
 };

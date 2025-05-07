@@ -173,7 +173,6 @@ xcopy "$(SolutionDir)Resources\*.*" "$(TargetDir)" /y /d /s</Command>
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="PeaShooter.cpp" />
     <ClCompile Include="Projectile.cpp" />
-    <ClCompile Include="SpecialPeaShooter.cpp" />
     <ClCompile Include="Spike.cpp" />
     <ClCompile Include="Tulip.cpp" />
     <ClCompile Include="TulipSeed.cpp" />
@@ -193,7 +192,6 @@ xcopy "$(SolutionDir)Resources\*.*" "$(TargetDir)" /y /d /s</Command>
     <ClInclude Include="pch.h" />
     <ClInclude Include="PeaShooter.h" />
     <ClInclude Include="Projectile.h" />
-    <ClInclude Include="SpecialPeaShooter.h" />
     <ClInclude Include="Spike.h" />
     <ClInclude Include="Tulip.h" />
     <ClInclude Include="TulipSeed.h" />

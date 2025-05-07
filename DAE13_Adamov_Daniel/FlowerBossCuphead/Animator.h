@@ -4,13 +4,13 @@ class Animator
 public:
 	explicit Animator();
 
-	void PlayAnimation(const float elapsedSec, const float maxFrameSec);
-	void PlayAnimation(const float elapsedSec, const float maxFrameSec, const int frameToReset);
-	void ReverseAnimate(const float elapsedSec, int lastFrame, float maxFrameSec);
-	void AnimateBetweenFrames(const float elapsedSec, int firstFrame, int lastFrame, float maxFrameSec, const float duration);
-	void AnimateBetweenFrames(const float elapsedSec, int firstFrame, int lastFrame, float maxFrameSec);
+	void PlayAnimation(float elapsedSec, float maxFrameSec);
+	void PlayAnimation(float elapsedSec, float maxFrameSec, int frameToReset);
+	void ReverseAnimate(float elapsedSec, int lastFrame, float maxFrameSec);
+	void AnimateBetweenFrames(float elapsedSec, int firstFrame, int lastFrame, float maxFrameSec, float duration);
+	void AnimateBetweenFrames(float elapsedSec, int firstFrame, int lastFrame, float maxFrameSec);
 	void SkipFrame(int frameToSkip);
-	void BounceBetween(const float elapsedSec, int firstFrame, int lastFrame, const float maxFrameSec);
+	void BounceBetween(float elapsedSec, int firstFrame, int lastFrame, float maxFrameSec);
 	void Reset(int frameToReset = 0);
 	void Stop();
 
