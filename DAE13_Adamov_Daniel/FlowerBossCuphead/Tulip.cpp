@@ -6,6 +6,7 @@
 #include "utils.h"
 #include <iostream>
 #include "TulipSeed.h"
+#include <cassert>
 
 Tulip::Tulip(const Texture* idleTexture, const Texture* attackTexture, const Texture* seed, const Texture* explosion, const Vector2f& pos,
 	int colNr, int rowNr, float range)
@@ -98,6 +99,8 @@ void Tulip::Animate(float elapsedSec)
 		m_Animator.BounceBetween(elapsedSec, 0, 14, 0.075f);
 		break;
 	}
+
+	assert(("Enemy Texture not set properly -> resulting in a nullptr.", m_CurrentTexture != nullptr));
 	m_CurrentFrameWidth = m_CurrentTexture->GetWidth() / m_CurrentSpriteColNr;
 	m_CurrentFrameHeight = m_CurrentTexture->GetHeight() / m_CurrentSpriteRowNr;
 }

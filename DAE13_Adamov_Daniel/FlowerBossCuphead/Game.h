@@ -59,8 +59,13 @@ private:
 	const Texture* m_MushroomDeath;
 	const Texture* m_MushroomCloud;
 
+	const Texture* m_AcornIdle;
+	const Texture* m_AcornDrop;
+
 	// FUNCTIONS
 	void Initialize();
 	void Cleanup( );
 	void ClearBackground( ) const;
+
+	void SpawnAcorns(float elapsedSec);
 };

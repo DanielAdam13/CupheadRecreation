@@ -29,6 +29,11 @@ void Animator::PlayAnimation(float elapsedSec, float maxFrameSec, int frameToRes
 		m_FrameNr++;
 		m_AccuSec -= maxFrameSec;
 	}
+
+	if (m_FrameNr >= frameToReset)
+	{
+		m_FrameNr = 0;
+	}
 }
 
 void Animator::ReverseAnimate(float elapsedSec, int lastFrame, float maxFrameSec)

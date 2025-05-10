@@ -27,7 +27,6 @@ private:
 		idle,
 		attack
 	};
-
 	TulipState m_CurrentState;
 	
 	const Texture* m_TextureSeed;

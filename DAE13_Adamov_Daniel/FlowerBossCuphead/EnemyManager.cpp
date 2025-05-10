@@ -45,13 +45,13 @@ void EnemyManager::UpdateEnemies(float elapsedSec, const Rectf& cameraBox, Bulle
 		{
 			if (m_EnemiesVector[i]->MarkedForDeath())
 			{
-
 				delete m_EnemiesVector[i];
 				m_EnemiesVector[i] = nullptr;
 			}
 			else
 			{
-				if (std::abs(m_EnemiesVector[i]->GetBounds().left - cameraBox.left) <= cameraBox.width * 1.5f)
+				if (m_EnemiesVector[i]->GetBounds().left - cameraBox.left <= cameraBox.width * 1.5f ||
+					cameraBox.left - m_EnemiesVector[i]->GetBounds().left <= cameraBox.width * 0.5f)
 				{
 					m_EnemiesVector[i]->Update(elapsedSec, bulletManager, cuphead);
 				}

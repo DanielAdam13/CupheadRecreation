@@ -46,12 +46,12 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-![Game image](/images_&_spritesheets/Flower_Screenshot.png?raw=true "Flower Boss")
 ![Game image](/images_&_spritesheets/Run'n'Gun_Screenshot.png?raw=true "Run'n'Gun level")
+![Game image](/images_&_spritesheets/Flower_Screenshot.png?raw=true "Flower Boss")
 
 Here's why:
-* Cuphead is a beloved game of mine
-* I figured cuphead would be a great choice to recreate since it uses camera movement and has a lot of potential with enemy classes, all having different interactions.
+* Cuphead is a beloved game of mine.
+* I figured Cuphead would be a great game to recreate since it uses camera, has a cool character controller and has a lot of potential with enemy and projectile classes, all having different interactions.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -61,18 +61,18 @@ Here's why:
 This section gives a clear and detailed overview of which parts of the original game I planned to make.
 
 ### The minimum I will most certainly develop:
-* I will make two levels - one will be a more massive level with 4 types of enemies, namely: the stationary mushroom, the stationary flower, the flying acorn and the chomper.
-* I will make the first phase of the flower boss fight, where the boss will be fully animated with correct collisions.
-* I will add its attack where he spawns little enemies, the attack where he creates the acorns and the boomerang.
-* I will animate and apply correct character controller to Cuphead + small projectiles, big attack.
+* I will make a "Run'N'Gun" level that has correct collision and showcases its resepctful enemies with all their in-game behaviour and sounds.
+* I will implement animations, collisions, spawning projectiles, death handling and apply polymorphism within a manager class for every enemy.
+* I will animate, apply a correct character controller with collisions and keyboard states, implement parrying and logic to create projectiles to Cuphead.
+* I will develop a logic for projectiles that interacts with the rest of the game, namely - the camera, the player and the enemies, while applying polymorphism.
+* UI for the player - cards, health, announcments and death screen.
 
 ### What I will probably make as well:
-* I will implement correct collision for parrying and possibly correctly make the parriable objects in both stages, namely: the spike from Run'n'Gun, the small bombs from the Flower.
-* I will add the attack where the Flower extends his face.
+* Sound effects for every attack and action of every object (depends on what I can find online).
 
 ### What I plan to create if I have enough time left:
-* I would make the second part of the flower boss fight.
-* 2 more enemies for the Run'n'Gun level, namely: the running flower and the small running blue guy.
+* I would start working on the Flower Boss level.
+* I would make a level manager that starts and ends a specific level whenever it has to.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -102,8 +102,10 @@ Use this space to show useful examples of how a game can be played.
 Additional screenshots and demos work well in this space. 
 
 ### Controls
-* keys, .. 
-* .. 
+* Arrow keys for movement.
+* Z for jump, SHIFT for dash.
+* X for shooting normal projectiles and V for using the special attack.
+* C for locking while shooting.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

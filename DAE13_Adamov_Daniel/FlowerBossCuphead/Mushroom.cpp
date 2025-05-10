@@ -5,6 +5,7 @@
 #include "Cuphead.h"
 #include "BulletManager.h"
 #include "MushroomCloud.h"
+#include <cassert>
 
 Mushroom::Mushroom(const Texture* idleTexture, const Texture* boiledTexture, const Texture* attackTexture, const Texture* popTexture, const Texture* deathTexture,
 	const Texture* cloudTexture, const Vector2f& pos, int colNr, int rowNr, float range)
@@ -34,22 +35,19 @@ Mushroom::Mushroom(const Texture* idleTexture, const Texture* boiledTexture, con
 
 void Mushroom::Draw() const
 {
-	if (m_CurrentTexture != nullptr)
-	{
-		Rectf srcRect{ 0.f + (m_Animator.GetCurrentFrameNr() % m_CurrentSpriteColNr) * m_CurrentFrameWidth,
-			0.f + (m_Animator.GetCurrentFrameNr() / m_CurrentSpriteColNr) * m_CurrentFrameHeight, m_CurrentFrameWidth, m_CurrentFrameHeight };
+	Rectf srcRect{ 0.f + (m_Animator.GetCurrentFrameNr() % m_CurrentSpriteColNr) * m_CurrentFrameWidth,
+		0.f + (m_Animator.GetCurrentFrameNr() / m_CurrentSpriteColNr) * m_CurrentFrameHeight, m_CurrentFrameWidth, m_CurrentFrameHeight };
 
-		glPushMatrix();
-			glTranslatef(m_Positon.x, m_Positon.y, 0);
-			glRotatef(m_FacingAngle, 0, 1, 0);
-			m_CurrentTexture->Draw(Rectf{ -m_CurrentFrameWidth * 0.75f / 2, 0, m_CurrentFrameWidth * 0.75f, m_CurrentFrameHeight * 0.75f }, srcRect);
-		glPopMatrix();
+	glPushMatrix();
+		glTranslatef(m_Positon.x, m_Positon.y, 0);
+		glRotatef(m_FacingAngle, 0, 1, 0);
+		m_CurrentTexture->Draw(Rectf{ -m_CurrentFrameWidth * 0.75f / 2, 0, m_CurrentFrameWidth * 0.75f, m_CurrentFrameHeight * 0.75f }, srcRect);
+	glPopMatrix();
 
-		// Hitbox
-		utils::SetColor(Color4f{ 1,0,0,1 });
-		utils::DrawRect(GetBounds());
-		utils::FillEllipse(m_Positon, 5.f, 5.f);
-	}
+	// Hitbox
+	utils::SetColor(Color4f{ 1,0,0,1 });
+	utils::DrawRect(GetBounds());
+	utils::FillEllipse(m_Positon, 5.f, 5.f);
 }
 
 void Mushroom::Update(float elapsedSec, BulletManager& bulletManager, Cuphead& cuphead)
@@ -203,6 +201,9 @@ void Mushroom::Animate(float elapsedSec)
 
 		break;
 	}
+
+	assert(("Enemy Texture not set properly -> resulting in a nullptr.", m_CurrentTexture != nullptr));
+
 	m_CurrentFrameWidth = m_CurrentTexture->GetWidth() / m_CurrentSpriteColNr;
 	m_CurrentFrameHeight = m_CurrentTexture->GetHeight() / m_CurrentSpriteRowNr;
 }

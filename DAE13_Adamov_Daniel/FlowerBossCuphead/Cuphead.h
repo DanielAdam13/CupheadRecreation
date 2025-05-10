@@ -29,6 +29,7 @@ public:
 
 	Vector2f GetPosition() const;
 	Rectf GetBounds() const;
+	Circlef GetHitbox() const;
 
 	Vector2f GetPlaceOfDeath() const; // for camera reset
 	
@@ -134,7 +135,7 @@ private:
 	void CreateProjectiles(float elapsedSec, BulletManager& bulletManager);
 
 	void UpdateFacingDirection(const Uint8* pStates);
-	void ResetParry();
+	void ResetState();
 
 	void TakeDamage(float elapsedSec);
 	void SetDeath();

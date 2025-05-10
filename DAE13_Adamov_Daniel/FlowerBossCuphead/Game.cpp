@@ -9,6 +9,7 @@
 #include "BigChomper.h"
 #include "Mushroom.h"
 #include "Tulip.h"
+#include "Acorn.h"
 #include "Projectile.h"
 
 Game::Game(const Window& window)
@@ -34,7 +35,9 @@ Game::Game(const Window& window)
 	m_MushroomPop{ new Texture("Run'N'Gun/Mushroom/Sprite_Mushroom_Pop.png") },
 	m_MushroomBoil{ new Texture("Run'N'Gun/Mushroom/Sprite_Mushroom_Boil.png") },
 	m_MushroomDeath{ new Texture("Run'N'Gun/Mushroom/Sprite_Mushroom_Death.png") },
-	m_MushroomCloud{ new Texture("Run'N'Gun/Mushroom/Sprite_Mushroom_Cloud.png") }
+	m_MushroomCloud{ new Texture("Run'N'Gun/Mushroom/Sprite_Mushroom_Cloud.png") },
+	m_AcornIdle{ new Texture("Run'N'Gun/Acorn/Sprite_Acorn_Fly.png") },
+	m_AcornDrop{ new Texture("Run'N'Gun/Acorn/Sprite_Acorn_Drop.png") }
 {
 	Initialize();
 }
@@ -130,6 +133,11 @@ void Game::Cleanup( )
 	delete m_MushroomCloud;
 	m_MushroomCloud = nullptr;
 
+	delete m_AcornIdle;
+	m_AcornIdle = nullptr;
+	delete m_AcornDrop;
+	m_AcornDrop = nullptr;
+
 	m_Vertices.clear();
 }
 
@@ -141,17 +149,11 @@ void Game::Update( float elapsedSec )
 	// updates cuphead and pushes projectiles to player BulletManager
 	m_Cuphead.Update(elapsedSec, pStates, m_Vertices, m_PlayerBulletManager);
 
-	m_PlayerBulletManager.AnimateActiveBullets(elapsedSec);
-
-	// animate enemy bullets even if player is dead
-	m_EnemyBulletManager.AnimateActiveBullets(elapsedSec);
-
-	// animate enemies even if player is dead
-	m_EnemyManager.AnimateEnemies(elapsedSec, m_Camera.GetCuurentCameraBounds());
-
 	// update enemies and enemy bullets if player is alive
 	if (m_Cuphead.GetHealth() > 0) 
 	{
+		SpawnAcorns(elapsedSec);
+
 		// update enemies and pushes projectiles to enemy BulletManager
 		m_EnemyManager.UpdateEnemies(elapsedSec, m_Camera.GetCuurentCameraBounds(), m_EnemyBulletManager, m_Cuphead);
 	
@@ -166,9 +168,17 @@ void Game::Update( float elapsedSec )
 		m_Camera.Aim(12400.f, 760.f, m_Cuphead.GetPlaceOfDeath());
 		
 	}
+
+	// animate enemy bullets even if player is dead
+	m_EnemyBulletManager.AnimateActiveBullets(elapsedSec);
+
+	// animate enemies even if player is dead
+	m_EnemyManager.AnimateEnemies(elapsedSec, m_Camera.GetCuurentCameraBounds());
 	
 	// update and animate even if player is dead
 	m_PlayerBulletManager.UpdateActiveBullets(elapsedSec, m_Camera.GetCuurentCameraBounds(), m_Vertices, m_Cuphead);
+
+	m_PlayerBulletManager.AnimateActiveBullets(elapsedSec);
 
 	// delete player bullets if they collide with enemy
 	for (int j{}; j < m_EnemyManager.GetVectorSize(); ++j)
@@ -194,7 +204,7 @@ void Game::Update( float elapsedSec )
 	{
 		if (m_EnemyManager[i] != nullptr)
 		{
-			if (utils::IsOverlapping(m_EnemyManager[i]->GetBounds(), m_Cuphead.GetBounds()) && m_Cuphead.GetHealth() > 0)
+			if (utils::IsOverlapping(m_EnemyManager[i]->GetBounds(), m_Cuphead.GetHitbox()) && m_Cuphead.GetHealth() > 0)
 			{
 				m_Cuphead.Hit();
 			}
@@ -206,7 +216,7 @@ void Game::Update( float elapsedSec )
 	{
 		if (m_EnemyBulletManager[i] != nullptr)
 		{
-			if (utils::IsOverlapping(m_Cuphead.GetBounds(), m_EnemyBulletManager[i]->GetHitbox()))
+			if (utils::IsOverlapping(m_Cuphead.GetHitbox(), m_EnemyBulletManager[i]->GetHitbox()))
 			{
 				m_Cuphead.Hit();
 			}
@@ -310,4 +320,42 @@ void Game::ClearBackground( ) const
 {
 	glClearColor( 0.0f, 0.0f, 0.3f, 1.0f );
 	glClear( GL_COLOR_BUFFER_BIT );
+}
+
+void Game::SpawnAcorns(float elapsedSec)
+{
+	static bool allowedSpawn{ false };
+
+	if (m_Cuphead.GetPosition().x >= 4000.f)
+	{
+		allowedSpawn = true; // stays on
+	}
+
+	if (allowedSpawn)
+	{
+		static float accuSec{ 5.f };
+		accuSec += elapsedSec;
+
+		if (accuSec >= 5.f)
+		{
+			int randNr{ rand() % 2 };
+
+			if (randNr == 0) // from left
+			{
+				m_EnemyManager.AddEnemy(new Acorn(m_AcornIdle, m_AcornDrop,
+					Vector2f{ m_Camera.GetCuurentCameraBounds().left - m_Camera.GetCuurentCameraBounds().width * 0.2f, 
+					m_Camera.GetCuurentCameraBounds().bottom + m_Camera.GetCuurentCameraBounds().height * 0.9f},
+					Vector2f{ 1, 0 }));
+			}
+			else
+			{
+				m_EnemyManager.AddEnemy(new Acorn(m_AcornIdle, m_AcornDrop,
+					Vector2f{ m_Camera.GetCuurentCameraBounds().left + m_Camera.GetCuurentCameraBounds().width * 1.2f, 
+					m_Camera.GetCuurentCameraBounds().bottom + m_Camera.GetCuurentCameraBounds().height * 0.9f},
+					Vector2f{ -1, 0 }));
+			}
+
+			accuSec -= 5.f;
+		}
+	}
 }

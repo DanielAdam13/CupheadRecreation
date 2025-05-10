@@ -5,6 +5,7 @@
 #include "utils.h"
 #include "BulletManager.h"
 #include "PeaShooter.h"
+#include <cassert>
 
 Cuphead::Cuphead(const Vector2f& position, bool playIntro, int hp, const Texture* peaShooter, const Texture* peaSpecial)
 	: m_Position{ position },
@@ -91,7 +92,8 @@ void Cuphead::Draw() const
 
 		// Hitbox
 		utils::SetColor(Color4f{ 1, 0, 0, 1 });
-		utils::DrawRect(GetBounds());
+		//utils::DrawRect(GetBounds());
+		utils::DrawEllipse(GetHitbox().center, GetHitbox().radius, GetHitbox().radius);
 		utils::FillEllipse(m_Position, 5.f, 5.f);
 
 		if (m_IsHit)
@@ -120,6 +122,9 @@ void Cuphead::Draw() const
 
 void Cuphead::Update(float elapsedSec, const Uint8* pStates, const std::vector<Vector2f>& vertices, BulletManager& bulletManager)
 {
+	// the parry doesn't continue going off if Z is held
+	ResetState();
+
 	// set the m_IsAlive flag
 	SetDeath();
 
@@ -137,9 +142,6 @@ void Cuphead::Update(float elapsedSec, const Uint8* pStates, const std::vector<V
 
 	// updates the postion using m_Velocity and enables collisions from a std::vector<Vector2f>
 	HandleRaycast(elapsedSec, vertices);
-
-	// the parry doesn't continue going off if Z is held
-	ResetParry();
 
 	// handles invincibility when hit
 	TakeDamage(elapsedSec);
@@ -749,6 +751,7 @@ void Cuphead::AnimateCuphead(float elapsedSec)
 				m_CurrentColNr = 5;
 				m_CurrentRowNr = 5;
 
+				//m_Animator.PlayAnimation(elapsedSec, m_MaxFrameSec + 0.01f);
 				switch (m_CupheadShootingState)
 				{
 				case Cuphead::Shoot::shootUp:
@@ -773,6 +776,8 @@ void Cuphead::AnimateCuphead(float elapsedSec)
 			}
 		}
 	}
+
+	assert(("Cuphead Texture not set properly -> resulting in a nullptr.", m_CurrentTexture != nullptr));
 	m_FrameWidth = m_CurrentTexture->GetWidth() / m_CurrentColNr;
 	m_FrameHeight = m_CurrentTexture->GetHeight() / m_CurrentRowNr;
 }
@@ -983,6 +988,27 @@ Rectf Cuphead::GetBounds() const
 	return Rectf{ m_Position.x - m_FrameWidth / 2, m_Position.y, m_FrameWidth, m_FrameHeight };
 }
 
+Circlef Cuphead::GetHitbox() const
+{
+	if (!m_IsAlive || m_IsHit)
+	{
+		return Circlef();
+	}
+	else if (m_CupheadMovementState == Movement::dash)
+	{
+		if (m_FacingAngle == 0.f)
+		{
+			return Circlef(m_Position.x + m_FrameWidth / 4, m_Position.y + m_FrameHeight / 2, m_FrameHeight / 4);
+		}
+		else return Circlef(m_Position.x - m_FrameWidth / 4, m_Position.y + m_FrameHeight / 2, m_FrameHeight / 4);
+	}
+	else if (m_CupheadMovementState == Movement::duck && m_IsGrounded)
+	{
+		return Circlef(m_Position.x, m_Position.y + m_FrameHeight / 4, m_FrameHeight / 3);
+	}
+	return Circlef(m_Position.x, m_Position.y + m_FrameHeight / 2, m_FrameWidth / 4);
+}
+
 Vector2f Cuphead::GetPlaceOfDeath() const
 {
 	return m_PlaceOfHit;
@@ -1000,9 +1026,9 @@ void Cuphead::UpdateFacingDirection(const Uint8* pStates)
 	}
 }
 
-void Cuphead::ResetParry()
+void Cuphead::ResetState()
 {
-	if (m_IsGrounded && !m_IsDashing)
+	if (m_IsGrounded && !m_IsDashing && m_CupheadMovementState != Movement::duck && m_CupheadMovementState != Movement::dash)
 	{
 		m_CupheadMovementState = Movement::idle;
 		m_CupheadShootingState = Shoot::notShooting;
