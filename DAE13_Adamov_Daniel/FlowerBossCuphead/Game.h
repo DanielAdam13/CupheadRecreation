@@ -6,6 +6,7 @@ class Texture;
 #include "Camera.h"
 #include "EnemyManager.h"
 #include "BulletManager.h"
+#include "UIManager.h"
 
 class Game : public BaseGame
 {
@@ -39,6 +40,10 @@ private:
 	EnemyManager m_EnemyManager;
 	BulletManager m_PlayerBulletManager;
 	BulletManager m_EnemyBulletManager;
+
+	const Texture* m_HealthSprite;
+	const Texture* m_CardsSprite;
+	UIManager m_UIManager;
 
 	const Texture* m_PeaShooterSprite;
 	const Texture* m_PeaSpecialSprite;

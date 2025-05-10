@@ -39,7 +39,7 @@ void MushroomCloud::Draw() const
 	
 }
 
-void MushroomCloud::Update(float elapsedSec, const std::vector<Vector2f>& vertices, BulletManager& bulletManager, Cuphead& cuphead)
+void MushroomCloud::Update(float elapsedSec, const std::vector<Vector2f>& vertices, BulletManager& bulletManager, Cuphead& cuphead, UIManager& uiManager)
 {
 	m_ShootDirection = (m_TargetPoint - m_StartPoint).Normalized();
 
@@ -51,7 +51,7 @@ void MushroomCloud::Update(float elapsedSec, const std::vector<Vector2f>& vertic
 		{
 			if (utils::IsOverlapping(GetParryHitbox(), cuphead.GetBounds()))
 			{
-				cuphead.Parry();
+				cuphead.Parry(uiManager);
 				m_DeleteMarker = true;
 			}
 		}
@@ -73,7 +73,7 @@ Circlef MushroomCloud::GetHitbox() const
 	return Circlef(m_Position.x, m_Position.y + GetBounds().height / 2, 30.f);
 }
 
-int MushroomCloud::Damage() const
+float MushroomCloud::Damage() const
 {
 	return m_Damage;
 }

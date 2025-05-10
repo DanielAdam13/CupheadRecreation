@@ -9,12 +9,12 @@ public:
 		const Texture* cloudTexture, const Vector2f& pos, int colNr = 1, int rowNr = 1, float range = 400.f);
 
 	virtual void Draw() const override;
-	virtual void Update(float elapsedSec, BulletManager& bulletManager, Cuphead& cuphead) override;
+	virtual void Update(float elapsedSec, BulletManager& bulletManager, Cuphead& cuphead, UIManager& uiManager) override;
 	virtual void Animate(float elapsedSec) override;
 
 	virtual Rectf GetBounds() const override;
 
-	virtual void TakeDamage(int damage) override;
+	virtual void TakeDamage(float damage, UIManager& uiManager) override;
 	virtual int GetHealth() const override;
 
 	virtual bool MarkedForDeath() const override;
@@ -35,7 +35,7 @@ protected:
 	virtual bool PlayerInRange(const Vector2f& playerPos, float range);
 
 private:
-	int m_Hp;
+	float m_Hp;
 
 	enum class MushroomState
 	{

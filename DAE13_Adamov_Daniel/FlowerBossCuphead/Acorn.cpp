@@ -3,11 +3,12 @@
 #include "Texture.h"
 #include "Cuphead.h"
 #include "utils.h"
+#include "UIManager.h"
 #include <cassert>
 
 Acorn::Acorn(const Texture* idle, const Texture* drop, const Vector2f& pos, const Vector2f& direction)
 	:Enemy::Enemy(pos),
-	m_Hp{ 3 },
+	m_Hp{ 5 },
 	m_CurrentState{ AcornState::idle },
 	m_TextureIdle{ idle },
 	m_TextureDrop{ drop },
@@ -43,7 +44,7 @@ void Acorn::Draw() const
 	utils::FillEllipse(m_Positon, 5.f, 5.f);
 }
 
-void Acorn::Update(float elapsedSec, BulletManager& bulletManager, Cuphead& cuphead)
+void Acorn::Update(float elapsedSec, BulletManager& bulletManager, Cuphead& cuphead, UIManager& uiManager)
 {
 	float speed{ 500.f };
 
@@ -89,12 +90,16 @@ void Acorn::Animate(float elapsedSec)
 
 Rectf Acorn::GetBounds() const
 {
-	return Rectf(m_Positon.x - m_CurrentFrameWidth / 2, m_Positon.y - m_CurrentFrameHeight / 2, m_CurrentFrameWidth * 0.75f, m_CurrentFrameHeight * 0.75f);
+	return Rectf(m_Positon.x - m_CurrentFrameWidth * 0.75f / 2, m_Positon.y - m_CurrentFrameHeight * 0.75f / 2, m_CurrentFrameWidth * 0.75f, m_CurrentFrameHeight * 0.75f);
 }
 
-void Acorn::TakeDamage(int damage)
+void Acorn::TakeDamage(float damage, UIManager& uiManager)
 {
 	m_Hp -= damage;
+	if (damage != 0.3f)
+	{
+		uiManager.ChangeCards();
+	}
 }
 
 int Acorn::GetHealth() const

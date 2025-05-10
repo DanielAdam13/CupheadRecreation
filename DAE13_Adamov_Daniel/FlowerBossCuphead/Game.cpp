@@ -21,6 +21,9 @@ Game::Game(const Window& window)
 	m_EnemyManager{},
 	m_PlayerBulletManager{},
 	m_EnemyBulletManager{},
+	m_HealthSprite{ new Texture("UI/Health_Stages.png") },
+	m_CardsSprite{ new Texture("UI/Cards_Stages.png") },
+	m_UIManager{ m_HealthSprite, m_CardsSprite },
 	m_PeaShooterSprite{ new Texture("Projectile_Loop.png") },
 	m_PeaSpecialSprite{ new Texture("Projectile_Special_Loop.png") },
 	m_Cuphead{ Vector2f{GetViewPort().width / 2, 100.f}, true, 3, m_PeaShooterSprite, m_PeaSpecialSprite },
@@ -100,6 +103,11 @@ void Game::Cleanup( )
 	delete m_ForectBackground2;
 	m_ForectBackground2 = nullptr;
 
+	delete m_HealthSprite;
+	m_HealthSprite = nullptr;
+	delete m_CardsSprite;
+	m_CardsSprite = nullptr;
+
 	delete m_PeaShooterSprite;
 	m_PeaShooterSprite = nullptr;
 	delete m_PeaSpecialSprite;
@@ -147,7 +155,7 @@ void Game::Update( float elapsedSec )
 	const Uint8 *pStates = SDL_GetKeyboardState( nullptr );
 
 	// updates cuphead and pushes projectiles to player BulletManager
-	m_Cuphead.Update(elapsedSec, pStates, m_Vertices, m_PlayerBulletManager);
+	m_Cuphead.Update(elapsedSec, pStates, m_Vertices, m_PlayerBulletManager, m_UIManager);
 
 	// update enemies and enemy bullets if player is alive
 	if (m_Cuphead.GetHealth() > 0) 
@@ -155,9 +163,9 @@ void Game::Update( float elapsedSec )
 		SpawnAcorns(elapsedSec);
 
 		// update enemies and pushes projectiles to enemy BulletManager
-		m_EnemyManager.UpdateEnemies(elapsedSec, m_Camera.GetCuurentCameraBounds(), m_EnemyBulletManager, m_Cuphead);
+		m_EnemyManager.UpdateEnemies(elapsedSec, m_Camera.GetCuurentCameraBounds(), m_EnemyBulletManager, m_Cuphead, m_UIManager);
 	
-		m_EnemyBulletManager.UpdateActiveBullets(elapsedSec, m_Camera.GetCuurentCameraBounds(), m_Vertices, m_Cuphead);
+		m_EnemyBulletManager.UpdateActiveBullets(elapsedSec, m_Camera.GetCuurentCameraBounds(), m_Vertices, m_Cuphead, m_UIManager);
 
 		// follow player if alive
 		m_Camera.Aim(12400.f, 760.f, m_Cuphead.GetPosition());
@@ -176,11 +184,11 @@ void Game::Update( float elapsedSec )
 	m_EnemyManager.AnimateEnemies(elapsedSec, m_Camera.GetCuurentCameraBounds());
 	
 	// update and animate even if player is dead
-	m_PlayerBulletManager.UpdateActiveBullets(elapsedSec, m_Camera.GetCuurentCameraBounds(), m_Vertices, m_Cuphead);
+	m_PlayerBulletManager.UpdateActiveBullets(elapsedSec, m_Camera.GetCuurentCameraBounds(), m_Vertices, m_Cuphead, m_UIManager);
 
 	m_PlayerBulletManager.AnimateActiveBullets(elapsedSec);
 
-	// delete player bullets if they collide with enemy
+	// delete player bullets if they collide with enemy and deal damage
 	for (int j{}; j < m_EnemyManager.GetVectorSize(); ++j)
 	{
 		if (m_EnemyManager[j] != nullptr)
@@ -191,8 +199,12 @@ void Game::Update( float elapsedSec )
 				{
 					if (utils::IsOverlapping(m_EnemyManager[j]->GetBounds(), m_PlayerBulletManager[i]->GetHitbox()))
 					{
-						m_EnemyManager[j]->TakeDamage(m_PlayerBulletManager[i]->Damage());
-						m_PlayerBulletManager.RemoveProjectile(i);
+						m_EnemyManager[j]->TakeDamage(m_PlayerBulletManager[i]->Damage(), m_UIManager);
+
+						if (m_PlayerBulletManager[i]->Damage() - 0.3f > 0.001f)
+						{
+							m_PlayerBulletManager.RemoveProjectile(i);
+						}
 					}
 				}
 			}
@@ -222,6 +234,8 @@ void Game::Update( float elapsedSec )
 			}
 		}
 	}
+
+	m_UIManager.Update(elapsedSec, m_Cuphead.GetHealth());
 }
 
 void Game::Draw( ) const
@@ -246,6 +260,8 @@ void Game::Draw( ) const
 	m_EnemyBulletManager.DrawActiveBullets();
 
 	m_EnemyManager.DrawEnemies(m_Camera.GetCuurentCameraBounds());
+
+	m_UIManager.Draw(m_Camera.GetCuurentCameraBounds());
 
 	m_Camera.Reset();
 

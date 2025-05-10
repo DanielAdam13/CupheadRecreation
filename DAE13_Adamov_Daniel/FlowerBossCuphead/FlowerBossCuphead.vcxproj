@@ -177,6 +177,7 @@ xcopy "$(SolutionDir)Resources\*.*" "$(TargetDir)" /y /d /s</Command>
     <ClCompile Include="Spike.cpp" />
     <ClCompile Include="Tulip.cpp" />
     <ClCompile Include="TulipSeed.cpp" />
+    <ClCompile Include="UIManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Acorn.h" />
@@ -197,6 +198,7 @@ xcopy "$(SolutionDir)Resources\*.*" "$(TargetDir)" /y /d /s</Command>
     <ClInclude Include="Spike.h" />
     <ClInclude Include="Tulip.h" />
     <ClInclude Include="TulipSeed.h" />
+    <ClInclude Include="UIManager.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

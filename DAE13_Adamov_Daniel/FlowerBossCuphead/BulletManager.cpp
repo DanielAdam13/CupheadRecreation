@@ -34,7 +34,7 @@ void BulletManager::DrawActiveBullets() const
 	}
 }
 
-void BulletManager::UpdateActiveBullets(float elapsedSec, const Rectf& cameraBox, const std::vector<Vector2f>& vertices, Cuphead& cuphead)
+void BulletManager::UpdateActiveBullets(float elapsedSec, const Rectf& cameraBox, const std::vector<Vector2f>& vertices, Cuphead& cuphead, UIManager& uiManager)
 {
 	for (size_t i{}; i < m_Projectiles.size(); ++i)
 	{
@@ -44,7 +44,7 @@ void BulletManager::UpdateActiveBullets(float elapsedSec, const Rectf& cameraBox
 			{
 				if (utils::IsOverlapping(Rectf{ cameraBox.left, cameraBox.bottom, cameraBox.width, cameraBox.height * 1.2f }, m_Projectiles[i]->GetHitbox())) // a bit higher than camera y
 				{
-					m_Projectiles[i]->Update(elapsedSec, vertices, *this, cuphead);
+					m_Projectiles[i]->Update(elapsedSec, vertices, *this, cuphead, uiManager);
 				}
 				else
 				{

@@ -1,8 +1,6 @@
 #pragma once
 #include "Mushroom.h"
 class Texture;
-class BulletManager;
-class Cuphead;
 
 class Tulip final : public Mushroom
 {
@@ -10,17 +8,17 @@ public:
 	explicit Tulip(const Texture* idleTexture, const Texture* attackTexture, const Texture* seed, const Texture* explosion, const Vector2f& pos, int colNr = 5, int rowNr = 4, float range = 600.f);
 
 	virtual void Draw() const override;
-	virtual void Update(float elapsedSec, BulletManager& bulletManager, Cuphead& cuphead) override;
+	virtual void Update(float elapsedSec, BulletManager& bulletManager, Cuphead& cuphead, UIManager& uiManager) override;
 	virtual void Animate(float elapsedSec) override;
 
 	virtual Rectf GetBounds() const override;
 
-	virtual void TakeDamage(int damage) override;
+	virtual void TakeDamage(float damage, UIManager& uiManager) override;
 	virtual int GetHealth() const override;
 	virtual bool MarkedForDeath() const override;
 
 private:
-	int m_Hp;
+	float m_Hp;
 
 	enum class TulipState 
 	{

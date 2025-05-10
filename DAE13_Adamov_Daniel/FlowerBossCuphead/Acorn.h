@@ -1,8 +1,6 @@
 #pragma once
 #include "Enemy.h"
 class Texture;
-class Cuphead;
-class BulletManager;
 
 class Acorn final : public Enemy
 {
@@ -10,18 +8,18 @@ public:
 	explicit Acorn(const Texture* idle, const Texture* drop, const Vector2f& pos, const Vector2f& direction = Vector2f{ -1, 0 });
 
 	virtual void Draw() const override;
-	virtual void Update(float elapsedSec, BulletManager& bulletManager, Cuphead& cuphead) override;
+	virtual void Update(float elapsedSec, BulletManager& bulletManager, Cuphead& cuphead, UIManager& uiManager) override;
 	virtual void Animate(float elapsedSec) override;
 
 	virtual Rectf GetBounds() const override;
 
-	virtual void TakeDamage(int damage) override;
+	virtual void TakeDamage(float damage, UIManager& uiManager) override;
 	virtual int GetHealth() const override;
 
 	virtual bool MarkedForDeath() const override;
 
 private:
-	int m_Hp;	
+	float m_Hp;	
 
 	enum class AcornState
 	{

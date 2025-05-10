@@ -10,11 +10,11 @@ public:
 	explicit Explosion(const Texture* sprite, const Vector2f& pos);
 
 	virtual void Draw() const override;
-	virtual void Update(float elapsedSec, const std::vector<Vector2f>& vertices, BulletManager& bulletManager, Cuphead& cuphead) override; // it has to announce self deletion to BulletManager
+	virtual void Update(float elapsedSec, const std::vector<Vector2f>& vertices, BulletManager& bulletManager, Cuphead& cuphead, UIManager& uiManager) override; // it has to announce self deletion to BulletManager
 	virtual void Animate(float elapsedSec) override;
 
 	virtual Circlef GetHitbox() const override;
-	virtual int Damage() const override;
+	virtual float Damage() const override;
 
 	virtual bool MarkedForDeletion() const override;
 

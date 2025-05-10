@@ -3,6 +3,7 @@
 #include "Texture.h"
 #include "utils.h"
 #include "Cuphead.h"
+#include "UIManager.h"
 
 Spike::Spike(const Texture* spriteTexture, const Vector2f& pos, const Vector2f& lowestPoint, const Vector2f& highestPoint, float speed)
 	:Enemy(pos),
@@ -33,7 +34,7 @@ void Spike::Draw() const
 	utils::DrawRect(GetParryHitbox());
 }
 
-void Spike::Update(float elapsedSec, BulletManager& bulletManager, Cuphead& cuphead)
+void Spike::Update(float elapsedSec, BulletManager& bulletManager, Cuphead& cuphead, UIManager& uiManager)
 {
 	Bounce(elapsedSec);
 
@@ -41,7 +42,7 @@ void Spike::Update(float elapsedSec, BulletManager& bulletManager, Cuphead& cuph
 	{
 		if (utils::IsOverlapping(GetParryHitbox(), cuphead.GetBounds()))
 		{
-			cuphead.Parry();
+			cuphead.Parry(uiManager);
 			m_DeathMarker = true;
 		}
 	}
@@ -62,7 +63,7 @@ Rectf Spike::GetParryHitbox() const
 	return Rectf{ this->GetBounds().left - m_FrameWidth * 0.75f, this->GetBounds().bottom - m_FrameHeight * 0.75f, m_FrameWidth * 2.5f, m_FrameHeight * 2.5f};
 }
 
-void Spike::TakeDamage(int damage)
+void Spike::TakeDamage(float damage, UIManager& uiManager)
 {
 }
 

@@ -4,12 +4,12 @@
 #include "utils.h"
 #include <iostream>
 
-PeaShooter::PeaShooter(const Texture* sprite, const Vector2f& spawnPos, const Vector2f& playerPos, float directionAngle, float speed, int damage, int colNr, int rowNr)
+PeaShooter::PeaShooter(const Texture* sprite, const Vector2f& spawnPos, const Vector2f& playerPos, float directionAngle, float speed, float damage, int colNr, int rowNr)
 	: Projectile::Projectile(sprite, spawnPos, playerPos, directionAngle, speed, damage),
 	m_FrameWidth{m_Texture->GetWidth() / colNr},
 	m_FrameHeight{m_Texture->GetHeight() / rowNr}
 {
-	std::cout << "CREATED PeaShooter with direction: " << directionAngle << std::endl;
+	//std::cout << "CREATED PeaShooter with direction: " << directionAngle << std::endl;
 }
 
 void PeaShooter::Draw() const
@@ -28,7 +28,7 @@ void PeaShooter::Draw() const
 	utils::DrawEllipse(GetHitbox().center, GetHitbox().radius, GetHitbox().radius);
 }
 
-void PeaShooter::Update(float elapsedSec, const std::vector<Vector2f>& vertices, BulletManager& bulletManager, Cuphead& cuphead)
+void PeaShooter::Update(float elapsedSec, const std::vector<Vector2f>& vertices, BulletManager& bulletManager, Cuphead& cuphead, UIManager& uiManager)
 {
 	m_Position += m_ShootDirection * m_Speed * elapsedSec;
 }
@@ -48,7 +48,7 @@ Circlef PeaShooter::GetHitbox() const
 	return Circlef(Vector2f{m_Position.x + m_ShootDirection.x * 25.f, m_Position.y + m_ShootDirection.y * 25.f}, m_FrameWidth / 8);
 }
 
-int PeaShooter::Damage() const
+float PeaShooter::Damage() const
 {
 	return m_Damage;
 }

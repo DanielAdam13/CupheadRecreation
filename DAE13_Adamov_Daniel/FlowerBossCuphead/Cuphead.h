@@ -3,6 +3,7 @@
 #include <vector>
 class Texture;
 class BulletManager;
+class UIManager;
 
 class Cuphead final
 {
@@ -15,7 +16,7 @@ public:
 	~Cuphead();
 
 	void Draw() const;
-	void Update(float elapsedSec, const Uint8* pStates, const std::vector<Vector2f>& vertices, BulletManager& bulletManager);
+	void Update(float elapsedSec, const Uint8* pStates, const std::vector<Vector2f>& vertices, BulletManager& bulletManager, UIManager& uiManager);
 	
 	void StartDash();
 	void ToggleParryState();
@@ -25,7 +26,7 @@ public:
 	int GetHealth() const; // used for UI
 	bool IsParrying() const; // used to parry in other classes
 
-	void Parry(); // actual parry
+	void Parry(UIManager& uiManager); // actual parry
 
 	Vector2f GetPosition() const;
 	Rectf GetBounds() const;
@@ -104,7 +105,6 @@ private:
 	bool m_FiringSpecial;
 
 	Vector2f m_PlaceOfHit;
-	bool m_Parried;
 
 	const Texture* m_TexturePeaShooter;
 	const Texture* m_TextureSpecialPeaShooter;
@@ -127,15 +127,14 @@ private:
 	Animator m_Animator;
 
 	// MEMBER FUNCTIONS
-	void ProcessKeys(const Uint8* pStates);
+	void ProcessKeys(const Uint8* pStates, UIManager& uiManager);
 	void AnimateCuphead(float elapsedSec);
 	void ResetAnimation(int frameToReset);
 	void HandleRaycast(float elapsedSec, const std::vector<Vector2f>& vertices);
 	void Dash(float elapsedSec);
-	void CreateProjectiles(float elapsedSec, BulletManager& bulletManager);
+	void CreateProjectiles(float elapsedSec, BulletManager& bulletManager, UIManager& uiManager);
 
 	void UpdateFacingDirection(const Uint8* pStates);
-	void ResetState();
 
 	void TakeDamage(float elapsedSec);
 	void SetDeath();

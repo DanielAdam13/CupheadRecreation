@@ -2,6 +2,7 @@
 #include <vector>
 class Projectile;
 class Cuphead;
+class UIManager;
 
 class BulletManager
 {
@@ -14,7 +15,7 @@ public:
 	~BulletManager();
 
 	void DrawActiveBullets() const;
-	void UpdateActiveBullets(float elapsedSec, const Rectf& cameraBox, const std::vector<Vector2f>& vertices, Cuphead& cuphead);
+	void UpdateActiveBullets(float elapsedSec, const Rectf& cameraBox, const std::vector<Vector2f>& vertices, Cuphead& cuphead, UIManager& uiManager);
 	void AnimateActiveBullets(float elapsedSec);
 
 	void AddProjectile(Projectile* projectile);

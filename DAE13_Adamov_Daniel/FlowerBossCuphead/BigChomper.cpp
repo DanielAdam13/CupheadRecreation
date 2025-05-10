@@ -29,7 +29,7 @@ void BigChomper::Draw() const
 	utils::FillEllipse(m_HighestPoint, 5.f, 5.f);
 }
 
-void BigChomper::Update(float elapsedSec, BulletManager& bulletManager, Cuphead& cuphead)
+void BigChomper::Update(float elapsedSec, BulletManager& bulletManager, Cuphead& cuphead, UIManager& uiManager)
 {
 	Spike::Bounce(elapsedSec);
 }
@@ -69,7 +69,7 @@ Rectf BigChomper::GetBounds() const
 	return Rectf(m_Positon.x - frameWidth / 2, m_Positon.y - frameHeight / 2, frameWidth, frameHeight);
 }
 
-void BigChomper::TakeDamage(int damage)
+void BigChomper::TakeDamage(float damage, UIManager& uiManager)
 {
 }
 

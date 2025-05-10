@@ -5,6 +5,7 @@
 #include "utils.h"
 #include "BulletManager.h"
 #include "PeaShooter.h"
+#include "UIManager.h"
 #include <cassert>
 
 Cuphead::Cuphead(const Vector2f& position, bool playIntro, int hp, const Texture* peaShooter, const Texture* peaSpecial)
@@ -29,7 +30,7 @@ Cuphead::Cuphead(const Vector2f& position, bool playIntro, int hp, const Texture
 	m_IsDashing{ false },
 	m_DashCooldownAcuuSec{ 0.f },
 	m_DashAnimAccuSec{ 0.f },
-	m_MaxFrameSec{ 0.07f },
+	m_MaxFrameSec{ 0.06f },
 	m_CurrentTexture{ nullptr },
 	m_CurrentColNr{ 1 },
 	m_CurrentRowNr{ 1 },
@@ -38,7 +39,6 @@ Cuphead::Cuphead(const Vector2f& position, bool playIntro, int hp, const Texture
 	m_SpecialAllowed{ true },
 	m_FiringSpecial{ false },
 	m_PlaceOfHit{},
-	m_Parried{ false },
 	m_TexturePeaShooter{ peaShooter },
 	m_TextureSpecialPeaShooter{ peaSpecial },
 	m_Animator{}
@@ -120,11 +120,8 @@ void Cuphead::Draw() const
 	}
 }
 
-void Cuphead::Update(float elapsedSec, const Uint8* pStates, const std::vector<Vector2f>& vertices, BulletManager& bulletManager)
+void Cuphead::Update(float elapsedSec, const Uint8* pStates, const std::vector<Vector2f>& vertices, BulletManager& bulletManager, UIManager& uiManager)
 {
-	// the parry doesn't continue going off if Z is held
-	ResetState();
-
 	// set the m_IsAlive flag
 	SetDeath();
 
@@ -132,10 +129,10 @@ void Cuphead::Update(float elapsedSec, const Uint8* pStates, const std::vector<V
 	Dash(elapsedSec);
 
 	// determines which key is pressed where + combinations and sets the velocity
-	ProcessKeys(pStates);
+	ProcessKeys(pStates, uiManager);
 
 	// pushes a new projectile to BulletManager
-	CreateProjectiles(elapsedSec, bulletManager);
+	CreateProjectiles(elapsedSec, bulletManager, uiManager);
 
 	// sets up the current Texture which is going to be drawn and updates the current framer number via m_Aniamtor
 	AnimateCuphead(elapsedSec);
@@ -147,7 +144,7 @@ void Cuphead::Update(float elapsedSec, const Uint8* pStates, const std::vector<V
 	TakeDamage(elapsedSec);
 }
 
-void Cuphead::ProcessKeys(const Uint8* pStates)
+void Cuphead::ProcessKeys(const Uint8* pStates, UIManager& uiManager)
 {
 	if (!m_PlayingIntro)
 	{
@@ -240,7 +237,7 @@ void Cuphead::ProcessKeys(const Uint8* pStates)
 					}
 				}
 				// special left
-				else if (pStates[SDL_SCANCODE_LEFT] && pStates[SDL_SCANCODE_V] && m_SpecialAllowed)
+				else if (pStates[SDL_SCANCODE_LEFT] && pStates[SDL_SCANCODE_V] && m_SpecialAllowed && uiManager.SpecialAttackAllowed())
 				{
 					m_CupheadMovementState = Movement::lock;
 					m_CupheadShootingState = Shoot::specialLeft;
@@ -258,7 +255,7 @@ void Cuphead::ProcessKeys(const Uint8* pStates)
 					m_FrameToResetAnimation = 12;
 				}
 				// special right
-				else if (pStates[SDL_SCANCODE_RIGHT] && pStates[SDL_SCANCODE_V] && m_SpecialAllowed)
+				else if (pStates[SDL_SCANCODE_RIGHT] && pStates[SDL_SCANCODE_V] && m_SpecialAllowed && uiManager.SpecialAttackAllowed())
 				{
 					m_CupheadMovementState = Movement::lock;
 					m_CupheadShootingState = Shoot::specialRight;
@@ -275,7 +272,7 @@ void Cuphead::ProcessKeys(const Uint8* pStates)
 					m_FrameToResetAnimation = 12;
 				}
 				// special up
-				else if (pStates[SDL_SCANCODE_UP] && pStates[SDL_SCANCODE_V] && m_SpecialAllowed)
+				else if (pStates[SDL_SCANCODE_UP] && pStates[SDL_SCANCODE_V] && m_SpecialAllowed && uiManager.SpecialAttackAllowed())
 				{
 					m_CupheadMovementState = Movement::lock;
 					m_CupheadShootingState = Shoot::specialUp;
@@ -293,7 +290,7 @@ void Cuphead::ProcessKeys(const Uint8* pStates)
 					m_FrameToResetAnimation = 0;
 				}
 				// special down
-				else if (pStates[SDL_SCANCODE_DOWN] && pStates[SDL_SCANCODE_V] && m_SpecialAllowed)
+				else if (pStates[SDL_SCANCODE_DOWN] && pStates[SDL_SCANCODE_V] && m_SpecialAllowed && uiManager.SpecialAttackAllowed())
 				{
 					m_CupheadMovementState = Movement::lock;
 					m_CupheadShootingState = Shoot::specialDown;
@@ -486,7 +483,7 @@ void Cuphead::ProcessKeys(const Uint8* pStates)
 						m_Velocity = Vector2f{ 0.f, 0.f };
 					}
 				}
-				else if (pStates[SDL_SCANCODE_V] && m_SpecialAllowed)
+				else if (pStates[SDL_SCANCODE_V] && m_SpecialAllowed && uiManager.SpecialAttackAllowed())
 				{
 					m_CupheadMovementState = Movement::lock;
 					
@@ -880,7 +877,7 @@ void Cuphead::Dash(float elapsedSec)
 	}
 }
 
-void Cuphead::CreateProjectiles(float elapsedSec, BulletManager& bulletManager)
+void Cuphead::CreateProjectiles(float elapsedSec, BulletManager& bulletManager, UIManager& uiManager)
 {
 	static float m_AccuSecProjectiles{ 0.f };
 	static float m_AccuSpecial{ 0.f };
@@ -903,18 +900,19 @@ void Cuphead::CreateProjectiles(float elapsedSec, BulletManager& bulletManager)
 		{
 			m_AccuSecProjectiles += elapsedSec;
 
-			if (m_AccuSecProjectiles >= 0.2f)
+			if (m_AccuSecProjectiles >= 0.15f)
 			{
 				bulletManager.AddProjectile(new PeaShooter(m_TexturePeaShooter,
-					Vector2f{ GetBounds().left + GetBounds().width / 2, GetBounds().bottom + GetBounds().height * 0.4f }, {}, m_ShootAngle, 1200.f, 1));
-				m_AccuSecProjectiles -= 0.2f;
+					Vector2f{ GetBounds().left + GetBounds().width / 2, GetBounds().bottom + GetBounds().height * 0.4f }, {}, m_ShootAngle, 1200.f, 1.f));
+				m_AccuSecProjectiles -= 0.15f;
 			}
 		}
 		else if (m_SpecialAllowed)
 		{
 			m_FiringSpecial = true;
+			uiManager.ChangeCards(-20);
 			bulletManager.AddProjectile(new PeaShooter(m_TextureSpecialPeaShooter,
-				Vector2f{ GetBounds().left + GetBounds().width / 2, GetBounds().bottom + GetBounds().height * 0.4f }, {}, m_ShootAngle, 900.f, 5, 4, 2));
+				Vector2f{ GetBounds().left + GetBounds().width / 2, GetBounds().bottom + GetBounds().height * 0.4f }, {}, m_ShootAngle, 900.f, 0.3f, 4, 2));
 			m_SpecialAllowed = false;
 		}
 	}
@@ -972,9 +970,9 @@ bool Cuphead::IsParrying() const
 	return m_CupheadMovementState == Movement::parry;
 }
 
-void Cuphead::Parry()
+void Cuphead::Parry(UIManager& uiManager)
 {
-	m_Parried = true;
+	uiManager.ChangeCards(20);
 	m_Velocity = Vector2f{ 0.f, 700.f };
 }
 
@@ -1026,16 +1024,6 @@ void Cuphead::UpdateFacingDirection(const Uint8* pStates)
 	}
 }
 
-void Cuphead::ResetState()
-{
-	if (m_IsGrounded && !m_IsDashing && m_CupheadMovementState != Movement::duck && m_CupheadMovementState != Movement::dash)
-	{
-		m_CupheadMovementState = Movement::idle;
-		m_CupheadShootingState = Shoot::notShooting;
-		m_Parried = false;
-	}
-}
-
 void Cuphead::TakeDamage(float elapsedSec)
 {
 	if (m_IsHit)
@@ -1048,6 +1036,7 @@ void Cuphead::TakeDamage(float elapsedSec)
 			m_IsHit = false;
 			invAccuSec -= m_InvincibilityDuration;
 		}
+		m_CupheadShootingState = Shoot::notShooting;
 	}
 }
 
@@ -1056,6 +1045,7 @@ void Cuphead::SetDeath()
 	if (m_HP <= 0)
 	{
 		m_IsAlive = false;
+		m_CupheadShootingState = Shoot::notShooting;
 	}
 }
 

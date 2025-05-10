@@ -8,11 +8,11 @@ public:
 	explicit MushroomCloud(const Texture* sprite, const Vector2f& startPos, const Vector2f& playerPos, float directionAngle, float speed, int damage = 1, bool parryable = false);
 
 	virtual void Draw() const override;
-	virtual void Update(float elapsedSec, const std::vector<Vector2f>& vertices, BulletManager& bulletManager, Cuphead& cuphead) override;
+	virtual void Update(float elapsedSec, const std::vector<Vector2f>& vertices, BulletManager& bulletManager, Cuphead& cuphead, UIManager& uiManager) override;
 	virtual void Animate(float elapsedSec) override;
 
 	virtual Circlef GetHitbox() const override;
-	virtual int Damage() const override;
+	virtual float Damage() const override;
 
 	virtual bool MarkedForDeletion() const override;
 

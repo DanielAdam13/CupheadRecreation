@@ -34,7 +34,7 @@ void TulipSeed::Draw() const
 	}
 }
 
-void TulipSeed::Update(float elapsedSec, const std::vector<Vector2f>& vertices, BulletManager& bulletManager, Cuphead& cuphead) // Moving seed by bezier curve
+void TulipSeed::Update(float elapsedSec, const std::vector<Vector2f>& vertices, BulletManager& bulletManager, Cuphead& cuphead, UIManager& uiManager) // Moving seed by bezier curve
 {
 	m_DelayAccuSec += elapsedSec;
 
@@ -69,7 +69,7 @@ Circlef TulipSeed::GetHitbox() const
 	return Circlef(m_Position, 30.f);
 }
 
-int TulipSeed::Damage() const
+float TulipSeed::Damage() const
 {
 	return m_Damage;
 }

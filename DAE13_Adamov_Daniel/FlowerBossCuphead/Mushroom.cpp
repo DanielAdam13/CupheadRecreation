@@ -5,7 +5,9 @@
 #include "Cuphead.h"
 #include "BulletManager.h"
 #include "MushroomCloud.h"
+#include "UIManager.h"
 #include <cassert>
+#include <iostream>
 
 Mushroom::Mushroom(const Texture* idleTexture, const Texture* boiledTexture, const Texture* attackTexture, const Texture* popTexture, const Texture* deathTexture,
 	const Texture* cloudTexture, const Vector2f& pos, int colNr, int rowNr, float range)
@@ -13,7 +15,7 @@ Mushroom::Mushroom(const Texture* idleTexture, const Texture* boiledTexture, con
 	m_CurrentTexture{ boiledTexture },
 	m_CurrentState{ MushroomState::boil },
 	m_LastMushroomState{},
-	m_Hp{ 10 },
+	m_Hp{ 15 },
 	m_TextureIdle{ idleTexture },
 	m_TextureAttack{ attackTexture },
 	m_CurrentSpriteColNr{ colNr },
@@ -50,7 +52,7 @@ void Mushroom::Draw() const
 	utils::FillEllipse(m_Positon, 5.f, 5.f);
 }
 
-void Mushroom::Update(float elapsedSec, BulletManager& bulletManager, Cuphead& cuphead)
+void Mushroom::Update(float elapsedSec, BulletManager& bulletManager, Cuphead& cuphead, UIManager& uiManager)
 {
 	UpdateFacingDirection(cuphead.GetPosition());
 
@@ -213,11 +215,16 @@ Rectf Mushroom::GetBounds() const
 	return Rectf(m_Positon.x - (m_CurrentFrameWidth * 0.75f) / 2, m_Positon.y, m_CurrentFrameWidth * 0.75f, m_CurrentFrameHeight * 0.75f);
 }
 
-void Mushroom::TakeDamage(int damage)
+void Mushroom::TakeDamage(float damage, UIManager& uiManager)
 {
 	if (m_CurrentState != MushroomState::boil && m_CurrentState != MushroomState::death)
 	{
 		m_Hp -= damage;
+		std::cout << m_Hp << std::endl;
+		if (damage != 0.3f)
+		{
+			uiManager.ChangeCards();
+		}
 	}
 }
 

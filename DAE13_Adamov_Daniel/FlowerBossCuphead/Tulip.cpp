@@ -6,12 +6,13 @@
 #include "utils.h"
 #include <iostream>
 #include "TulipSeed.h"
+#include "UIManager.h"
 #include <cassert>
 
 Tulip::Tulip(const Texture* idleTexture, const Texture* attackTexture, const Texture* seed, const Texture* explosion, const Vector2f& pos,
 	int colNr, int rowNr, float range)
 	:Mushroom::Mushroom(idleTexture, idleTexture, attackTexture, nullptr, nullptr, nullptr, pos, colNr, rowNr, range),
-	m_Hp{ 15 },
+	m_Hp{ 20.f },
 	m_CurrentState{},
 	m_TextureSeed{ seed },
 	m_TextureExplosion{ explosion },
@@ -31,7 +32,7 @@ void Tulip::Draw() const
 	Mushroom::Draw();
 }
 
-void Tulip::Update(float elapsedSec, BulletManager& bulletManager, Cuphead& cuphead)
+void Tulip::Update(float elapsedSec, BulletManager& bulletManager, Cuphead& cuphead, UIManager& uiManager)
 {
 	const float attackAnimDuration{ 1.5f };
 	const float attackCooldown{ 3.f };
@@ -110,9 +111,14 @@ Rectf Tulip::GetBounds() const
 	return Rectf(m_Positon.x - (m_CurrentFrameWidth * 0.75f) / 2, m_Positon.y, m_CurrentFrameWidth * 0.75f, m_CurrentFrameHeight * 0.75f);
 }
 
-void Tulip::TakeDamage(int damage)
+void Tulip::TakeDamage(float damage, UIManager& uiManager)
 {
 	m_Hp -= damage;
+	std::cout << m_Hp << std::endl;
+	if (damage != 0.3f)
+	{
+		uiManager.ChangeCards();
+	}
 }
 
 int Tulip::GetHealth() const

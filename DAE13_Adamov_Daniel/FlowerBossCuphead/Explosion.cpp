@@ -29,7 +29,7 @@ void Explosion::Draw() const
 	utils::DrawEllipse(Ellipsef{ GetHitbox().center, GetHitbox().radius, GetHitbox().radius});
 }
 
-void Explosion::Update(float elapsedSec, const std::vector<Vector2f>& vertices, BulletManager& bulletManager, Cuphead& cuphead)
+void Explosion::Update(float elapsedSec, const std::vector<Vector2f>& vertices, BulletManager& bulletManager, Cuphead& cuphead, UIManager& uiManager)
 {
 	m_AccuSec += elapsedSec;
 	if (m_AccuSec >= m_Duration)
@@ -54,7 +54,7 @@ Circlef Explosion::GetHitbox() const
 	return Circlef(m_Position.x, m_Position.y + GetBounds().height / 2, 45.f);
 }
 
-int Explosion::Damage() const
+float Explosion::Damage() const
 {
 	return m_Damage;
 }

@@ -37,7 +37,7 @@ void EnemyManager::DrawEnemies(const Rectf& cameraBox) const
 	}
 }
 
-void EnemyManager::UpdateEnemies(float elapsedSec, const Rectf& cameraBox, BulletManager& bulletManager, Cuphead& cuphead)
+void EnemyManager::UpdateEnemies(float elapsedSec, const Rectf& cameraBox, BulletManager& bulletManager, Cuphead& cuphead, UIManager& uiManager)
 {
 	for (size_t i{}; i < m_EnemiesVector.size(); ++i)
 	{
@@ -53,7 +53,7 @@ void EnemyManager::UpdateEnemies(float elapsedSec, const Rectf& cameraBox, Bulle
 				if (m_EnemiesVector[i]->GetBounds().left - cameraBox.left <= cameraBox.width * 1.5f ||
 					cameraBox.left - m_EnemiesVector[i]->GetBounds().left <= cameraBox.width * 0.5f)
 				{
-					m_EnemiesVector[i]->Update(elapsedSec, bulletManager, cuphead);
+					m_EnemiesVector[i]->Update(elapsedSec, bulletManager, cuphead, uiManager);
 				}
 			}
 		}
