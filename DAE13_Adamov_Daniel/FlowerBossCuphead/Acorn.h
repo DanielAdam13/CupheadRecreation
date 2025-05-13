@@ -2,7 +2,7 @@
 #include "Enemy.h"
 class Texture;
 
-class Acorn final : public Enemy
+class Acorn final : public Enemy // Enemy derived class that falls down from above
 {
 public:
 	explicit Acorn(const Texture* idle, const Texture* drop, const Vector2f& pos, const Vector2f& direction = Vector2f{ -1, 0 });
@@ -14,7 +14,6 @@ public:
 	virtual Rectf GetBounds() const override;
 
 	virtual void TakeDamage(float damage, UIManager& uiManager) override;
-	virtual int GetHealth() const override;
 
 	virtual bool MarkedForDeath() const override;
 

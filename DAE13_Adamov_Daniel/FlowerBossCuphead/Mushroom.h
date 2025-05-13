@@ -2,7 +2,7 @@
 #include "Enemy.h"
 class Texture;
 
-class Mushroom : public Enemy
+class Mushroom : public Enemy // The most complex AI in this cuphead level, spawns MushroomCloud
 {
 public:
 	explicit Mushroom(const Texture* idleTexture, const Texture* boiledTexture, const Texture* attackTexture, const Texture* popTexture, const Texture* deathTexture, 
@@ -15,7 +15,6 @@ public:
 	virtual Rectf GetBounds() const override;
 
 	virtual void TakeDamage(float damage, UIManager& uiManager) override;
-	virtual int GetHealth() const override;
 
 	virtual bool MarkedForDeath() const override;
 

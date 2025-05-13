@@ -114,16 +114,11 @@ Rectf Tulip::GetBounds() const
 void Tulip::TakeDamage(float damage, UIManager& uiManager)
 {
 	m_Hp -= damage;
-	std::cout << m_Hp << std::endl;
-	if (damage != 0.3f)
+	//std::cout << "HP: " << m_Hp << std::endl;
+	if (damage != 0.8f)
 	{
 		uiManager.ChangeCards();
 	}
-}
-
-int Tulip::GetHealth() const
-{
-	return m_Hp;
 }
 
 bool Tulip::MarkedForDeath() const

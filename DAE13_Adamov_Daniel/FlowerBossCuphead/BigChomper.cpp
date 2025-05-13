@@ -18,15 +18,15 @@ void BigChomper::Draw() const
 
 	this->m_Texture->Draw(Vector2f{ this->GetBounds().left, this->GetBounds().bottom }, srcRect);
 
-	// Hitbox
-	utils::SetColor(Color4f{ 1,0,0,1 });
-	utils::DrawRect(this->GetBounds());
-	utils::FillEllipse(m_Positon, 5.f, 5.f);
+	//// Hitbox
+	//utils::SetColor(Color4f{ 1,0,0,1 });
+	//utils::DrawRect(this->GetBounds());
+	//utils::FillEllipse(m_Positon, 5.f, 5.f);
 
-	// End Points Hitbox
-	utils::SetColor(Color4f{ 0, 0, 1, 1 });
-	utils::FillEllipse(m_LowestPoint, 5.f, 5.f);
-	utils::FillEllipse(m_HighestPoint, 5.f, 5.f);
+	//// End Points Hitbox
+	//utils::SetColor(Color4f{ 0, 0, 1, 1 });
+	//utils::FillEllipse(m_LowestPoint, 5.f, 5.f);
+	//utils::FillEllipse(m_HighestPoint, 5.f, 5.f);
 }
 
 void BigChomper::Update(float elapsedSec, BulletManager& bulletManager, Cuphead& cuphead, UIManager& uiManager)
@@ -71,11 +71,6 @@ Rectf BigChomper::GetBounds() const
 
 void BigChomper::TakeDamage(float damage, UIManager& uiManager)
 {
-}
-
-int BigChomper::GetHealth() const
-{
-	return 1;
 }
 
 bool BigChomper::MarkedForDeath() const

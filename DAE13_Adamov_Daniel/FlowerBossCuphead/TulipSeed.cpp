@@ -5,7 +5,7 @@
 #include "BulletManager.h"
 #include "Explosion.h"
 
-TulipSeed::TulipSeed(const Texture* sprite, const Texture* explosion, const Vector2f& spawnPos, const Vector2f& playerPos, float directionAngle, float speed, int damage)
+TulipSeed::TulipSeed(const Texture* sprite, const Texture* explosion, const Vector2f& spawnPos, const Vector2f& playerPos, float directionAngle, float speed, float damage)
 	:Projectile::Projectile(sprite, spawnPos, playerPos, directionAngle, speed, damage),
 	m_ExplosionTexture{ explosion },
 	m_InitialPlayerPoint{ playerPos },
@@ -28,13 +28,14 @@ void TulipSeed::Draw() const
 			m_Texture->Draw(Vector2f{ -m_Texture->GetWidth() / 2, -m_Texture->GetHeight() / 2 }, {});
 		glPopMatrix();
 
-		utils::SetColor(Color4f{ 1,0,0,1 });
+		// Hitbox
+		/*utils::SetColor(Color4f{ 1,0,0,1 });
 		utils::DrawEllipse(GetHitbox().center, 30.f, 30.f);
-		utils::FillEllipse(m_Position, 5.f, 5.f);
+		utils::FillEllipse(m_Position, 5.f, 5.f);*/
 	}
 }
 
-void TulipSeed::Update(float elapsedSec, const std::vector<Vector2f>& vertices, BulletManager& bulletManager, Cuphead& cuphead, UIManager& uiManager) // Moving seed by bezier curve
+void TulipSeed::Update(float elapsedSec, const std::vector<std::vector<Vector2f>>& vertices, BulletManager& bulletManager, Cuphead& cuphead, UIManager& uiManager) // Moving seed by bezier curve
 {
 	m_DelayAccuSec += elapsedSec;
 
@@ -86,16 +87,20 @@ Vector2f TulipSeed::CalculateBezierPoint(float t) const // Formula for bezier cu
 	u * u * m_StartPoint.y + 2 * u * t * m_ControlPoint.y + t * t * m_InitialPlayerPoint.y };
 }
 
-void TulipSeed::DissapearOnGroundImpact(const std::vector<Vector2f>& vertices, BulletManager& bulletManager)
+void TulipSeed::DissapearOnGroundImpact(const std::vector<std::vector<Vector2f>>& vertices, BulletManager& bulletManager)
 {
 	utils::HitInfo hitInfo;
 	Vector2f first{ this->GetHitbox().center.x,this->GetHitbox().center.y };
 	Vector2f second{ this->GetHitbox().center.x, this->GetHitbox().center.y + this->GetHitbox().radius };
 
-	if (utils::Raycast(vertices, first, second, hitInfo))
+	for (size_t i{}; i < vertices.size(); ++i)
 	{
-		bulletManager.AddProjectile(new Explosion(m_ExplosionTexture, hitInfo.intersectPoint));
+		if (utils::Raycast(vertices[i], first, second, hitInfo))
+		{
+			bulletManager.AddProjectile(new Explosion(m_ExplosionTexture, hitInfo.intersectPoint));
 
-		m_DeleteMarker = true;
+			m_DeleteMarker = true;
+		}
 	}
+	
 }

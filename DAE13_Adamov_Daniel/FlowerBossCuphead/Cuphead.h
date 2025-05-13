@@ -5,7 +5,7 @@ class Texture;
 class BulletManager;
 class UIManager;
 
-class Cuphead final
+class Cuphead final // Character controller
 {
 public:
 	explicit Cuphead(const Vector2f& position, bool playIntro, int hp, const Texture* peaShooter, const Texture* peaSpecial);
@@ -16,7 +16,7 @@ public:
 	~Cuphead();
 
 	void Draw() const;
-	void Update(float elapsedSec, const Uint8* pStates, const std::vector<Vector2f>& vertices, BulletManager& bulletManager, UIManager& uiManager);
+	void Update(float elapsedSec, const Uint8* pStates, const std::vector<std::vector<Vector2f>>& vertices, BulletManager& bulletManager, UIManager& uiManager);
 	
 	void StartDash();
 	void ToggleParryState();
@@ -130,7 +130,7 @@ private:
 	void ProcessKeys(const Uint8* pStates, UIManager& uiManager);
 	void AnimateCuphead(float elapsedSec);
 	void ResetAnimation(int frameToReset);
-	void HandleRaycast(float elapsedSec, const std::vector<Vector2f>& vertices);
+	void HandleRaycast(float elapsedSec, const std::vector<std::vector<Vector2f>>& vertices);
 	void Dash(float elapsedSec);
 	void CreateProjectiles(float elapsedSec, BulletManager& bulletManager, UIManager& uiManager);
 

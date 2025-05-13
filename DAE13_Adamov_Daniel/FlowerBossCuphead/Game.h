@@ -31,9 +31,9 @@ public:
 
 private:
 	// VARIABLES
-	std::vector<Vector2f> m_Vertices;
+	std::vector<std::vector<Vector2f>> m_Vertices;
 	Texture* m_ForestBackground1;
-	Texture* m_ForectBackground2;
+	Texture* m_ForestBackground2;
 
 	Camera m_Camera;
 
@@ -41,9 +41,24 @@ private:
 	BulletManager m_PlayerBulletManager;
 	BulletManager m_EnemyBulletManager;
 
+	enum class GameState
+	{
+		intro,
+		gameplay,
+		pause,
+		death,
+		win
+	};
+	GameState m_CurrentGameState;
+
 	const Texture* m_HealthSprite;
 	const Texture* m_CardsSprite;
+	const Texture* m_IntroAnnouncment;
+	const Texture* m_DeathAnnouncment;
+	const Texture* m_BravoAnnouncment;
+	const Texture* m_PauseScreen;
 	UIManager m_UIManager;
+	
 
 	const Texture* m_PeaShooterSprite;
 	const Texture* m_PeaSpecialSprite;
@@ -67,10 +82,18 @@ private:
 	const Texture* m_AcornIdle;
 	const Texture* m_AcornDrop;
 
+	const float m_ScaledLevelWidth;
+	const float m_ScaledLevelHeight;
+
 	// FUNCTIONS
 	void Initialize();
 	void Cleanup( );
 	void ClearBackground( ) const;
+
+	void ManagePlayerProjectiles();
+	void ManageTakingDamageCuphead();
+	
+	void DrawScaledObjects() const;
 
 	void SpawnAcorns(float elapsedSec);
 };

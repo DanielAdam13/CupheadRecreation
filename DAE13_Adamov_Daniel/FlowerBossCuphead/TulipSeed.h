@@ -7,10 +7,10 @@ class Cuphead;
 class TulipSeed final: public Projectile // Tulip's attack projectile
 {
 public:
-	explicit TulipSeed(const Texture* sprite, const Texture* explosion, const Vector2f& spawnPos, const Vector2f& playerPos, float directionAngle, float speed, int damage = 1);
+	explicit TulipSeed(const Texture* sprite, const Texture* explosion, const Vector2f& spawnPos, const Vector2f& playerPos, float directionAngle, float speed, float damage = 1);
 
 	virtual void Draw() const override;
-	virtual void Update(float elapsedSec, const std::vector<Vector2f>& vertices, BulletManager& bulletManager, Cuphead& cuphead, UIManager& uiManager) override;
+	virtual void Update(float elapsedSec, const std::vector<std::vector<Vector2f>>& vertices, BulletManager& bulletManager, Cuphead& cuphead, UIManager& uiManager) override;
 	virtual void Animate(float elapsedSec) override;
 
 	virtual Circlef GetHitbox() const override;
@@ -24,7 +24,7 @@ protected:
 private:
 	virtual Rectf GetBounds() const override;
 	Vector2f CalculateBezierPoint(float t) const;
-	virtual void DissapearOnGroundImpact(const std::vector<Vector2f>& vertices, BulletManager& bulletManager);
+	virtual void DissapearOnGroundImpact(const std::vector<std::vector<Vector2f>>& vertices, BulletManager& bulletManager);
 
 	const Texture* m_ExplosionTexture;
 

@@ -21,15 +21,15 @@ void Explosion::Draw() const
 	m_Texture->Draw(GetBounds(), srcRect);
 	
 	// Hitbox
-	utils::SetColor(Color4f{ 1,0,0,1 });
+	/*utils::SetColor(Color4f{ 1,0,0,1 });
 	utils::DrawRect(GetBounds());
 	utils::FillEllipse(m_Position, 15.f, 15.f);
 
 	utils::SetColor(Color4f{ 1,0,1,1 });
-	utils::DrawEllipse(Ellipsef{ GetHitbox().center, GetHitbox().radius, GetHitbox().radius});
+	utils::DrawEllipse(Ellipsef{ GetHitbox().center, GetHitbox().radius, GetHitbox().radius});*/
 }
 
-void Explosion::Update(float elapsedSec, const std::vector<Vector2f>& vertices, BulletManager& bulletManager, Cuphead& cuphead, UIManager& uiManager)
+void Explosion::Update(float elapsedSec, const std::vector<std::vector<Vector2f>>& vertices, BulletManager& bulletManager, Cuphead& cuphead, UIManager& uiManager)
 {
 	m_AccuSec += elapsedSec;
 	if (m_AccuSec >= m_Duration)

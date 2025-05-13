@@ -2,13 +2,13 @@
 #include "Projectile.h"
 class Cuphead;
 
-class MushroomCloud final : public Projectile
+class MushroomCloud final : public Projectile // the spawned projectile from Mushroom
 {
 public:
-	explicit MushroomCloud(const Texture* sprite, const Vector2f& startPos, const Vector2f& playerPos, float directionAngle, float speed, int damage = 1, bool parryable = false);
+	explicit MushroomCloud(const Texture* sprite, const Vector2f& startPos, const Vector2f& playerPos, float directionAngle, float speed, float damage = 1, bool parryable = false);
 
 	virtual void Draw() const override;
-	virtual void Update(float elapsedSec, const std::vector<Vector2f>& vertices, BulletManager& bulletManager, Cuphead& cuphead, UIManager& uiManager) override;
+	virtual void Update(float elapsedSec, const std::vector<std::vector<Vector2f>>& vertices, BulletManager& bulletManager, Cuphead& cuphead, UIManager& uiManager) override;
 	virtual void Animate(float elapsedSec) override;
 
 	virtual Circlef GetHitbox() const override;

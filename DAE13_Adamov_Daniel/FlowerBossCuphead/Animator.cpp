@@ -106,6 +106,11 @@ void Animator::SkipFrame(int frameToSkip)
 
 void Animator::BounceBetween(float elapsedSec, int firstFrame, int lastFrame, float maxFrameSec)
 {
+	if (m_FrameNr < firstFrame || m_FrameNr > lastFrame) // !!!
+	{
+		m_FrameNr = firstFrame;
+	}
+
 	m_AccuSec += elapsedSec;
 	
 	if (m_AccuSec >= maxFrameSec)

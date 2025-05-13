@@ -1,5 +1,5 @@
 #pragma once
-class Animator
+class Animator // Used for changing the current frame number in pretty much all game objects
 {
 public:
 	explicit Animator();

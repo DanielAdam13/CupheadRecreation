@@ -2,7 +2,7 @@
 #include "Mushroom.h"
 class Texture;
 
-class Tulip final : public Mushroom
+class Tulip final : public Mushroom // Shoots at player while spawning TulipSeed projectile
 {
 public:
 	explicit Tulip(const Texture* idleTexture, const Texture* attackTexture, const Texture* seed, const Texture* explosion, const Vector2f& pos, int colNr = 5, int rowNr = 4, float range = 600.f);
@@ -14,7 +14,7 @@ public:
 	virtual Rectf GetBounds() const override;
 
 	virtual void TakeDamage(float damage, UIManager& uiManager) override;
-	virtual int GetHealth() const override;
+
 	virtual bool MarkedForDeath() const override;
 
 private:

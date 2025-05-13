@@ -11,28 +11,35 @@
 #include "Tulip.h"
 #include "Acorn.h"
 #include "Projectile.h"
+#include "SVGParser.h"
 
 Game::Game(const Window& window)
 	:BaseGame{ window },
 	m_Vertices{},
-	m_ForestBackground1{ new Texture("ForestFollies_Background_First.png") },
-	m_ForectBackground2{ new Texture("ForestFollies_Background_Second.png") },
-	m_Camera{ GetViewPort().width, GetViewPort().height },
+	m_ForestBackground1{ new Texture("ForestFollies_Background_First_Smaller.png") },
+	m_ForestBackground2{ new Texture("ForestFollies_Background_Second_Smaller.png") },
+	m_Camera{ GetViewPort().width, GetViewPort().height, (GetViewPort().width / (m_ForestBackground1->GetWidth() + m_ForestBackground2->GetWidth())) * 9.95f
+	, (GetViewPort().height / m_ForestBackground1->GetHeight()) * 1.29f },
 	m_EnemyManager{},
 	m_PlayerBulletManager{},
 	m_EnemyBulletManager{},
+	m_CurrentGameState{ GameState::intro },
 	m_HealthSprite{ new Texture("UI/Health_Stages.png") },
 	m_CardsSprite{ new Texture("UI/Cards_Stages.png") },
-	m_UIManager{ m_HealthSprite, m_CardsSprite },
+	m_IntroAnnouncment{ new Texture("UI/Stages_Intro.png") }, // + ~60 mb memory
+	m_DeathAnnouncment{ new Texture("UI/YouDied_Stages.png") }, // + ~45 mb memory
+	m_BravoAnnouncment{ new Texture("UI/Bravo_Sprite.png") }, // + 200+ mb !!!!!!!!!!!!!!!!!!???
+	m_PauseScreen{ new Texture("UI/Pause_Screen.bmp") }, // 20 mb
+	m_UIManager{ m_HealthSprite, m_CardsSprite, m_IntroAnnouncment, m_DeathAnnouncment, m_BravoAnnouncment, m_PauseScreen },
 	m_PeaShooterSprite{ new Texture("Projectile_Loop.png") },
 	m_PeaSpecialSprite{ new Texture("Projectile_Special_Loop.png") },
-	m_Cuphead{ Vector2f{GetViewPort().width / 2, 100.f}, true, 3, m_PeaShooterSprite, m_PeaSpecialSprite },
+	m_Cuphead{ Vector2f{ GetViewPort().width / 2, GetViewPort().height * 7 / 36.f}, (m_CurrentGameState == GameState::intro), 3, m_PeaShooterSprite, m_PeaSpecialSprite},
 	m_SpikeSprite{ new Texture("Run'N'Gun/Sprite_Spike.png") },
 	m_ChomperSprite{ new Texture("Run'N'Gun/Sprite_Chomper.png") },
 	m_TulipIdle{ new Texture("Run'N'Gun/Tulip/Sprite_Tulip_Idle.png") },
 	m_TulipAttack{ new Texture("Run'N'Gun/Tulip/Sprite_Tulip_Attack.png") },
 	m_TulipSeed{ new Texture("Run'N'Gun/Tulip/Sprite_Tulip_Seed.png") },
-	m_TulipSeedExplosion{ new Texture("Run'N'Gun/Tulip/Sprite_Tulip_Explosion.png") }, // ~25 mb memory?
+	m_TulipSeedExplosion{ new Texture("Run'N'Gun/Tulip/Sprite_Tulip_Explosion.png") }, // + ~25 mb memory
 	m_MushroomIdle{ new Texture("Run'N'Gun/Mushroom/Sprite_Mushroom_Idle.png") },
 	m_MushroomAttack{ new Texture("Run'N'Gun/Mushroom/Sprite_Mushroom_Attack.png") },
 	m_MushroomPop{ new Texture("Run'N'Gun/Mushroom/Sprite_Mushroom_Pop.png") },
@@ -40,9 +47,11 @@ Game::Game(const Window& window)
 	m_MushroomDeath{ new Texture("Run'N'Gun/Mushroom/Sprite_Mushroom_Death.png") },
 	m_MushroomCloud{ new Texture("Run'N'Gun/Mushroom/Sprite_Mushroom_Cloud.png") },
 	m_AcornIdle{ new Texture("Run'N'Gun/Acorn/Sprite_Acorn_Fly.png") },
-	m_AcornDrop{ new Texture("Run'N'Gun/Acorn/Sprite_Acorn_Drop.png") }
+	m_AcornDrop{ new Texture("Run'N'Gun/Acorn/Sprite_Acorn_Drop.png") },
+	m_ScaledLevelWidth{GetViewPort().width * 9.95f},
+	m_ScaledLevelHeight{ GetViewPort().height * 1.29f }
 {
-	Initialize();
+	Initialize(); 
 }
 
 Game::~Game( )
@@ -61,38 +70,17 @@ void Game::Initialize( )
 
 	m_EnemyManager.AddEnemy(new Spike(m_SpikeSprite, Vector2f{ 1700.f, 250.f }, Vector2f{ 500.f, 150.f }, Vector2f{ 500.f, 350.f }, 250.f));
 
-	m_EnemyManager.AddEnemy(new BigChomper(m_ChomperSprite, Vector2f{ 2800.f, (m_ChomperSprite->GetHeight() / 4) / 2 },
-		Vector2f{ 2800.f, -(m_ChomperSprite->GetHeight() / 4) * 1.5f }, Vector2f{ 2800.f, 450.f }, 600.f));
+	/*m_EnemyManager.AddEnemy(new BigChomper(m_ChomperSprite, Vector2f{ 2800.f, (m_ChomperSprite->GetHeight() / 4) / 2 },
+		Vector2f{ 2800.f, -(m_ChomperSprite->GetHeight() / 4) * 1.5f }, Vector2f{ 2800.f, 450.f }, 600.f));*/
 
 	m_EnemyManager.AddEnemy(new Tulip(m_TulipIdle, m_TulipAttack, m_TulipSeed, m_TulipSeedExplosion, Vector2f{ 3850.f, 280.f }));
-	m_EnemyManager.AddEnemy(new Tulip(m_TulipIdle, m_TulipAttack, m_TulipSeed, m_TulipSeedExplosion, Vector2f{ 1000.f, 170.f }, 5, 4, m_Camera.GetCuurentCameraBounds().width / 2));
+	//m_EnemyManager.AddEnemy(new Tulip(m_TulipIdle, m_TulipAttack, m_TulipSeed, m_TulipSeedExplosion, Vector2f{ 1000.f, 170.f }, 5, 4, m_Camera.GetCuurentCameraBounds().width / 2));
 
-	m_EnemyManager.AddEnemy(new Mushroom(m_MushroomIdle, m_MushroomBoil, m_MushroomAttack, m_MushroomPop, m_MushroomDeath, m_MushroomCloud, Vector2f{ 2200.f, 170.f }, 
+	m_EnemyManager.AddEnemy(new Mushroom(m_MushroomIdle, m_MushroomBoil, m_MushroomAttack, m_MushroomPop, m_MushroomDeath, m_MushroomCloud, 
+		Vector2f{ 2800, 150.f},
 		1, 1, m_Camera.GetCuurentCameraBounds().width / 2.5f));
 
-	m_Vertices.reserve(20);
-	m_Vertices.push_back(Vector2f{ 50.f, 170.f });
-	m_Vertices.push_back(Vector2f{ 50.f, GetViewPort().height + 200.f });
-	m_Vertices.push_back(Vector2f{ 11800.f, GetViewPort().height + 200.f });
-	m_Vertices.push_back(Vector2f{ 11800.f, 400.f });
-
-	m_Vertices.push_back(Vector2f{ 10000.f, 420.f });
-
-	m_Vertices.push_back(Vector2f{ 7400.f, 230.f });
-	m_Vertices.push_back(Vector2f{ 6700.f, 500.f });
-
-	m_Vertices.push_back(Vector2f{ 4000.f, 380.f });
-	m_Vertices.push_back(Vector2f{ 4000.f, 0.f });
-
-	m_Vertices.push_back(Vector2f{ 4000.f, 190.f });
-	m_Vertices.push_back(Vector2f{ 4000.f, 280.f });
-	m_Vertices.push_back(Vector2f{ 3700.f, 280.f });
-	m_Vertices.push_back(Vector2f{ 3700.f, 190.f });
-
-	m_Vertices.push_back(Vector2f{ 3200.f, 170.f });
-	m_Vertices.push_back(Vector2f{ 3200.f, 270.f });
-	m_Vertices.push_back(Vector2f{ 3100.f, 270.f });
-	m_Vertices.push_back(Vector2f{ 3100.f, 170.f });
+	SVGParser::GetVerticesFromSvgFile("ForestFollies_Background_Finished_Smaller_3.svg", m_Vertices);
 }
 
 void Game::Cleanup( )
@@ -100,13 +88,21 @@ void Game::Cleanup( )
 	delete m_ForestBackground1;
 	m_ForestBackground1 = nullptr;
 
-	delete m_ForectBackground2;
-	m_ForectBackground2 = nullptr;
+	delete m_ForestBackground2;
+	m_ForestBackground2 = nullptr;
 
 	delete m_HealthSprite;
 	m_HealthSprite = nullptr;
 	delete m_CardsSprite;
 	m_CardsSprite = nullptr;
+	delete m_IntroAnnouncment;
+	m_IntroAnnouncment = nullptr;
+	delete m_DeathAnnouncment;
+	m_DeathAnnouncment = nullptr;
+	delete m_BravoAnnouncment;
+	m_BravoAnnouncment = nullptr;
+	delete m_PauseScreen;
+	m_PauseScreen = nullptr;
 
 	delete m_PeaShooterSprite;
 	m_PeaShooterSprite = nullptr;
@@ -146,131 +142,103 @@ void Game::Cleanup( )
 	delete m_AcornDrop;
 	m_AcornDrop = nullptr;
 
+	for (size_t i{}; i < m_Vertices.size(); ++i)
+	{
+		m_Vertices[i].clear();
+	}
 	m_Vertices.clear();
 }
 
 void Game::Update( float elapsedSec )
 {
-	// Check keyboard state
-	const Uint8 *pStates = SDL_GetKeyboardState( nullptr );
+	static float m_AccuSec{ 0.f };
 
-	// updates cuphead and pushes projectiles to player BulletManager
-	m_Cuphead.Update(elapsedSec, pStates, m_Vertices, m_PlayerBulletManager, m_UIManager);
-
-	// update enemies and enemy bullets if player is alive
-	if (m_Cuphead.GetHealth() > 0) 
-	{
-		SpawnAcorns(elapsedSec);
-
-		// update enemies and pushes projectiles to enemy BulletManager
-		m_EnemyManager.UpdateEnemies(elapsedSec, m_Camera.GetCuurentCameraBounds(), m_EnemyBulletManager, m_Cuphead, m_UIManager);
 	
-		m_EnemyBulletManager.UpdateActiveBullets(elapsedSec, m_Camera.GetCuurentCameraBounds(), m_Vertices, m_Cuphead, m_UIManager);
+	
+	switch (m_CurrentGameState)
+	{
+	case Game::GameState::intro:
+		m_AccuSec += elapsedSec;
+		if (m_AccuSec >= 2.8f)
+		{
+			m_CurrentGameState = GameState::gameplay;
+			m_AccuSec -= 2.8f;
+		}
+		break;
+	case Game::GameState::death:
+		//m_AccuSec += elapsedSec;
+		break;
+	}
 
-		// follow player if alive
-		m_Camera.Aim(12400.f, 760.f, m_Cuphead.GetPosition());
+	if (m_CurrentGameState != GameState::pause)
+	{
+		// Check keyboard state
+		const Uint8* pStates = SDL_GetKeyboardState(nullptr);
+
+		// updates cuphead and pushes projectiles to player BulletManager
+		m_Cuphead.Update(elapsedSec, pStates, m_Vertices, m_PlayerBulletManager, m_UIManager);
+
+		// update enemies and enemy bullets if player is alive
+		if (m_Cuphead.GetHealth() > 0)
+		{
+			SpawnAcorns(elapsedSec);
+
+			// update enemies and pushes projectiles to enemy BulletManager
+			m_EnemyManager.UpdateEnemies(elapsedSec, m_Camera.GetCuurentCameraBounds(), m_EnemyBulletManager, m_Cuphead, m_UIManager);
+
+			m_EnemyBulletManager.UpdateActiveBullets(elapsedSec, m_Camera.GetCuurentCameraBounds(), m_Vertices, m_Cuphead, m_UIManager);
+
+			Vector2f transf{ m_Cuphead.GetPosition().x * (GetViewPort().width / (m_ForestBackground1->GetWidth() + m_ForestBackground2->GetWidth())) * 9.95f,
+			   m_Cuphead.GetPosition().y * (GetViewPort().height / m_ForestBackground1->GetHeight()) * 1.29f };
+			// follow player if alive
+			m_Camera.Aim(m_ScaledLevelWidth, m_ScaledLevelHeight, transf);
+		}
+		else
+		{
+			m_CurrentGameState = GameState::death;
+			// unfollow if player dead
+			Vector2f transf{ m_Cuphead.GetPlaceOfDeath().x * (GetViewPort().width / (m_ForestBackground1->GetWidth() + m_ForestBackground2->GetWidth())) * 9.95f,
+			   m_Cuphead.GetPlaceOfDeath().y * (GetViewPort().height / m_ForestBackground1->GetHeight()) * 1.29f };
+			m_Camera.Aim(m_ScaledLevelWidth, m_ScaledLevelHeight, transf);
+		}
+
+		// animate enemy bullets even if player is dead
+		m_EnemyBulletManager.AnimateActiveBullets(elapsedSec);
+
+		// animate enemies even if player is dead
+		m_EnemyManager.AnimateEnemies(elapsedSec, m_Camera.GetCuurentCameraBounds());
+
+		// update and animate even if player is dead
+		m_PlayerBulletManager.UpdateActiveBullets(elapsedSec, m_Camera.GetCuurentCameraBounds(), m_Vertices, m_Cuphead, m_UIManager);
+
+		m_PlayerBulletManager.AnimateActiveBullets(elapsedSec);
+
+		// delete player bullets if they collide with enemy and deal damage
+		ManagePlayerProjectiles();
+
+		ManageTakingDamageCuphead();
 	}
 	else
 	{
-		// unfollow if player dead
-		m_Camera.Aim(12400.f, 760.f, m_Cuphead.GetPlaceOfDeath());
-		
+		// follow player if paused
+		Vector2f transf{ m_Cuphead.GetPosition().x * (GetViewPort().width / (m_ForestBackground1->GetWidth() + m_ForestBackground2->GetWidth())) * 9.95f,
+			   m_Cuphead.GetPosition().y * (GetViewPort().height / m_ForestBackground1->GetHeight()) * 1.29f };
+		m_Camera.Aim(m_ScaledLevelWidth, m_ScaledLevelHeight, transf);
 	}
 
-	// animate enemy bullets even if player is dead
-	m_EnemyBulletManager.AnimateActiveBullets(elapsedSec);
-
-	// animate enemies even if player is dead
-	m_EnemyManager.AnimateEnemies(elapsedSec, m_Camera.GetCuurentCameraBounds());
-	
-	// update and animate even if player is dead
-	m_PlayerBulletManager.UpdateActiveBullets(elapsedSec, m_Camera.GetCuurentCameraBounds(), m_Vertices, m_Cuphead, m_UIManager);
-
-	m_PlayerBulletManager.AnimateActiveBullets(elapsedSec);
-
-	// delete player bullets if they collide with enemy and deal damage
-	for (int j{}; j < m_EnemyManager.GetVectorSize(); ++j)
-	{
-		if (m_EnemyManager[j] != nullptr)
-		{
-			for (int i{}; i < m_PlayerBulletManager.GetVectorSize(); ++i)
-			{
-				if (m_PlayerBulletManager[i] != nullptr)
-				{
-					if (utils::IsOverlapping(m_EnemyManager[j]->GetBounds(), m_PlayerBulletManager[i]->GetHitbox()))
-					{
-						m_EnemyManager[j]->TakeDamage(m_PlayerBulletManager[i]->Damage(), m_UIManager);
-
-						if (m_PlayerBulletManager[i]->Damage() - 0.3f > 0.001f)
-						{
-							m_PlayerBulletManager.RemoveProjectile(i);
-						}
-					}
-				}
-			}
-		}
-	}
-
-	// deal damage to cuphead by enemy collisions
-	for (int i{}; i < m_EnemyManager.GetVectorSize(); ++i)
-	{
-		if (m_EnemyManager[i] != nullptr)
-		{
-			if (utils::IsOverlapping(m_EnemyManager[i]->GetBounds(), m_Cuphead.GetHitbox()) && m_Cuphead.GetHealth() > 0)
-			{
-				m_Cuphead.Hit();
-			}
-		}
-	}
-
-	// deal damage to cuphead by projectiles
-	for (int i{}; i < m_EnemyBulletManager.GetVectorSize(); ++i)
-	{
-		if (m_EnemyBulletManager[i] != nullptr)
-		{
-			if (utils::IsOverlapping(m_Cuphead.GetHitbox(), m_EnemyBulletManager[i]->GetHitbox()))
-			{
-				m_Cuphead.Hit();
-			}
-		}
-	}
-
-	m_UIManager.Update(elapsedSec, m_Cuphead.GetHealth());
+	m_UIManager.Update(elapsedSec, m_Cuphead.GetHealth(), int(m_CurrentGameState));
 }
 
 void Game::Draw( ) const
 {
 	ClearBackground( );
-
-	glPushMatrix();
-		glScalef(0.66f, 0.67f, 0.f);
-		m_ForestBackground1->Draw();
-		m_ForectBackground2->Draw(Rectf{m_ForestBackground1->GetWidth(), 0.f, m_ForectBackground2->GetWidth(), m_ForectBackground2->GetHeight()});
-	glPopMatrix();
-
-	m_Cuphead.Draw();
+	
+	m_Camera.Apply();
+	
+	DrawScaledObjects();
 
 	m_Camera.DrawBorderOverlay(GetViewPort().height / 20);
-
-	// Hitbox
-	utils::SetColor(Color4f{ 1,0,1,1 });
-	utils::DrawPolygon(m_Vertices, true, 2.f);
-
-	m_PlayerBulletManager.DrawActiveBullets();
-	m_EnemyBulletManager.DrawActiveBullets();
-
-	m_EnemyManager.DrawEnemies(m_Camera.GetCuurentCameraBounds());
-
-	m_UIManager.Draw(m_Camera.GetCuurentCameraBounds());
-
 	m_Camera.Reset();
-
-	if (m_Cuphead.GetHealth() <= 0)
-	{
-		utils::SetColor(Color4f{ 0, 0, 0, 0.5f });
-		utils::FillRect(GetViewPort());
-	}
-	
 }
 
 void Game::ProcessKeyDownEvent( const SDL_KeyboardEvent & e )
@@ -283,6 +251,16 @@ void Game::ProcessKeyDownEvent( const SDL_KeyboardEvent & e )
 		break;
 	case SDLK_z:
 		m_Cuphead.ToggleParryState();
+		break;
+	case SDLK_ESCAPE:
+		if (m_CurrentGameState == GameState::gameplay)
+		{
+			m_CurrentGameState = GameState::pause;
+		}
+		else if (m_CurrentGameState == GameState::pause)
+		{
+			m_CurrentGameState = GameState::gameplay;
+		}
 		break;
 	}
 }
@@ -338,11 +316,92 @@ void Game::ClearBackground( ) const
 	glClear( GL_COLOR_BUFFER_BIT );
 }
 
+void Game::ManagePlayerProjectiles()
+{
+	for (int j{}; j < m_EnemyManager.GetVectorSize(); ++j)
+	{
+		if (m_EnemyManager[j] != nullptr)
+		{
+			for (int i{}; i < m_PlayerBulletManager.GetVectorSize(); ++i)
+			{
+				if (m_PlayerBulletManager[i] != nullptr)
+				{
+					if (utils::IsOverlapping(m_EnemyManager[j]->GetBounds(), m_PlayerBulletManager[i]->GetHitbox()))
+					{
+						m_EnemyManager[j]->TakeDamage(m_PlayerBulletManager[i]->Damage(), m_UIManager);
+
+						if (m_PlayerBulletManager[i]->Damage() - 0.8f > 0.001f)
+						{
+							m_PlayerBulletManager.RemoveProjectile(i);
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+void Game::ManageTakingDamageCuphead()
+{
+	// deal damage to cuphead by enemy collisions
+	for (int i{}; i < m_EnemyManager.GetVectorSize(); ++i)
+	{
+		if (m_EnemyManager[i] != nullptr)
+		{
+			if (utils::IsOverlapping(m_EnemyManager[i]->GetBounds(), m_Cuphead.GetHitbox()) && m_Cuphead.GetHealth() > 0)
+			{
+				m_Cuphead.Hit();
+			}
+		}
+	}
+
+	// deal damage to cuphead by projectiles
+	for (int i{}; i < m_EnemyBulletManager.GetVectorSize(); ++i)
+	{
+		if (m_EnemyBulletManager[i] != nullptr)
+		{
+			if (utils::IsOverlapping(m_Cuphead.GetHitbox(), m_EnemyBulletManager[i]->GetHitbox()))
+			{
+				m_Cuphead.Hit();
+			}
+		}
+	}
+}
+
+void Game::DrawScaledObjects() const
+{
+	glPushMatrix();
+
+	glScalef((GetViewPort().width / (m_ForestBackground1->GetWidth() + m_ForestBackground2->GetWidth())) * 9.95f, // x ratio
+		(GetViewPort().height / m_ForestBackground1->GetHeight()) * 1.29f, // y ratio
+		0.f);
+
+	m_ForestBackground1->Draw();
+	m_ForestBackground2->Draw(Rectf{ m_ForestBackground1->GetWidth(), 0.f, m_ForestBackground2->GetWidth(), m_ForestBackground2->GetHeight() });
+	m_Cuphead.Draw();
+
+	// Hitbox
+	/*utils::SetColor(Color4f{ 1,0,1,1 });
+	for (size_t i{}; i < m_Vertices.size(); ++i)
+	{
+		utils::DrawPolygon(m_Vertices[i], true, 2.f);
+	}*/
+
+	m_PlayerBulletManager.DrawActiveBullets();
+	m_EnemyBulletManager.DrawActiveBullets();
+
+	m_EnemyManager.DrawEnemies(m_Camera.GetCuurentCameraBounds());
+	m_UIManager.Draw(m_Camera.GetCuurentCameraBounds());
+
+
+	glPopMatrix();
+}
+
 void Game::SpawnAcorns(float elapsedSec)
 {
 	static bool allowedSpawn{ false };
 
-	if (m_Cuphead.GetPosition().x >= 4000.f)
+	if (!allowedSpawn && m_Cuphead.GetPosition().x >= (m_ForestBackground1->GetWidth() + m_ForestBackground2->GetWidth()) / 3)
 	{
 		allowedSpawn = true; // stays on
 	}
@@ -359,14 +418,14 @@ void Game::SpawnAcorns(float elapsedSec)
 			if (randNr == 0) // from left
 			{
 				m_EnemyManager.AddEnemy(new Acorn(m_AcornIdle, m_AcornDrop,
-					Vector2f{ m_Camera.GetCuurentCameraBounds().left - m_Camera.GetCuurentCameraBounds().width * 0.2f, 
+					Vector2f{ m_Camera.GetCuurentCameraBounds().left - m_Camera.GetCuurentCameraBounds().width * 0.05f, 
 					m_Camera.GetCuurentCameraBounds().bottom + m_Camera.GetCuurentCameraBounds().height * 0.9f},
 					Vector2f{ 1, 0 }));
 			}
-			else
+			else // from right
 			{
 				m_EnemyManager.AddEnemy(new Acorn(m_AcornIdle, m_AcornDrop,
-					Vector2f{ m_Camera.GetCuurentCameraBounds().left + m_Camera.GetCuurentCameraBounds().width * 1.2f, 
+					Vector2f{ m_Camera.GetCuurentCameraBounds().left + m_Camera.GetCuurentCameraBounds().width * 1.05f, 
 					m_Camera.GetCuurentCameraBounds().bottom + m_Camera.GetCuurentCameraBounds().height * 0.9f},
 					Vector2f{ -1, 0 }));
 			}

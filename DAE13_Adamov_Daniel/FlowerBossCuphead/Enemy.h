@@ -4,7 +4,7 @@ class BulletManager;
 class Cuphead;
 class UIManager;
 
-class Enemy abstract
+class Enemy abstract // The enemy abstract class
 {
 public:
 	Enemy(const Vector2f& pos);
@@ -18,7 +18,6 @@ public:
 	virtual Rectf GetBounds() const = 0;
 
 	virtual void TakeDamage(float damage, UIManager& uiManager) = 0;
-	virtual int GetHealth() const = 0;
 
 	virtual bool MarkedForDeath() const = 0;
 

@@ -4,7 +4,7 @@
 #include "utils.h"
 #include "Cuphead.h"
 
-MushroomCloud::MushroomCloud(const Texture* sprite, const Vector2f& startPos, const Vector2f& playerPos, float directionAngle, float speed, int damage, bool parryable)
+MushroomCloud::MushroomCloud(const Texture* sprite, const Vector2f& startPos, const Vector2f& playerPos, float directionAngle, float speed, float damage, bool parryable)
 	:Projectile::Projectile(sprite, startPos, playerPos, directionAngle, speed, damage),
 	m_ColNr{ 5 },
 	m_RowNr{ 4 },
@@ -25,7 +25,7 @@ void MushroomCloud::Draw() const
 	m_Texture->Draw(GetBounds(), srcRect);
 
 	// Hitbox
-	utils::SetColor(Color4f{ 1,0,0,1 });
+	/*utils::SetColor(Color4f{ 1,0,0,1 });
 	utils::DrawRect(GetBounds());
 	utils::FillEllipse(m_Position, 5.f, 5.f);
 
@@ -35,11 +35,11 @@ void MushroomCloud::Draw() const
 	if (m_Parryable)
 	{
 		utils::DrawRect(GetParryHitbox());
-	}
+	}*/
 	
 }
 
-void MushroomCloud::Update(float elapsedSec, const std::vector<Vector2f>& vertices, BulletManager& bulletManager, Cuphead& cuphead, UIManager& uiManager)
+void MushroomCloud::Update(float elapsedSec, const std::vector<std::vector<Vector2f>>& vertices, BulletManager& bulletManager, Cuphead& cuphead, UIManager& uiManager)
 {
 	m_ShootDirection = (m_TargetPoint - m_StartPoint).Normalized();
 

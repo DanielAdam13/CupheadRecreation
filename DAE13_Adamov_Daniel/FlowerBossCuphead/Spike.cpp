@@ -26,12 +26,12 @@ void Spike::Draw() const
 	m_Texture->Draw(Vector2f{ this->GetBounds().left, this->GetBounds().bottom}, srcRect);
 
 	// Hitbox
-	utils::SetColor(Color4f{ 1,0,0,1 });
+	/*utils::SetColor(Color4f{ 1,0,0,1 });
 	utils::DrawRect(this->GetBounds());
 	utils::FillEllipse(m_Positon, 5.f, 5.f);
 
 	utils::SetColor(Color4f{ 1,0,1,1 });
-	utils::DrawRect(GetParryHitbox());
+	utils::DrawRect(GetParryHitbox());*/
 }
 
 void Spike::Update(float elapsedSec, BulletManager& bulletManager, Cuphead& cuphead, UIManager& uiManager)
@@ -65,11 +65,6 @@ Rectf Spike::GetParryHitbox() const
 
 void Spike::TakeDamage(float damage, UIManager& uiManager)
 {
-}
-
-int Spike::GetHealth() const
-{
-	return 1;
 }
 
 bool Spike::MarkedForDeath() const

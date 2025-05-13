@@ -46,30 +46,6 @@ Cuphead::Cuphead(const Vector2f& position, bool playIntro, int hp, const Texture
 	IntializeTextures();
 }
 
-//Cuphead::Cuphead(const Cuphead& character)
-//	:m_Position{ character.m_Position },
-//	m_HP{ character.m_HP },
-//	m_PlayingIntro{ character.m_PlayingIntro },
-//	m_CupheadMovementState{ character.m_CupheadMovementState },
-//	m_CupheadShootingState{ character.m_CupheadShootingState },
-//	m_KeyPressed{ character.m_KeyPressed },
-//	m_AccuSecProjectiles{ character.m_AccuSecProjectiles },
-//	m_ShootAngle{ character.m_ShootAngle },
-//	m_IsGrounded{ character.m_IsGrounded },
-//	m_IsHit{ character.m_IsHit },
-//	m_ClickedDash{ character.m_ClickedDash },
-//	m_IsDashing{ character.m_IsDashing },
-//	m_MaxFrameSec{ character.m_MaxFrameSec },
-//	m_CurrentTexture{ character.m_CurrentTexture }, //!
-//	m_CurrentColNr{ character.m_CurrentColNr },
-//	m_CurrentRowNr{ character.m_CurrentRowNr },
-//	m_Velocity{ character.m_Velocity },
-//	m_FacingAngle{ character.m_FacingAngle },
-//	m_Animator{ character.m_Animator },
-//{
-//	IntializeTextures();
-//}
-
 Cuphead::~Cuphead()
 {
 	DeleteTextures();
@@ -77,50 +53,47 @@ Cuphead::~Cuphead()
 
 void Cuphead::Draw() const
 {
-	if (m_CurrentTexture != nullptr)
-	{
-		Rectf srcRect{ 0.f + (m_Animator.GetCurrentFrameNr() % m_CurrentColNr) * m_FrameWidth, 
-			0.f + (m_Animator.GetCurrentFrameNr() / m_CurrentColNr) * m_FrameHeight, m_FrameWidth, m_FrameHeight };
+	Rectf srcRect{ 0.f + (m_Animator.GetCurrentFrameNr() % m_CurrentColNr) * m_FrameWidth,
+		0.f + (m_Animator.GetCurrentFrameNr() / m_CurrentColNr) * m_FrameHeight, m_FrameWidth, m_FrameHeight };
+
+	// GetBounds is calculated by the mid point of each texture
+	glPushMatrix();
+		glTranslatef(m_Position.x, m_Position.y, 0); // This reduces the texture quality A LOT for some reason !!!
+		glRotatef(m_FacingAngle, 0, 1, 0);
+		m_CurrentTexture->Draw(Vector2f{ -GetBounds().width / 2, 0.f }, srcRect);
 		
-		// GetBounds is calculated by the mid point of each texture
-		glPushMatrix();
-			glTranslatef(m_Position.x, m_Position.y, 0); // This reduces the texture quality A LOT for some reason !!!
-			glRotatef(m_FacingAngle, 0, 1, 0); 
-			m_CurrentTexture->Draw(Vector2f{ -GetBounds().width / 2, 0.f}, srcRect);
+	glPopMatrix();
 
-		glPopMatrix();
+	// Hitbox
+	/*utils::SetColor(Color4f{ 1, 0, 0, 1 });
+	utils::DrawRect(GetBounds());
+	utils::DrawEllipse(GetHitbox().center, GetHitbox().radius, GetHitbox().radius);
+	utils::FillEllipse(m_Position, 5.f, 5.f);*/
 
-		// Hitbox
-		utils::SetColor(Color4f{ 1, 0, 0, 1 });
-		//utils::DrawRect(GetBounds());
-		utils::DrawEllipse(GetHitbox().center, GetHitbox().radius, GetHitbox().radius);
-		utils::FillEllipse(m_Position, 5.f, 5.f);
+	if (m_IsHit && m_IsAlive)
+	{
+		static float step{ 0.02f };
+		static float alpha{ 0.f };
 
-		if (m_IsHit)
+		utils::SetColor(Color4f{ 0.7f, 0.7f, 0.7f, alpha });
+		utils::FillRect(GetBounds());
+
+		if (alpha > 0.5f)
 		{
-			static float step{ 0.02f };
-			static float alpha{ 0.f };
-
-			utils::SetColor(Color4f{ 0.7f, 0.7f, 0.7f, alpha });
-			utils::FillRect(GetBounds());
-
-			if (alpha > 0.5f)
-			{
-				alpha = 0.5f;
-				step = -step;
-			}
-			else if (alpha < 0.f)
-			{
-				alpha = 0.f;
-				step = -step;
-			}
-
-			alpha += step;
+			alpha = 0.5f;
+			step = -step;
 		}
+		else if (alpha < 0.f)
+		{
+			alpha = 0.f;
+			step = -step;
+		}
+
+		alpha += step;
 	}
 }
 
-void Cuphead::Update(float elapsedSec, const Uint8* pStates, const std::vector<Vector2f>& vertices, BulletManager& bulletManager, UIManager& uiManager)
+void Cuphead::Update(float elapsedSec, const Uint8* pStates, const std::vector<std::vector<Vector2f>>& vertices, BulletManager& bulletManager, UIManager& uiManager)
 {
 	// set the m_IsAlive flag
 	SetDeath();
@@ -146,6 +119,8 @@ void Cuphead::Update(float elapsedSec, const Uint8* pStates, const std::vector<V
 
 void Cuphead::ProcessKeys(const Uint8* pStates, UIManager& uiManager)
 {
+	m_FrameToResetAnimation = 0; // !!!
+
 	if (!m_PlayingIntro)
 	{
 		if (!m_IsAlive)
@@ -194,13 +169,14 @@ void Cuphead::ProcessKeys(const Uint8* pStates, UIManager& uiManager)
 					}
 				}
 			}
-			// determines the whole rotation logic + enables dashing in a direction
 			else if(!m_FiringSpecial)
 			{
+				// determines the whole rotation logic + enables dashing in one direction
 				UpdateFacingDirection(pStates);
-				// change movement and shooting state, statring with COMBINATIONS
+				
 				const float movementSpeed{ 400.f };
 
+				// change movement and shooting state, statring with COMBINATIONS
 				if (pStates[SDL_SCANCODE_Z])
 				{
 					// parry
@@ -213,6 +189,11 @@ void Cuphead::ProcessKeys(const Uint8* pStates, UIManager& uiManager)
 						if (pStates[SDL_SCANCODE_RIGHT])
 						{
 							m_Velocity.x = movementSpeed * 0.75f;
+						}
+
+						if (m_IsGrounded)
+						{
+							m_CupheadMovementState = Movement::idle;
 						}
 					}
 					// jump
@@ -235,6 +216,76 @@ void Cuphead::ProcessKeys(const Uint8* pStates, UIManager& uiManager)
 							m_Velocity = Vector2f{ 0.f, 800.f };
 						}
 					}
+				}
+				// special up left
+				else if (pStates[SDL_SCANCODE_LEFT] && pStates[SDL_SCANCODE_UP] && pStates[SDL_SCANCODE_V] && m_SpecialAllowed && uiManager.SpecialAttackAllowed())
+				{
+					m_CupheadMovementState = Movement::lock;
+					m_CupheadShootingState = Shoot::specialLeft;
+
+					m_ShootAngle = 135.f;
+					if (m_IsGrounded)
+					{
+						m_Velocity = Vector2f{ 200.f, 300.f };
+					}
+					else
+					{
+						m_Velocity = Vector2f{ 200.f, 300.f };
+					}
+
+					m_FrameToResetAnimation = 12;
+				}
+				// special down left
+				else if (pStates[SDL_SCANCODE_LEFT] && pStates[SDL_SCANCODE_DOWN] && pStates[SDL_SCANCODE_V] && m_SpecialAllowed && uiManager.SpecialAttackAllowed())
+				{
+					m_CupheadMovementState = Movement::lock;
+					m_CupheadShootingState = Shoot::specialLeft;
+
+					m_ShootAngle = 225.f;
+					if (m_IsGrounded)
+					{
+						m_Velocity = Vector2f{ 200.f, 300.f };
+					}
+					else
+					{
+						m_Velocity = Vector2f{ 200.f, 300.f };
+					}
+
+					m_FrameToResetAnimation = 12;
+				}
+				// special up right
+				else if (pStates[SDL_SCANCODE_RIGHT] && pStates[SDL_SCANCODE_UP] && pStates[SDL_SCANCODE_V] && m_SpecialAllowed && uiManager.SpecialAttackAllowed())
+				{
+					m_CupheadMovementState = Movement::lock;
+					m_CupheadShootingState = Shoot::specialRight;
+
+					m_ShootAngle = 45.f;
+					if (m_IsGrounded)
+					{
+						m_Velocity = Vector2f{ -200.f, 300.f };
+					}
+					else
+					{
+						m_Velocity = Vector2f{ -200.f, 300.f };
+					}
+					m_FrameToResetAnimation = 12;
+				}
+				// special down right
+				else if (pStates[SDL_SCANCODE_RIGHT] && pStates[SDL_SCANCODE_DOWN] && pStates[SDL_SCANCODE_V] && m_SpecialAllowed && uiManager.SpecialAttackAllowed())
+				{
+					m_CupheadMovementState = Movement::lock;
+					m_CupheadShootingState = Shoot::specialRight;
+
+					m_ShootAngle = 315.f;
+					if (m_IsGrounded)
+					{
+						m_Velocity = Vector2f{ -200.f, 300.f };
+					}
+					else
+					{
+						m_Velocity = Vector2f{ -200.f, 300.f };
+					}
+					m_FrameToResetAnimation = 12;
 				}
 				// special left
 				else if (pStates[SDL_SCANCODE_LEFT] && pStates[SDL_SCANCODE_V] && m_SpecialAllowed && uiManager.SpecialAttackAllowed())
@@ -544,8 +595,6 @@ void Cuphead::ProcessKeys(const Uint8* pStates, UIManager& uiManager)
 					m_FrameToResetAnimation = 10;
 				}
 
-				// --- I can add whatever key combinations I want from now on, AnimateCuphead will handle it! ---
-
 				// if no key combinations are pressed -> it's idle
 				else
 				{
@@ -573,7 +622,7 @@ void Cuphead::AnimateCuphead(float elapsedSec)
 		m_CurrentColNr = 7;
 		m_CurrentRowNr = 4;
 
-		m_Animator.AnimateBetweenFrames(elapsedSec, 12, 19, m_MaxFrameSec, 2.5f);
+		m_Animator.AnimateBetweenFrames(elapsedSec, 12, 19, m_MaxFrameSec, 1.5f);
 		
 		if (m_Animator.GetCurrentFrameNr() > 27)
 		{
@@ -790,53 +839,68 @@ void Cuphead::ResetAnimation(int frameToReset)
 	}
 }
 
-void Cuphead::HandleRaycast(float elapsedSec, const std::vector<Vector2f>& vertices)
+void Cuphead::HandleRaycast(float elapsedSec, const std::vector<std::vector<Vector2f>>& vertices)
 {
-	Vector2f firstPointY{ m_Position.x, m_Position.y + GetBounds().height };
-	Vector2f secondPointY{ m_Position.x, m_Position.y - 1.f };
-
-	utils::HitInfo hitInfo;
-	// GROUND collision
-	if (utils::Raycast(vertices, firstPointY, secondPointY, hitInfo))
-	{
-		if (!m_KeyPressed)
-		{
-			m_Velocity = Vector2f{ 0.f, 0.f };
-		}
-
-		m_Position.y = hitInfo.intersectPoint.y;
-		m_IsGrounded = true;
-	}
-	else
+	//std::cout << "Velocity: " << m_Velocity << std::endl;
+	if (m_IsAlive)
 	{
 		m_IsGrounded = false;
-		m_Velocity += Vector2f{ 0, -9.8f * 170 } * elapsedSec; // if the gravity is only -9.8f, it flies off
-	}
 
-	Vector2f firstPointX{ GetBounds().left, m_Position.y + GetBounds().height / 2 };
-	Vector2f secondPointX{ GetBounds().left  + GetBounds().width, m_Position.y + GetBounds().height / 2 };
+		Vector2f firstPointY{ m_Position.x, m_Position.y + GetBounds().height / 5 };
+		Vector2f secondPointY{ m_Position.x, m_Position.y - 1.f };
 
-	// RIGHT collision
-	if (utils::Raycast(vertices, firstPointX, secondPointX, hitInfo))
-	{
+		utils::HitInfo hitInfoY;
 
-		if (!m_KeyPressed)
+		for (size_t i{}; i < vertices.size(); ++i)
 		{
-			m_Velocity.x = 0.f;
-		}
-		//m_Position.x = hitInfo.intersectPoint.x;
-		m_Position.x = hitInfo.intersectPoint.x - (GetBounds().width / 2 * hitInfo.normal.x);
-	}
+			// GROUND collision
+			if (utils::Raycast(vertices[i], firstPointY, secondPointY, hitInfoY))
+			{
+				if (m_Velocity.y <= 0.f) // platform check
+				{
+					if (!m_KeyPressed)
+					{
+						m_Velocity = Vector2f{ 0.f, 0.f };
+					}
 
-	// LEFT collision
-	if (utils::Raycast(vertices, secondPointX, firstPointX, hitInfo))
-	{
-		if (!m_KeyPressed)
-		{
-			m_Velocity.x = 0.f;
+					m_Position.y = hitInfoY.intersectPoint.y;
+					m_IsGrounded = true;
+				}
+			}
+			if (!m_IsGrounded)
+			{
+				m_Velocity += Vector2f{ 0, -9.8f * 20 } * elapsedSec; // if the gravity is only -9.8f, it flies off
+			}
 		}
-		//m_Position.x = hitInfo.intersectPoint.x + GetBounds().width / 2;
-		m_Position.x = hitInfo.intersectPoint.x - (GetBounds().width / 2 * hitInfo.normal.x);
+
+		for (size_t i{}; i < vertices.size(); ++i)
+		{
+			Vector2f firstPointX{ GetBounds().left, m_Position.y + GetBounds().height / 2 };
+			Vector2f secondPointX{ GetBounds().left + GetBounds().width, m_Position.y + GetBounds().height / 2 };
+			utils::HitInfo hitInfoX;
+
+			// RIGHT collision
+			if (utils::Raycast(vertices[i], firstPointX, secondPointX, hitInfoX))
+			{
+				if (!m_KeyPressed)
+				{
+					m_Velocity.x = 0.f;
+				}
+
+				m_Position.x = hitInfoX.intersectPoint.x - (GetBounds().width / 2 * hitInfoX.normal.x);	
+			}
+
+			// LEFT collision
+			if (utils::Raycast(vertices[i], secondPointX, firstPointX, hitInfoX))
+			{
+				if (!m_KeyPressed)
+				{
+					m_Velocity.x = 0.f;
+				}
+
+				m_Position.x = hitInfoX.intersectPoint.x - (GetBounds().width / 2 * hitInfoX.normal.x);
+			}
+		}
 	}
 
 	m_Position += m_Velocity * elapsedSec;
@@ -912,7 +976,7 @@ void Cuphead::CreateProjectiles(float elapsedSec, BulletManager& bulletManager, 
 			m_FiringSpecial = true;
 			uiManager.ChangeCards(-20);
 			bulletManager.AddProjectile(new PeaShooter(m_TextureSpecialPeaShooter,
-				Vector2f{ GetBounds().left + GetBounds().width / 2, GetBounds().bottom + GetBounds().height * 0.4f }, {}, m_ShootAngle, 900.f, 0.3f, 4, 2));
+				Vector2f{ GetBounds().left + GetBounds().width / 2, GetBounds().bottom + GetBounds().height * 0.4f }, {}, m_ShootAngle, 900.f, 0.8f, 4, 2));
 			m_SpecialAllowed = false;
 		}
 	}

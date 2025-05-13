@@ -47,9 +47,9 @@ void Mushroom::Draw() const
 	glPopMatrix();
 
 	// Hitbox
-	utils::SetColor(Color4f{ 1,0,0,1 });
+	/*utils::SetColor(Color4f{ 1,0,0,1 });
 	utils::DrawRect(GetBounds());
-	utils::FillEllipse(m_Positon, 5.f, 5.f);
+	utils::FillEllipse(m_Positon, 5.f, 5.f);*/
 }
 
 void Mushroom::Update(float elapsedSec, BulletManager& bulletManager, Cuphead& cuphead, UIManager& uiManager)
@@ -80,11 +80,11 @@ void Mushroom::Update(float elapsedSec, BulletManager& bulletManager, Cuphead& c
 		else if (!PlayerInRange(cuphead.GetPosition(), m_Range))
 		{
 			m_CurrentState = MushroomState::idle;
-			if (m_AccuSec >= 2.f)
+			if (m_AccuSec >= 1.5f)
 			{
 				frameToResetAnimation = 9;
 				m_CurrentState = MushroomState::popin;
-				m_AccuSec -= 2.f;
+				m_AccuSec -= 1.5f;
 			}
 		}
 		else
@@ -129,9 +129,9 @@ void Mushroom::Update(float elapsedSec, BulletManager& bulletManager, Cuphead& c
 			m_CurrentState = MushroomState::popout;
 			m_AccuSec = 0.f;
 		}
-		else if (m_BoilTimer >= 1.f)
+		else if (m_BoilTimer >= 2.5f)
 		{
-			m_BoilTimer -= 1.f;
+			m_BoilTimer -= 2.5f;
 			m_CurrentState = MushroomState::popout;
 			m_AccuSec = 0.f;
 		}
@@ -220,17 +220,11 @@ void Mushroom::TakeDamage(float damage, UIManager& uiManager)
 	if (m_CurrentState != MushroomState::boil && m_CurrentState != MushroomState::death)
 	{
 		m_Hp -= damage;
-		std::cout << m_Hp << std::endl;
-		if (damage != 0.3f)
+		if (damage != 0.8f)
 		{
 			uiManager.ChangeCards();
 		}
 	}
-}
-
-int Mushroom::GetHealth() const
-{
-	return m_Hp;
 }
 
 bool Mushroom::MarkedForDeath() const

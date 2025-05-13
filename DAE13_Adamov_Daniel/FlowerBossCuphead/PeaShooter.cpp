@@ -24,11 +24,12 @@ void PeaShooter::Draw() const
 		m_Texture->Draw(Vector2f{ -srcRect.width / 2, -srcRect.height / 2 }, srcRect);
 	glPopMatrix();
 
-	utils::SetColor(Color4f{ 1,0,0,1 });
-	utils::DrawEllipse(GetHitbox().center, GetHitbox().radius, GetHitbox().radius);
+	// Hitbox
+	/*utils::SetColor(Color4f{ 1,0,0,1 });
+	utils::DrawEllipse(GetHitbox().center, GetHitbox().radius, GetHitbox().radius);*/
 }
 
-void PeaShooter::Update(float elapsedSec, const std::vector<Vector2f>& vertices, BulletManager& bulletManager, Cuphead& cuphead, UIManager& uiManager)
+void PeaShooter::Update(float elapsedSec, const std::vector<std::vector<Vector2f>>& vertices, BulletManager& bulletManager, Cuphead& cuphead, UIManager& uiManager)
 {
 	m_Position += m_ShootDirection * m_Speed * elapsedSec;
 }

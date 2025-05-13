@@ -39,9 +39,9 @@ void Acorn::Draw() const
 	glPopMatrix();
 
 	// Hitbox
-	utils::SetColor(Color4f{ 1,0,0,1 });
-	utils::DrawRect(GetBounds());
-	utils::FillEllipse(m_Positon, 5.f, 5.f);
+	//utils::SetColor(Color4f{ 1,0,0,1 });
+	//utils::DrawRect(GetBounds());
+	//utils::FillEllipse(m_Positon, 5.f, 5.f);
 }
 
 void Acorn::Update(float elapsedSec, BulletManager& bulletManager, Cuphead& cuphead, UIManager& uiManager)
@@ -96,15 +96,10 @@ Rectf Acorn::GetBounds() const
 void Acorn::TakeDamage(float damage, UIManager& uiManager)
 {
 	m_Hp -= damage;
-	if (damage != 0.3f)
+	if (damage != 0.8f)
 	{
 		uiManager.ChangeCards();
 	}
-}
-
-int Acorn::GetHealth() const
-{
-	return m_Hp;
 }
 
 bool Acorn::MarkedForDeath() const
