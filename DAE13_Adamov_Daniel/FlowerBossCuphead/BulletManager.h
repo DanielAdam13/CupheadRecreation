@@ -1,0 +1,31 @@
+#pragma once
+#include <vector>
+class Projectile;
+class Cuphead;
+class UIManager;
+
+class BulletManager final
+{
+public:
+	explicit BulletManager();
+	BulletManager(const BulletManager& other) = delete;
+	BulletManager& operator=(const BulletManager& rhs) = delete;
+	BulletManager(BulletManager&& other) = delete;
+	BulletManager& operator=(BulletManager&& rhs) = delete;
+	~BulletManager() noexcept;
+
+	void DrawActiveBullets() const;
+	void UpdateActiveBullets(float elapsedSec, const Rectf& cameraBox, const std::vector<std::vector<Vector2f>>& vertices, Cuphead& cuphead, UIManager& uiManager);
+	void AnimateActiveBullets(float elapsedSec);
+
+	void AddProjectile(Projectile* projectile);
+	Projectile* operator[](int index) const;
+
+	size_t GetVectorSize() const;
+	
+	void RemoveProjectile(int index);;
+
+private:
+	std::vector<Projectile*> m_Projectiles;
+};
+

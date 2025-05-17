@@ -24,6 +24,7 @@
     <ProjectGuid>{3e27e450-1331-4b68-acfd-6352e9080359}</ProjectGuid>
     <RootNamespace>FlowerBossCuphead</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>FlowerBossCuphead</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -157,13 +158,51 @@ xcopy "$(SolutionDir)Resources\*.*" "$(TargetDir)" /y /d /s</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Acorn.cpp" />
+    <ClCompile Include="Animator.cpp" />
+    <ClCompile Include="BigChomper.cpp" />
+    <ClCompile Include="BulletManager.cpp" />
+    <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Cuphead.cpp" />
+    <ClCompile Include="Effect.cpp" />
+    <ClCompile Include="VisualEffectManager.cpp" />
+    <ClCompile Include="Enemy.cpp" />
+    <ClCompile Include="EnemyManager.cpp" />
+    <ClCompile Include="Explosion.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Mushroom.cpp" />
+    <ClCompile Include="MushroomCloud.cpp" />
     <ClCompile Include="pch.cpp" />
+    <ClCompile Include="PeaShooter.cpp" />
+    <ClCompile Include="Projectile.cpp" />
+    <ClCompile Include="Spike.cpp" />
+    <ClCompile Include="Tulip.cpp" />
+    <ClCompile Include="TulipSeed.cpp" />
+    <ClCompile Include="UIManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Acorn.h" />
+    <ClInclude Include="Animator.h" />
+    <ClInclude Include="BigChomper.h" />
+    <ClInclude Include="BulletManager.h" />
+    <ClInclude Include="Camera.h" />
+    <ClInclude Include="Cuphead.h" />
+    <ClInclude Include="Effect.h" />
+    <ClInclude Include="VisualEffectManager.h" />
+    <ClInclude Include="Enemy.h" />
+    <ClInclude Include="EnemyManager.h" />
+    <ClInclude Include="Explosion.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="Mushroom.h" />
+    <ClInclude Include="MushroomCloud.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="PeaShooter.h" />
+    <ClInclude Include="Projectile.h" />
+    <ClInclude Include="Spike.h" />
+    <ClInclude Include="Tulip.h" />
+    <ClInclude Include="TulipSeed.h" />
+    <ClInclude Include="UIManager.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
