@@ -4,19 +4,24 @@
 #include <iostream>
 #include "utils.h"
 
-UIManager::UIManager(const Texture* healthDisplay, const Texture* cards, const Texture* intro, const Texture* death, const Texture* completion, const Texture* pause)
+UIManager::UIManager(const Texture* healthDisplay, const Texture* cards, const Texture* intro, const Texture* death, const Texture* completion, const Texture* pause, const Texture* deathScreen)
 	:m_HealthTexture{ healthDisplay },
 	m_CardsTexture{ cards },
-	m_IntroTexture{ intro },
-	m_DeathTexture{ death },
-	m_CompletionTexture{ completion },
+	m_IntroAnnouncementTexture{ intro },
+	m_DeathAnnouncementTexture{ death },
+	m_CompletionAnnouncementTexture{ completion },
 	m_PauseScreenTexture{ pause },
+	m_DeathScreenCardTexture{ deathScreen },
+	m_CurrentFrameWidth{},
+	m_CurrentFrameHeight{},
 	m_CurrentFrameHp{ 0 },
 	m_CardIdx{ 0 },
 	m_PlayingIntro{ false },
 	m_Paused{ false },
-	m_PlayingDeathAnnouncment{ false },
+	m_PlayingDeathAnnouncement{ false },
 	m_DrawingDeathScreen{ false },
+	m_PlayingWinAnnounement{ false },
+	m_ScreenAlpha{ 0.f },
 	m_Animator{},
 	m_StateAccuSec{ 0.f }
 {
@@ -27,24 +32,70 @@ void UIManager::Update(float elapsedSec, int cupheadHp, int currentGameStateIdx)
 	UpdateHealth(elapsedSec, cupheadHp);
 	UpdateCards();
 
+	// Pause
 	if (currentGameStateIdx == 2)
 	{
 		m_Paused = true;
 	}
 	else m_Paused = false;
 
+	// Intro
 	if (currentGameStateIdx == 0)
 	{
+		m_ScreenAlpha = 0.f;
 		m_PlayingIntro = true;
+
+		m_CurrentFrameWidth = m_IntroAnnouncementTexture->GetWidth() / 7;
+		m_CurrentFrameHeight = m_IntroAnnouncementTexture->GetHeight() / 7;
+
 		m_Animator.PlayAnimation(elapsedSec, 0.06f);
 	} 
 	else m_PlayingIntro = false;
 
+	// Gameplay
+	if (currentGameStateIdx == 1)
+	{
+		if (m_Animator.GetCurrentFrameNr() != 0)
+		{
+			this->m_Animator.Reset(0);
+		}
+	}
 
+	// Death
 	if (currentGameStateIdx == 3)
 	{
+		m_CurrentFrameWidth = m_DeathAnnouncementTexture->GetWidth() / 3;
+		m_CurrentFrameHeight = m_DeathAnnouncementTexture->GetHeight() / 7;
 		HandleDeathUI(elapsedSec);
 	}
+
+	// Win
+	if (currentGameStateIdx == 4)
+	{
+		m_PlayingWinAnnounement = true;
+
+		m_CurrentFrameWidth = m_CompletionAnnouncementTexture->GetWidth() / 3;
+		m_CurrentFrameHeight = m_CompletionAnnouncementTexture->GetHeight() / 9;
+
+		m_Animator.PlayAnimation(elapsedSec, 0.06f);
+
+		if (m_Animator.GetCurrentFrameNr() >= 26)
+		{
+			m_Animator.Stop();
+		}
+
+		if (m_ScreenAlpha < 1.f)
+		{
+			m_StateAccuSec += elapsedSec;
+
+			if (m_StateAccuSec >= 0.1f)
+			{
+				m_ScreenAlpha += 0.02f;
+				m_StateAccuSec -= 0.1f;
+			}
+		}
+	}
+	else m_PlayingWinAnnounement = false;
 }
 
 void UIManager::Draw(const Rectf& cameraBox) const
@@ -54,11 +105,10 @@ void UIManager::Draw(const Rectf& cameraBox) const
 
 	if (m_PlayingIntro)
 	{
-		const float frameWidth{ m_IntroTexture->GetWidth() / 7 };
-		const float frameHeight{ m_IntroTexture->GetHeight() / 7 };
-		const Rectf srcRect{ 0.f + (m_Animator.GetCurrentFrameNr() % 7) * frameWidth, 0.f + (m_Animator.GetCurrentFrameNr() / 7) * frameHeight, frameWidth, frameHeight };
+		const Rectf srcRect{ 0.f + (m_Animator.GetCurrentFrameNr() % 7) * m_CurrentFrameWidth, 
+			0.f + (m_Animator.GetCurrentFrameNr() / 7) * m_CurrentFrameHeight, m_CurrentFrameWidth, m_CurrentFrameHeight };
 
-		m_IntroTexture->Draw(cameraBox, srcRect);
+		m_IntroAnnouncementTexture->Draw(cameraBox, srcRect);
 	}
 
 	if (m_Paused)
@@ -68,20 +118,43 @@ void UIManager::Draw(const Rectf& cameraBox) const
 		m_PauseScreenTexture->Draw(Rectf{cameraBox.left + cameraBox.width * 0.25f, cameraBox.height * 0.25f, cameraBox.width * 0.5f, cameraBox.height * 0.5f});
 	}
 
-	if (m_PlayingDeathAnnouncment)
+	if (m_PlayingDeathAnnouncement)
 	{
-		const float frameWidth{ m_DeathTexture->GetWidth() / 3 };
-		const float frameHeight{ m_DeathTexture->GetHeight() / 7 };
-		const Rectf srcRect{ 0.f + (m_Animator.GetCurrentFrameNr() % 3) * frameWidth, 0.f + (m_Animator.GetCurrentFrameNr() / 3) * frameHeight, frameWidth, frameHeight };
+		const Rectf srcRect{ 0.f + (m_Animator.GetCurrentFrameNr() % 3) * m_CurrentFrameWidth, 
+			0.f + (m_Animator.GetCurrentFrameNr() / 3) * m_CurrentFrameHeight, m_CurrentFrameWidth, m_CurrentFrameHeight };
 
-		m_DeathTexture->Draw(Rectf{cameraBox.left + cameraBox.width * 0.05f, cameraBox.bottom + cameraBox.height * 0.15f, cameraBox.width * 0.9f, cameraBox.height * 0.7f}, srcRect);
+		m_DeathAnnouncementTexture->Draw(Rectf{cameraBox.left + cameraBox.width * 0.05f, cameraBox.bottom + cameraBox.height * 0.15f, cameraBox.width * 0.9f, cameraBox.height * 0.7f}, srcRect);
+
 	}
 
 	if (m_DrawingDeathScreen)
 	{
 		utils::SetColor(Color4f{ 0, 0, 0, 0.5f });
 		utils::FillRect(cameraBox);
+		m_DeathScreenCardTexture->Draw(Rectf{ cameraBox.left + cameraBox.width * 0.3f, cameraBox.bottom + cameraBox.height * 0.1f, cameraBox.width * 0.4f, cameraBox.width * 0.45f });
 	}
+
+	if (m_PlayingWinAnnounement)
+	{
+		const Rectf srcRect{ 0.f + (m_Animator.GetCurrentFrameNr() % 3) * m_CurrentFrameWidth,
+			0.f + (m_Animator.GetCurrentFrameNr() / 3) * m_CurrentFrameHeight, m_CurrentFrameWidth, m_CurrentFrameHeight };
+		
+		m_CompletionAnnouncementTexture->Draw(cameraBox, srcRect);
+
+		utils::SetColor(Color4f{ 0, 0, 0, m_ScreenAlpha });
+		utils::FillRect(cameraBox);
+	}
+}
+
+void UIManager::ResetUI()
+{
+	m_CardIdx = 0;
+	m_Animator.Reset(0);
+	m_DrawingDeathScreen = false;
+	m_PlayingDeathAnnouncement = false;
+	m_Paused = false;
+	m_PlayingWinAnnounement = false;
+	m_StateAccuSec = 0.f;
 }
 
 void UIManager::ChangeCards(int index)
@@ -174,18 +247,18 @@ void UIManager::DrawHealthBar(const Rectf& cameraBox) const
 
 void UIManager::HandleDeathUI(float elapsedSec)
 {
-	m_PlayingDeathAnnouncment = true;
+	m_PlayingDeathAnnouncement = true;
 
-	if (m_PlayingDeathAnnouncment)
+	if (m_PlayingDeathAnnouncement)
 	{
 		m_StateAccuSec += elapsedSec;
 
-		if (m_StateAccuSec >= 1.f)
+		if (m_StateAccuSec >= 1.5f)
 		{
-			m_PlayingDeathAnnouncment = false;
+			m_PlayingDeathAnnouncement = false;
 			m_DrawingDeathScreen = true;
 			m_Animator.Reset(0);
 		}
-		else m_Animator.PlayAnimation(elapsedSec, 0.07f);
+		else m_Animator.PlayAnimation(elapsedSec, 0.1f);
 	}
 }

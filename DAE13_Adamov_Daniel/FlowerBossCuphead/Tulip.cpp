@@ -8,10 +8,11 @@
 #include "TulipSeed.h"
 #include "UIManager.h"
 #include <cassert>
+#include "SoundEffect.h"
 
-Tulip::Tulip(const Texture* idleTexture, const Texture* attackTexture, const Texture* seed, const Texture* explosion, const Vector2f& pos,
-	int colNr, int rowNr, float range)
-	:Mushroom::Mushroom(idleTexture, idleTexture, attackTexture, nullptr, nullptr, nullptr, pos, colNr, rowNr, range),
+Tulip::Tulip(const Texture* idleTexture, const Texture* attackTexture, const Texture* seed, const Texture* explosion, 
+	const Vector2f& pos, const SoundEffect* shoot1, const SoundEffect* shoot2, int colNr, int rowNr, float range)
+	:Mushroom::Mushroom(idleTexture, idleTexture, attackTexture, nullptr, nullptr, nullptr, pos, shoot1, shoot2, colNr, rowNr, range),
 	m_Hp{ 20.f },
 	m_CurrentState{},
 	m_TextureSeed{ seed },
@@ -64,7 +65,10 @@ void Tulip::Update(float elapsedSec, BulletManager& bulletManager, Cuphead& cuph
 			}
 			m_CurrentState = TulipState::attack;
 
-			bulletManager.AddProjectile(new TulipSeed(m_TextureSeed, m_TextureExplosion, Vector2f{ m_Positon.x, m_Positon.y + this->GetBounds().height  }, cuphead.GetPosition(), 0.f, 0.f));
+			bulletManager.AddProjectile(new TulipSeed(m_TextureSeed, m_TextureExplosion, Vector2f{ m_Positon.x, m_Positon.y + this->GetBounds().height  }, 
+				cuphead.GetPosition(), m_ShootSFX2, 0.f, 0.f));
+
+			m_ShootSFX1->Play(0);
 		}
 	}
 	else if (m_CurrentState == TulipState::attack )

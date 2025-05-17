@@ -12,7 +12,7 @@ public:
 	BulletManager& operator=(const BulletManager& rhs) = delete;
 	BulletManager(BulletManager&& other) = delete;
 	BulletManager& operator=(BulletManager&& rhs) = delete;
-	~BulletManager();
+	~BulletManager() noexcept;
 
 	void DrawActiveBullets() const;
 	void UpdateActiveBullets(float elapsedSec, const Rectf& cameraBox, const std::vector<std::vector<Vector2f>>& vertices, Cuphead& cuphead, UIManager& uiManager);

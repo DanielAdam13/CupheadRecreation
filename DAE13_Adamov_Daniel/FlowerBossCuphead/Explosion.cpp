@@ -2,15 +2,18 @@
 #include "Explosion.h"
 #include "Texture.h"
 #include "utils.h"
+#include "SoundEffect.h"
 
-Explosion::Explosion(const Texture* sprite, const Vector2f& pos)
+Explosion::Explosion(const Texture* sprite, const Vector2f& pos, const SoundEffect* SFX)
 	:Projectile::Projectile(sprite, pos, pos, 0, 0, 0),
 	m_FrameWidth{sprite->GetWidth() / 5},
 	m_FrameHeight{sprite->GetHeight() / 4},
 	m_AccuSec{ 0.f },
 	m_Duration{ 0.95f },
+	m_SFX{ SFX },
 	m_Animator{}
 {
+	SFX->Play(0);
 }
 
 void Explosion::Draw() const

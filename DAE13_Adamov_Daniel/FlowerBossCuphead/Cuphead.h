@@ -4,16 +4,17 @@
 class Texture;
 class BulletManager;
 class UIManager;
+class SoundEffect;
 
 class Cuphead final // Character controller
 {
 public:
 	explicit Cuphead(const Vector2f& position, bool playIntro, int hp, const Texture* peaShooter, const Texture* peaSpecial);
-	Cuphead(const Cuphead& character) = delete; // deleted because too much work to be honest + I don't need them for now
+	Cuphead(const Cuphead& character) = delete;
 	Cuphead& operator=(const Cuphead& rhs) = delete;
 	Cuphead(Cuphead&& character) = delete;
 	Cuphead& operator=(Cuphead&& rhs) = delete;
-	~Cuphead();
+	~Cuphead() noexcept;
 
 	void Draw() const;
 	void Update(float elapsedSec, const Uint8* pStates, const std::vector<std::vector<Vector2f>>& vertices, BulletManager& bulletManager, UIManager& uiManager);
@@ -27,6 +28,8 @@ public:
 	bool IsParrying() const; // used to parry in other classes
 
 	void Parry(UIManager& uiManager); // actual parry
+
+	void ResetPlayer(const Vector2f& pos);
 
 	Vector2f GetPosition() const;
 	Rectf GetBounds() const;
@@ -112,7 +115,6 @@ private:
 	Texture* m_TextureDash;
 	Texture* m_TextureShoot;
 	Texture* m_TextureShootSpecial;
-	Texture* m_TextureDeath;
 	Texture* m_TextureDuck;
 	Texture* m_TextureGhost;
 	Texture* m_TextureHit;
@@ -123,6 +125,20 @@ private:
 	Texture* m_TextureRun;
 	Texture* m_TextureRunShootDiagonal;
 	Texture* m_TextureRunShootStraight;
+
+	SoundEffect* m_DashSFX;
+	SoundEffect* m_JumpSFX;
+	SoundEffect* m_ParrySFX;
+	SoundEffect* m_SlapSFX;
+	SoundEffect* m_DeathSFX;
+	SoundEffect* m_CrackSFX;
+	SoundEffect* m_HitSFX1;
+	SoundEffect* m_HitSFX2;
+
+	SoundEffect* m_PeaShooterSFX1;
+	SoundEffect* m_PeaShooterSFX2;
+	SoundEffect* m_PeaShooterSFX3;
+	SoundEffect* m_SpecialPeaSFX1;
 
 	Animator m_Animator;
 
@@ -140,6 +156,8 @@ private:
 	void SetDeath();
 	
 	void IntializeTextures();
+	void InitializeSoundEffects();
 	void DeleteTextures();
+	void DeleteSoundEffects();
 };
 

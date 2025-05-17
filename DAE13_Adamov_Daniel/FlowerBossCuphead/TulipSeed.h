@@ -3,11 +3,13 @@
 #include <vector>
 class Texture;
 class Cuphead;
+class SoundEffect;
 
 class TulipSeed final: public Projectile // Tulip's attack projectile
 {
 public:
-	explicit TulipSeed(const Texture* sprite, const Texture* explosion, const Vector2f& spawnPos, const Vector2f& playerPos, float directionAngle, float speed, float damage = 1);
+	explicit TulipSeed(const Texture* sprite, const Texture* explosion, const Vector2f& spawnPos, const Vector2f& playerPos,
+		const SoundEffect* explosionSFX, float directionAngle, float speed, float damage = 1);
 
 	virtual void Draw() const override;
 	virtual void Update(float elapsedSec, const std::vector<std::vector<Vector2f>>& vertices, BulletManager& bulletManager, Cuphead& cuphead, UIManager& uiManager) override;
@@ -27,6 +29,7 @@ private:
 	virtual void DissapearOnGroundImpact(const std::vector<std::vector<Vector2f>>& vertices, BulletManager& bulletManager);
 
 	const Texture* m_ExplosionTexture;
+	const SoundEffect* m_ExplosionSFX;
 
 	const Vector2f m_InitialPlayerPoint;
 	const Vector2f m_StartPoint;

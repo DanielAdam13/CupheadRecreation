@@ -5,8 +5,9 @@
 #include "utils.h"
 #include "UIManager.h"
 #include <cassert>
+#include "SoundEffect.h"
 
-Acorn::Acorn(const Texture* idle, const Texture* drop, const Vector2f& pos, const Vector2f& direction)
+Acorn::Acorn(const Texture* idle, const Texture* drop, const Vector2f& pos, const Vector2f& direction, SoundEffect* idleSFX, SoundEffect* fallSFX)
 	:Enemy::Enemy(pos),
 	m_Hp{ 5 },
 	m_CurrentState{ AcornState::idle },
@@ -18,13 +19,18 @@ Acorn::Acorn(const Texture* idle, const Texture* drop, const Vector2f& pos, cons
 	m_CurrentFrameWidth{ m_CurrentTexture->GetWidth() / m_CurrentColNr },
 	m_CurrentFrameHeight{ m_CurrentTexture->GetHeight() / m_CurrentRowNr },
 	m_Direction{ direction },
-	m_FacingAngle{}
+	m_FacingAngle{},
+	m_IdleSFX{ idleSFX },
+	m_DropSFX{ fallSFX }
 {
 	if (direction.x < 0)
 	{
 		m_FacingAngle = 0.f;
 	}
 	else m_FacingAngle = 180.f;
+
+	m_IdleSFX->SetVolume(40);
+	m_IdleSFX->Play(0);
 }
 
 void Acorn::Draw() const
@@ -46,7 +52,7 @@ void Acorn::Draw() const
 
 void Acorn::Update(float elapsedSec, BulletManager& bulletManager, Cuphead& cuphead, UIManager& uiManager)
 {
-	float speed{ 500.f };
+	float speed{ 450.f };
 
 	if (m_Hp <= 0 || m_Positon.y <= cuphead.GetPosition().y - m_CurrentFrameWidth * 4)
 	{
@@ -59,6 +65,9 @@ void Acorn::Update(float elapsedSec, BulletManager& bulletManager, Cuphead& cuph
 		if (std::abs(m_Positon.x - cuphead.GetPosition().x) <= 10.f)
 		{
 			m_CurrentState = AcornState::drop;
+			m_IdleSFX->StopAll();
+			m_DropSFX->SetVolume(50);
+			m_DropSFX->Play(0);
 		}
 		break;
 	case Acorn::AcornState::drop:

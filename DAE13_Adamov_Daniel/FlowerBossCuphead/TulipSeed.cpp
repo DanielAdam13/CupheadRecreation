@@ -5,9 +5,11 @@
 #include "BulletManager.h"
 #include "Explosion.h"
 
-TulipSeed::TulipSeed(const Texture* sprite, const Texture* explosion, const Vector2f& spawnPos, const Vector2f& playerPos, float directionAngle, float speed, float damage)
+TulipSeed::TulipSeed(const Texture* sprite, const Texture* explosion, const Vector2f& spawnPos, const Vector2f& playerPos, 
+	const SoundEffect* explosionSFX, float directionAngle, float speed, float damage)
 	:Projectile::Projectile(sprite, spawnPos, playerPos, directionAngle, speed, damage),
 	m_ExplosionTexture{ explosion },
+	m_ExplosionSFX{ explosionSFX },
 	m_InitialPlayerPoint{ playerPos },
 	m_StartPoint{ m_Position },
 	m_ControlPoint{ (spawnPos + m_InitialPlayerPoint) / 2 + Vector2f{0.f, 800.f} },
@@ -97,7 +99,7 @@ void TulipSeed::DissapearOnGroundImpact(const std::vector<std::vector<Vector2f>>
 	{
 		if (utils::Raycast(vertices[i], first, second, hitInfo))
 		{
-			bulletManager.AddProjectile(new Explosion(m_ExplosionTexture, hitInfo.intersectPoint));
+			bulletManager.AddProjectile(new Explosion(m_ExplosionTexture, hitInfo.intersectPoint, m_ExplosionSFX));
 
 			m_DeleteMarker = true;
 		}

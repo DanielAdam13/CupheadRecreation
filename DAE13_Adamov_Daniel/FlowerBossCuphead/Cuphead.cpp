@@ -7,6 +7,7 @@
 #include "PeaShooter.h"
 #include "UIManager.h"
 #include <cassert>
+#include "SoundEffect.h"
 
 Cuphead::Cuphead(const Vector2f& position, bool playIntro, int hp, const Texture* peaShooter, const Texture* peaSpecial)
 	: m_Position{ position },
@@ -44,11 +45,13 @@ Cuphead::Cuphead(const Vector2f& position, bool playIntro, int hp, const Texture
 	m_Animator{}
 {
 	IntializeTextures();
+	InitializeSoundEffects();
 }
 
-Cuphead::~Cuphead()
+Cuphead::~Cuphead() noexcept
 {
 	DeleteTextures();
+	DeleteSoundEffects();
 }
 
 void Cuphead::Draw() const
@@ -213,6 +216,7 @@ void Cuphead::ProcessKeys(const Uint8* pStates, UIManager& uiManager)
 
 						if (m_IsGrounded)
 						{
+							m_JumpSFX->Play(0);
 							m_Velocity = Vector2f{ 0.f, 800.f };
 						}
 					}
@@ -966,8 +970,22 @@ void Cuphead::CreateProjectiles(float elapsedSec, BulletManager& bulletManager, 
 
 			if (m_AccuSecProjectiles >= 0.15f)
 			{
+				int randNr{ rand() % 3 + 1 };
+				switch (randNr)
+				{
+				case 1:
+					m_PeaShooterSFX1->Play(0);
+					break;
+				case 2:
+					m_PeaShooterSFX2->Play(0);
+					break;
+				case 3:
+					m_PeaShooterSFX3->Play(0);
+					break;
+				}
+
 				bulletManager.AddProjectile(new PeaShooter(m_TexturePeaShooter,
-					Vector2f{ GetBounds().left + GetBounds().width / 2, GetBounds().bottom + GetBounds().height * 0.4f }, {}, m_ShootAngle, 1200.f, 1.f));
+					Vector2f{ GetBounds().left + GetBounds().width / 2, GetBounds().bottom + GetBounds().height * 0.4f }, {}, m_ShootAngle, 1300.f, 1.5f));
 				m_AccuSecProjectiles -= 0.15f;
 			}
 		}
@@ -975,9 +993,13 @@ void Cuphead::CreateProjectiles(float elapsedSec, BulletManager& bulletManager, 
 		{
 			m_FiringSpecial = true;
 			uiManager.ChangeCards(-20);
+
+			m_SpecialPeaSFX1->Play(0);
+
 			bulletManager.AddProjectile(new PeaShooter(m_TextureSpecialPeaShooter,
 				Vector2f{ GetBounds().left + GetBounds().width / 2, GetBounds().bottom + GetBounds().height * 0.4f }, {}, m_ShootAngle, 900.f, 0.8f, 4, 2));
 			m_SpecialAllowed = false;
+
 		}
 	}
 
@@ -999,6 +1021,9 @@ void Cuphead::StartDash()
 	if (!m_PlayingIntro && (m_DashCooldownAcuuSec <= 0.f && m_DashAnimAccuSec == 0.f) && !m_AnimatingHit && !m_FiringSpecial)
 	{
 		m_ClickedDash = true;
+		
+		m_DashSFX->Play(0);
+		
 		m_CupheadMovementState = Movement::dash;
 		m_CupheadShootingState = Shoot::notShooting;
 	}
@@ -1021,6 +1046,21 @@ void Cuphead::Hit()
 		m_AnimatingHit = true;
 		m_IsHit = true;
 		m_HP--;
+
+		if (m_HP >= 1)
+		{
+			int randNr{ rand() % 2 + 1 };
+			switch (randNr)
+			{
+			case 1:
+				m_HitSFX1->Play(0);
+				break;
+			case 2:
+				m_HitSFX2->Play(0);
+				break;
+			}
+			m_CrackSFX->Play(0);
+		}
 	}
 }
 
@@ -1036,8 +1076,25 @@ bool Cuphead::IsParrying() const
 
 void Cuphead::Parry(UIManager& uiManager)
 {
+	m_ParrySFX->Play(0);
+	m_SlapSFX->Play(0);
 	uiManager.ChangeCards(20);
 	m_Velocity = Vector2f{ 0.f, 700.f };
+}
+
+void Cuphead::ResetPlayer(const Vector2f& pos)
+{
+	m_IsAlive = true;
+	m_FacingAngle = 0.f;
+	m_Position = pos;
+	m_HP = 3;
+	m_PlayingIntro = true;
+	m_Velocity = Vector2f{};
+	m_CupheadMovementState = Movement::idle;
+	m_CupheadShootingState = Shoot::notShooting;
+	m_Animator.Reset(0);
+
+	// I'm not resetting the hit animation on purpose = )
 }
 
 Vector2f Cuphead::GetPosition() const
@@ -1090,6 +1147,15 @@ void Cuphead::UpdateFacingDirection(const Uint8* pStates)
 
 void Cuphead::TakeDamage(float elapsedSec)
 {
+	if (m_Position.y <= 0.f)
+	{
+		if (!m_IsHit)
+		{
+			Hit();
+		}
+		m_Velocity.y = 1000.f;
+	}
+
 	if (m_IsHit)
 	{
 		static float invAccuSec{ 0.f };
@@ -1106,10 +1172,17 @@ void Cuphead::TakeDamage(float elapsedSec)
 
 void Cuphead::SetDeath()
 {
+	static bool canPlayDeath{ false };
 	if (m_HP <= 0)
 	{
 		m_IsAlive = false;
 		m_CupheadShootingState = Shoot::notShooting;
+
+		if (!canPlayDeath)
+		{
+			m_DeathSFX->Play(0);
+			canPlayDeath = true;
+		}
 	}
 }
 
@@ -1118,7 +1191,6 @@ void Cuphead::IntializeTextures()
 	m_TextureDash = new Texture("Cuphead_Sprites/Cuphead_Dash.png");
 	m_TextureShoot = new Texture("Cuphead_Sprites/Cuphead_Shooting.png");
 	m_TextureShootSpecial = new Texture("Cuphead_Sprites/Special_Attack_Air.png");
-	m_TextureDeath = new Texture("Cuphead_Sprites/Death.png");
 	m_TextureDuck = new Texture("Cuphead_Sprites/Duck.png");
 	m_TextureGhost = new Texture("Cuphead_Sprites/Ghost.png");
 	m_TextureHit = new Texture("Cuphead_Sprites/Hit_Ground.png");
@@ -1131,6 +1203,24 @@ void Cuphead::IntializeTextures()
 	m_TextureRunShootStraight = new Texture("Cuphead_Sprites/Run_Shoot_Straight.png");
 }
 
+void Cuphead::InitializeSoundEffects()
+{
+	m_DashSFX = new SoundEffect("Audio/Cuphead_Player/Dash SFX.wav");
+	m_JumpSFX = new SoundEffect("Audio/Cuphead_Player/Jump SFX.wav");
+	m_ParrySFX = new SoundEffect("Audio/Cuphead_Player/Parry SFX.wav");
+	m_SlapSFX = new SoundEffect("Audio/Cuphead_Player/Slap SFX.wav");
+	m_DeathSFX = new SoundEffect("Audio/Cuphead_Player/Death SFX.mp3");
+	m_CrackSFX = new SoundEffect("Audio/Cuphead_Player/Crack SFX.wav");
+	m_HitSFX1 = new SoundEffect("Audio/Cuphead_Player/Hit 1 SFX.wav");
+	m_HitSFX2 = new SoundEffect("Audio/Cuphead_Player/Hit 2 SFX.wav");
+
+	m_PeaShooterSFX1 = new SoundEffect("Audio/PeaShooter/1.wav");
+	m_PeaShooterSFX2 = new SoundEffect("Audio/PeaShooter/3.wav");
+	m_PeaShooterSFX3 = new SoundEffect("Audio/PeaShooter/6.wav");
+
+	m_SpecialPeaSFX1 = new SoundEffect("Audio/PeaShooter/Special 1 SFX.wav");
+}
+
 void Cuphead::DeleteTextures()
 {
 	delete m_TextureDash;
@@ -1139,8 +1229,6 @@ void Cuphead::DeleteTextures()
 	m_TextureShoot = nullptr;
 	delete m_TextureShootSpecial;
 	m_TextureShootSpecial = nullptr;
-	delete m_TextureDeath;
-	m_TextureDeath = nullptr;
 	delete m_TextureDuck;
 	m_TextureDuck = nullptr;
 	delete m_TextureGhost;
@@ -1161,4 +1249,34 @@ void Cuphead::DeleteTextures()
 	m_TextureRunShootDiagonal = nullptr;
 	delete m_TextureRunShootStraight;
 	m_TextureRunShootStraight = nullptr;
+}
+
+void Cuphead::DeleteSoundEffects()
+{
+	delete m_DashSFX;
+	m_DashSFX = nullptr;
+	delete m_JumpSFX;
+	m_JumpSFX = nullptr;
+	delete m_ParrySFX;
+	m_ParrySFX = nullptr;
+	delete m_SlapSFX;
+	m_SlapSFX = nullptr;
+	delete m_DeathSFX;
+	m_DeathSFX = nullptr;
+	delete m_CrackSFX;
+	m_CrackSFX = nullptr;
+	delete m_HitSFX1;
+	m_HitSFX1 = nullptr;
+	delete m_HitSFX2;
+	m_HitSFX2 = nullptr;
+
+	delete m_PeaShooterSFX1;
+	m_PeaShooterSFX1 = nullptr;
+	delete m_PeaShooterSFX2;
+	m_PeaShooterSFX1 = nullptr;
+	delete m_PeaShooterSFX3;
+	m_PeaShooterSFX1 = nullptr;
+
+	delete m_SpecialPeaSFX1;
+	m_SpecialPeaSFX1 = nullptr;
 }

@@ -3,14 +3,17 @@
 #include "Enemy.h"
 #include "Cuphead.h"
 #include "utils.h"
+#include "VisualEffectManager.h"
+#include "Effect.h"
 
-EnemyManager::EnemyManager()
-	: m_EnemiesVector{ nullptr }
+EnemyManager::EnemyManager(const Texture* enemyDeathVFX)
+	: m_EnemiesVector{ nullptr },
+	m_EnemyDeathSpriteVFX{ enemyDeathVFX }
 {
 	m_EnemiesVector.reserve(20);
 }
 
-EnemyManager::~EnemyManager()
+EnemyManager::~EnemyManager() noexcept
 {
 	for (size_t i{}; i < m_EnemiesVector.size(); ++i)
 	{
@@ -37,7 +40,7 @@ void EnemyManager::DrawEnemies(const Rectf& cameraBox) const
 	}
 }
 
-void EnemyManager::UpdateEnemies(float elapsedSec, const Rectf& cameraBox, BulletManager& bulletManager, Cuphead& cuphead, UIManager& uiManager)
+void EnemyManager::UpdateEnemies(float elapsedSec, const Rectf& cameraBox, BulletManager& bulletManager, Cuphead& cuphead, UIManager& uiManager, VisualEffectManager& vfxManager)
 {
 	for (size_t i{}; i < m_EnemiesVector.size(); ++i)
 	{
@@ -45,13 +48,14 @@ void EnemyManager::UpdateEnemies(float elapsedSec, const Rectf& cameraBox, Bulle
 		{
 			if (m_EnemiesVector[i]->MarkedForDeath())
 			{
+				vfxManager.AddEffect(new Effect(Vector2f{ m_EnemiesVector[i]->GetBounds().left, m_EnemiesVector[i]->GetBounds().bottom }, 
+					m_EnemyDeathSpriteVFX, 10, 1, 0.1f * m_EnemiesVector[i]->GetBounds().width / 25));
 				delete m_EnemiesVector[i];
 				m_EnemiesVector[i] = nullptr;
 			}
 			else
 			{
-				if (m_EnemiesVector[i]->GetBounds().left - cameraBox.left <= cameraBox.width * 1.5f ||
-					cameraBox.left - m_EnemiesVector[i]->GetBounds().left <= cameraBox.width * 0.5f)
+				if (std::abs(cameraBox.left - m_EnemiesVector[i]->GetBounds().left) <= cameraBox.width * 1.2f && cameraBox.left < (m_EnemiesVector[i]->GetBounds().left) + cameraBox.width * 0.2f)
 				{
 					m_EnemiesVector[i]->Update(elapsedSec, bulletManager, cuphead, uiManager);
 				}
@@ -71,6 +75,15 @@ void EnemyManager::AnimateEnemies(float elapsedSec, const Rectf& cameraBox)
 				m_EnemiesVector[i]->Animate(elapsedSec);
 			}
 		}
+	}
+}
+
+void EnemyManager::DeleteAllEnemies() noexcept
+{
+	for (size_t i{}; i < m_EnemiesVector.size(); ++i)
+	{
+		delete m_EnemiesVector[i];
+		m_EnemiesVector[i] = nullptr;
 	}
 }
 

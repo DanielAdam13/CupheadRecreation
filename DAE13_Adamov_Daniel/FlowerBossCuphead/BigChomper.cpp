@@ -2,12 +2,17 @@
 #include "BigChomper.h"
 #include "Texture.h"
 #include "utils.h"
+#include "SoundEffect.h"
 
 
-BigChomper::BigChomper(const Texture* spriteTexture, const Vector2f& pos, const Vector2f& lowestPoint, const Vector2f& highestPoint, float speed)
+BigChomper::BigChomper(const Texture* spriteTexture, const Vector2f& pos, const Vector2f& lowestPoint, const Vector2f& highestPoint, 
+	float speed, const SoundEffect* biteSFX1, const SoundEffect* biteSFX2)
 	:Spike(spriteTexture, pos, lowestPoint, highestPoint, speed),
 	m_SpriteRowNr{ 4 },
-	m_SpriteColNr{ 5 }
+	m_SpriteColNr{ 5 },
+	m_ShouldBite{ false },
+	m_BiteSFX1{ biteSFX1 },
+	m_BiteSFX2{ biteSFX2 }
 {
 }
 
@@ -16,7 +21,7 @@ void BigChomper::Draw() const
 	Rectf srcRect{ 0.f + (m_Animator.GetCurrentFrameNr() % m_SpriteColNr) * this->GetBounds().width,
 	0.f + (m_Animator.GetCurrentFrameNr() / m_SpriteColNr) * this->GetBounds().height, this->GetBounds().width, this->GetBounds().height };
 
-	this->m_Texture->Draw(Vector2f{ this->GetBounds().left, this->GetBounds().bottom }, srcRect);
+	m_Texture->Draw(Vector2f{ this->GetBounds().left, this->GetBounds().bottom }, srcRect);
 
 	//// Hitbox
 	//utils::SetColor(Color4f{ 1,0,0,1 });
@@ -38,22 +43,38 @@ void BigChomper::Animate(float elapsedSec)
 {
 	if (m_Speed > 0.f)
 	{
-		if (m_Positon.y <= m_HighestPoint.y - 300.f)
+		if (m_Positon.y <= m_HighestPoint.y - 300.f) // fly up
 		{
 			m_Animator.AnimateBetweenFrames(elapsedSec, 0, 8, 0.07f);
 		}
-		else
+		else // bite
 		{
+			if (!m_ShouldBite)
+			{
+				int randNr{ rand() % 2 + 1 };
+				switch (randNr)
+				{
+				case 1:
+					m_BiteSFX1->Play(0);
+					break;
+				case 2:
+					m_BiteSFX2->Play(0);
+					break;
+				}
+				m_ShouldBite = true;
+			}
+			
 			m_Animator.AnimateBetweenFrames(elapsedSec, 9, 11, 0.07f);
 		}
 	}
 	else
 	{
-		if (m_Positon.y >= m_HighestPoint.y - 200.f)
+		if (m_Positon.y >= m_HighestPoint.y - 200.f) // return bite
 		{
 			m_Animator.AnimateBetweenFrames(elapsedSec, 12, 15, 0.08f);
+			m_ShouldBite = false;
 		}
-		else
+		else // fly down
 		{
 			m_Animator.AnimateBetweenFrames(elapsedSec, 16, 19, 0.09f);
 		}

@@ -8,16 +8,19 @@
 #include "UIManager.h"
 #include <cassert>
 #include <iostream>
+#include "SoundEffect.h"
 
 Mushroom::Mushroom(const Texture* idleTexture, const Texture* boiledTexture, const Texture* attackTexture, const Texture* popTexture, const Texture* deathTexture,
-	const Texture* cloudTexture, const Vector2f& pos, int colNr, int rowNr, float range)
+	const Texture* cloudTexture, const Vector2f& pos, const SoundEffect* shoot1, const SoundEffect* shoot2, int colNr, int rowNr, float range)
 	:Enemy(pos),
 	m_CurrentTexture{ boiledTexture },
 	m_CurrentState{ MushroomState::boil },
 	m_LastMushroomState{},
-	m_Hp{ 15 },
+	m_Hp{ 10 },
 	m_TextureIdle{ idleTexture },
 	m_TextureAttack{ attackTexture },
+	m_ShootSFX1{ shoot1 },
+	m_ShootSFX2{ shoot2 },
 	m_CurrentSpriteColNr{ colNr },
 	m_CurrentSpriteRowNr{ rowNr },
 	m_CurrentFrameWidth{ m_CurrentTexture->GetWidth() / m_CurrentSpriteColNr },
@@ -73,9 +76,20 @@ void Mushroom::Update(float elapsedSec, BulletManager& bulletManager, Cuphead& c
 		if (PlayerInRange(cuphead.GetPosition(), m_Range) && m_AllowedAttack)
 		{
 			int randomNr{ rand() % 2 };
+
 			m_AccuSec = 0.f;
 			m_CurrentState = MushroomState::attack;
 			bulletManager.AddProjectile(new MushroomCloud(m_TextureCloud, m_Positon, cuphead.GetPosition(), 90.f, 350.f, 1, randomNr));
+			
+			switch (randomNr)
+			{
+			case 0:
+				m_ShootSFX1->Play(0);
+				break;
+			case 1:
+				m_ShootSFX2->Play(0);
+				break;
+			}
 		}
 		else if (!PlayerInRange(cuphead.GetPosition(), m_Range))
 		{
@@ -129,9 +143,9 @@ void Mushroom::Update(float elapsedSec, BulletManager& bulletManager, Cuphead& c
 			m_CurrentState = MushroomState::popout;
 			m_AccuSec = 0.f;
 		}
-		else if (m_BoilTimer >= 2.5f)
+		else if (m_BoilTimer >= 1.7f)
 		{
-			m_BoilTimer -= 2.5f;
+			m_BoilTimer -= 1.7f;
 			m_CurrentState = MushroomState::popout;
 			m_AccuSec = 0.f;
 		}

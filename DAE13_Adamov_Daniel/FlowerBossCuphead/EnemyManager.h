@@ -4,20 +4,24 @@ class Enemy;
 class BulletManager;
 class Cuphead;
 class UIManager;
+class VisualEffectManager;
+
+class Texture;
 
 class EnemyManager final
 {
 public:
-	explicit EnemyManager();
+	explicit EnemyManager(const Texture* enemyDeathVFX);
 	EnemyManager(const EnemyManager& enemyManager) = delete;
 	EnemyManager& operator=(const EnemyManager&) = delete;
 	EnemyManager(EnemyManager&& enemyManager) = delete;
 	EnemyManager& operator=(EnemyManager&& rhs) = delete;
-	~EnemyManager();
+	~EnemyManager() noexcept;
 
 	void DrawEnemies(const Rectf& cameraBox) const;
-	void UpdateEnemies(float elapsedSec, const Rectf& cameraBox, BulletManager& bulletManager, Cuphead& cuphead, UIManager& uiManager);
+	void UpdateEnemies(float elapsedSec, const Rectf& cameraBox, BulletManager& bulletManager, Cuphead& cuphead, UIManager& uiManager, VisualEffectManager& vfxManager);
 	void AnimateEnemies(float elapsedSec, const Rectf& cameraBox);
+	void DeleteAllEnemies() noexcept;
 
 	void AddEnemy(Enemy* enemy);
 	Enemy* operator[](int index) const;
@@ -26,5 +30,7 @@ public:
 
 private:
 	std::vector<Enemy*> m_EnemiesVector;
+
+	const Texture* m_EnemyDeathSpriteVFX;
 };
 

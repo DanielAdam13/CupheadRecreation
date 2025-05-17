@@ -15,11 +15,9 @@ Camera::Camera(float screenWidth, float screenHeight, float scaleX, float scaleY
 
 void Camera::Aim(float levelW, float levelH, const Vector2f& trackCenter)
 {
-	//levelW /= m_ScaleX;
-	levelH /= m_ScaleY;
-
 	m_TrackCenter = trackCenter;
-	m_CameraPos = Vector2f{trackCenter.x - m_ScreenWidth / 2, trackCenter.y - m_ScreenHeight / 2};
+	m_CameraPos = Vector2f{trackCenter.x * m_ScaleX - m_ScreenWidth / 2, trackCenter.y * m_ScaleY - m_ScreenHeight / 2};
+	levelW -= 200.f;
 
 	if (m_CameraPos.x + m_ScreenWidth > levelW)
 	{
@@ -29,9 +27,9 @@ void Camera::Aim(float levelW, float levelH, const Vector2f& trackCenter)
 	{
 		m_CameraPos.x = 0;
 	}
-	if (m_CameraPos.y + m_ScreenHeight - levelH / 6 > levelH )
+	if (m_CameraPos.y + m_ScreenHeight + levelH / 18 > levelH )
 	{
-		m_CameraPos.y = levelH - m_ScreenHeight + levelH / 6;
+		m_CameraPos.y = levelH - m_ScreenHeight - levelH / 18;
 	}
 	if (m_CameraPos.y < 0)
 	{

@@ -1,12 +1,13 @@
 #pragma once
 #include "Enemy.h"
 class Texture;
+class SoundEffect;
 
 class Mushroom : public Enemy // The most complex AI in this cuphead level, spawns MushroomCloud
 {
 public:
 	explicit Mushroom(const Texture* idleTexture, const Texture* boiledTexture, const Texture* attackTexture, const Texture* popTexture, const Texture* deathTexture, 
-		const Texture* cloudTexture, const Vector2f& pos, int colNr = 1, int rowNr = 1, float range = 400.f);
+		const Texture* cloudTexture, const Vector2f& pos, const SoundEffect* shoot1, const SoundEffect* shoot2, int colNr = 1, int rowNr = 1, float range = 400.f);
 
 	virtual void Draw() const override;
 	virtual void Update(float elapsedSec, BulletManager& bulletManager, Cuphead& cuphead, UIManager& uiManager) override;
@@ -23,6 +24,9 @@ protected:
 
 	const Texture* m_TextureIdle;
 	const Texture* m_TextureAttack;
+
+	const SoundEffect* m_ShootSFX1;
+	const SoundEffect* m_ShootSFX2;
 
 	int m_CurrentSpriteRowNr;
 	int m_CurrentSpriteColNr;

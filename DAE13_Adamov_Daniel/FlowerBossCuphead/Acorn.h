@@ -1,11 +1,12 @@
 #pragma once
 #include "Enemy.h"
 class Texture;
+class SoundEffect;
 
 class Acorn final : public Enemy // Enemy derived class that falls down from above
 {
 public:
-	explicit Acorn(const Texture* idle, const Texture* drop, const Vector2f& pos, const Vector2f& direction = Vector2f{ -1, 0 });
+	explicit Acorn(const Texture* idle, const Texture* drop, const Vector2f& pos, const Vector2f& direction, SoundEffect* idleSFX, SoundEffect* fallSFX);
 
 	virtual void Draw() const override;
 	virtual void Update(float elapsedSec, BulletManager& bulletManager, Cuphead& cuphead, UIManager& uiManager) override;
@@ -40,5 +41,7 @@ private:
 	Vector2f m_Direction;
 	float m_FacingAngle;
 
+	SoundEffect* m_IdleSFX;
+	SoundEffect* m_DropSFX;
 };
 

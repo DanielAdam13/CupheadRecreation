@@ -3,11 +3,12 @@
 class Texture;
 #include "Projectile.h"
 class Cuphead;
+class SoundEffect;
 
 class Explosion final : public Projectile // Used as Projectile derived class because since it works as a projectile
 {
 public:
-	explicit Explosion(const Texture* sprite, const Vector2f& pos);
+	explicit Explosion(const Texture* sprite, const Vector2f& pos, const SoundEffect* SFX);
 
 	virtual void Draw() const override;
 	virtual void Update(float elapsedSec, const std::vector<std::vector<Vector2f>>& vertices, BulletManager& bulletManager, Cuphead& cuphead, UIManager& uiManager) override; // it has to announce self deletion to BulletManager
@@ -26,6 +27,8 @@ private:
 
 	float m_AccuSec;
 	const float m_Duration;
+
+	const SoundEffect* m_SFX;
 
 	Animator m_Animator;
 	

@@ -10,7 +10,7 @@ BulletManager::BulletManager()
 	m_Projectiles.reserve(50);
 }
 
-BulletManager::~BulletManager()
+BulletManager::~BulletManager() noexcept
 {
 	for (Projectile* pProj : m_Projectiles)
 	{
@@ -42,13 +42,12 @@ void BulletManager::UpdateActiveBullets(float elapsedSec, const Rectf& cameraBox
 		{
 			if (!m_Projectiles[i]->MarkedForDeletion())
 			{
-				if (utils::IsOverlapping(Rectf{ cameraBox.left, cameraBox.bottom, cameraBox.width, cameraBox.height * 1.2f }, m_Projectiles[i]->GetHitbox())) // a bit higher than camera y
+				if (utils::IsOverlapping(Rectf{ cameraBox.left - cameraBox.width * 0.2f, cameraBox.bottom, cameraBox.width * 1.4f, cameraBox.height * 1.2f }, m_Projectiles[i]->GetHitbox())) // a bit higher than camera y
 				{
 					m_Projectiles[i]->Update(elapsedSec, vertices, *this, cuphead, uiManager);
 				}
 				else
 				{
-					std::cout << "Deleted\n";
 					delete m_Projectiles[i];
 					m_Projectiles[i] = nullptr;
 				}

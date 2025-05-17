@@ -6,7 +6,10 @@ class Texture;
 #include "Camera.h"
 #include "EnemyManager.h"
 #include "BulletManager.h"
+#include "VisualEffectManager.h"
 #include "UIManager.h"
+class SoundStream;
+class SoundEffect;
 
 class Game : public BaseGame
 {
@@ -35,11 +38,19 @@ private:
 	Texture* m_ForestBackground1;
 	Texture* m_ForestBackground2;
 
-	Camera m_Camera;
+	const float m_LevelWidthWorld;
+	const float m_LevelHeightWorld;
+	const float m_ScaleX;
+	const float m_ScaleY;
 
+	Camera m_Camera;
+	Vector2f m_TransformedPlayerPos;
+
+	const Texture* m_EnemyDeathVFXSprite;
 	EnemyManager m_EnemyManager;
 	BulletManager m_PlayerBulletManager;
 	BulletManager m_EnemyBulletManager;
+	VisualEffectManager m_VFXManager;
 
 	enum class GameState
 	{
@@ -51,18 +62,20 @@ private:
 	};
 	GameState m_CurrentGameState;
 
+	bool m_ShouldSpawnAcorns;
+
 	const Texture* m_HealthSprite;
 	const Texture* m_CardsSprite;
-	const Texture* m_IntroAnnouncment;
-	const Texture* m_DeathAnnouncment;
-	const Texture* m_BravoAnnouncment;
+	const Texture* m_IntroAnnouncementTexture;
+	const Texture* m_DeathAnnouncementTexture;
+	const Texture* m_BravoAnnouncementTexture;
 	const Texture* m_PauseScreen;
+	const Texture* m_DeathCardScreen;
 	UIManager m_UIManager;
 	
-
 	const Texture* m_PeaShooterSprite;
 	const Texture* m_PeaSpecialSprite;
-	Cuphead m_Cuphead;
+	const Texture* m_PeaDeathVFX;
 
 	const Texture* m_SpikeSprite;
 	const Texture* m_ChomperSprite;
@@ -82,13 +95,27 @@ private:
 	const Texture* m_AcornIdle;
 	const Texture* m_AcornDrop;
 
-	const float m_ScaledLevelWidth;
-	const float m_ScaledLevelHeight;
+	SoundStream* m_ForesFolliestSoundtrack;
+	SoundEffect* m_IntroAnnouncementAudio;
+	const SoundEffect* m_BravoAnnouncementAudio;
+
+	const SoundEffect* m_MushroomShootSFX1;
+	const SoundEffect* m_MushroomShootSFX2;
+	const SoundEffect* m_TulipShootSFX;
+	const SoundEffect* m_TulipSeedSFX;
+	SoundEffect* m_AcornIdleSFX;
+	SoundEffect* m_AcornFallSFX;
+	const SoundEffect* m_ChomperBiteSFX1;
+	const SoundEffect* m_ChomperBiteSFX2;
+	
+	Cuphead m_Cuphead;
 
 	// FUNCTIONS
 	void Initialize();
 	void Cleanup( );
 	void ClearBackground( ) const;
+
+	void InitalizeEnemies();
 
 	void ManagePlayerProjectiles();
 	void ManageTakingDamageCuphead();
@@ -96,4 +123,11 @@ private:
 	void DrawScaledObjects() const;
 
 	void SpawnAcorns(float elapsedSec);
+	void RestartLevel();
+	
+	void HandleGameStateLogic(float elapsedSec);
+	void UpdateForestFolliesLevel(float elapsedSec);
+
+	void DeleteSound();
+	void DeleteTextures();
 };
