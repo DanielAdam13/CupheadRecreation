@@ -115,13 +115,17 @@ Rectf Tulip::GetBounds() const
 	return Rectf(m_Positon.x - (m_CurrentFrameWidth * 0.75f) / 2, m_Positon.y, m_CurrentFrameWidth * 0.75f, m_CurrentFrameHeight * 0.75f);
 }
 
-void Tulip::TakeDamage(float damage, UIManager& uiManager)
+void Tulip::TakeDamage(float elapsedSec, float damage, UIManager& uiManager)
 {
-	m_Hp -= damage;
 	//std::cout << "HP: " << m_Hp << std::endl;
-	if (damage != 0.8f)
+	if (damage != 1.2f)
 	{
+		m_Hp -= damage;
 		uiManager.ChangeCards();
+	}
+	else
+	{
+		m_Hp -= damage * 100 * elapsedSec;
 	}
 }
 

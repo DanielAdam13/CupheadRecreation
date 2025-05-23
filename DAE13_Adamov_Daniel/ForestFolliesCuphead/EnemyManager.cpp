@@ -49,7 +49,7 @@ void EnemyManager::UpdateEnemies(float elapsedSec, const Rectf& cameraBox, Bulle
 			if (m_EnemiesVector[i]->MarkedForDeath())
 			{
 				vfxManager.AddEffect(new Effect(Vector2f{ m_EnemiesVector[i]->GetBounds().left, m_EnemiesVector[i]->GetBounds().bottom }, 
-					m_EnemyDeathSpriteVFX, 10, 1, 0.1f * m_EnemiesVector[i]->GetBounds().width / 25));
+					m_EnemyDeathSpriteVFX, 10, 1, 0.1f * m_EnemiesVector[i]->GetBounds().width / 15));
 				delete m_EnemiesVector[i];
 				m_EnemiesVector[i] = nullptr;
 			}

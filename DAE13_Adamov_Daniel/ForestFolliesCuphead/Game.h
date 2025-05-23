@@ -71,6 +71,7 @@ private:
 	const Texture* m_BravoAnnouncementTexture;
 	const Texture* m_PauseScreen;
 	const Texture* m_DeathCardScreen;
+	const Texture* m_ProgressMan;
 	UIManager m_UIManager;
 	
 	const Texture* m_PeaShooterSprite;
@@ -95,6 +96,10 @@ private:
 	const Texture* m_AcornIdle;
 	const Texture* m_AcornDrop;
 
+	const Texture* m_DaisyRun;
+	const Texture* m_DaisyJump;
+	const Texture* m_DaisyTurn;
+
 	SoundStream* m_ForesFolliestSoundtrack;
 	SoundEffect* m_IntroAnnouncementAudio;
 	const SoundEffect* m_BravoAnnouncementAudio;
@@ -117,7 +122,7 @@ private:
 
 	void InitalizeEnemies();
 
-	void ManagePlayerProjectiles();
+	void ManagePlayerProjectiles(float elapsedSec);
 	void ManageTakingDamageCuphead();
 	
 	void DrawScaledObjects() const;

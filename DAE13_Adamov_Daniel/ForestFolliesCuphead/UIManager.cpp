@@ -4,7 +4,8 @@
 #include <iostream>
 #include "utils.h"
 
-UIManager::UIManager(const Texture* healthDisplay, const Texture* cards, const Texture* intro, const Texture* death, const Texture* completion, const Texture* pause, const Texture* deathScreen)
+UIManager::UIManager(const Texture* healthDisplay, const Texture* cards, const Texture* intro, const Texture* death, 
+	const Texture* completion, const Texture* pause, const Texture* deathScreen, const Texture* progressMan)
 	:m_HealthTexture{ healthDisplay },
 	m_CardsTexture{ cards },
 	m_IntroAnnouncementTexture{ intro },
@@ -12,6 +13,7 @@ UIManager::UIManager(const Texture* healthDisplay, const Texture* cards, const T
 	m_CompletionAnnouncementTexture{ completion },
 	m_PauseScreenTexture{ pause },
 	m_DeathScreenCardTexture{ deathScreen },
+	m_ProgressManTexture{ progressMan },
 	m_CurrentFrameWidth{},
 	m_CurrentFrameHeight{},
 	m_CurrentFrameHp{ 0 },
@@ -115,7 +117,7 @@ void UIManager::Draw(const Rectf& cameraBox) const
 	{
 		utils::SetColor(Color4f{ 0, 0, 0, 0.5f });
 		utils::FillRect(cameraBox);
-		m_PauseScreenTexture->Draw(Rectf{cameraBox.left + cameraBox.width * 0.25f, cameraBox.height * 0.25f, cameraBox.width * 0.5f, cameraBox.height * 0.5f});
+		m_PauseScreenTexture->Draw(Rectf{cameraBox.left + cameraBox.width * 0.25f, cameraBox.bottom + cameraBox.height * 0.25f, cameraBox.width * 0.5f, cameraBox.height * 0.5f});
 	}
 
 	if (m_PlayingDeathAnnouncement)
@@ -124,7 +126,6 @@ void UIManager::Draw(const Rectf& cameraBox) const
 			0.f + (m_Animator.GetCurrentFrameNr() / 3) * m_CurrentFrameHeight, m_CurrentFrameWidth, m_CurrentFrameHeight };
 
 		m_DeathAnnouncementTexture->Draw(Rectf{cameraBox.left + cameraBox.width * 0.05f, cameraBox.bottom + cameraBox.height * 0.15f, cameraBox.width * 0.9f, cameraBox.height * 0.7f}, srcRect);
-
 	}
 
 	if (m_DrawingDeathScreen)
@@ -132,6 +133,14 @@ void UIManager::Draw(const Rectf& cameraBox) const
 		utils::SetColor(Color4f{ 0, 0, 0, 0.5f });
 		utils::FillRect(cameraBox);
 		m_DeathScreenCardTexture->Draw(Rectf{ cameraBox.left + cameraBox.width * 0.3f, cameraBox.bottom + cameraBox.height * 0.1f, cameraBox.width * 0.4f, cameraBox.width * 0.45f });
+
+		// draw progress man
+		const float playerLocationX{ cameraBox.left + cameraBox.width / 2 };
+		const Rectf progressDest{ cameraBox.left + cameraBox.width * 0.3f + (playerLocationX / 13500) * cameraBox.width * 0.4f, 
+			cameraBox.bottom + cameraBox.height * 0.4f + (playerLocationX / 13500) * sinf(7.f * utils::g_Pi / 180.f) * cameraBox.height * 0.4f,
+		m_ProgressManTexture->GetWidth() * 0.6f, m_ProgressManTexture->GetHeight() * 0.6f };
+
+		m_ProgressManTexture->Draw(progressDest);
 	}
 
 	if (m_PlayingWinAnnounement)

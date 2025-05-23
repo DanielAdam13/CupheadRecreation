@@ -17,7 +17,7 @@ public:
 
 	virtual Rectf GetBounds() const = 0;
 
-	virtual void TakeDamage(float damage, UIManager& uiManager) = 0;
+	virtual void TakeDamage(float elapsedSec, float damage, UIManager& uiManager) = 0;
 
 	virtual bool MarkedForDeath() const = 0;
 

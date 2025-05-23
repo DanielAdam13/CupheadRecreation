@@ -14,7 +14,7 @@ public:
 
 	virtual Rectf GetBounds() const override;
 
-	virtual void TakeDamage(float damage, UIManager& uiManager) override;
+	virtual void TakeDamage(float elapsedSec, float damage, UIManager& uiManager) override;
 
 	virtual bool MarkedForDeath() const override;
 

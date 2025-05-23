@@ -6,7 +6,7 @@ class UIManager final
 {
 public:
 	explicit UIManager(const Texture* healthDisplay, const Texture* cards, const Texture* intro, 
-		const Texture* death, const Texture* completion, const Texture* pause, const Texture* deathScreen);
+		const Texture* death, const Texture* completion, const Texture* pause, const Texture* deathScreen, const Texture* progressMan);
 
 	void Update(float elapsedSec, int cupheadHp, int currentGameStateIdx);
 	void Draw(const Rectf& cameraBox) const;
@@ -24,6 +24,7 @@ private:
 	const Texture* m_CompletionAnnouncementTexture;
 	const Texture* m_PauseScreenTexture;
 	const Texture* m_DeathScreenCardTexture;
+	const Texture* m_ProgressManTexture;
 
 	float m_CurrentFrameWidth;
 	float m_CurrentFrameHeight;

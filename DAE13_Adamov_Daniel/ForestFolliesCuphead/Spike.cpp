@@ -63,7 +63,7 @@ Rectf Spike::GetParryHitbox() const
 	return Rectf{ this->GetBounds().left - m_FrameWidth * 0.75f, this->GetBounds().bottom - m_FrameHeight * 0.75f, m_FrameWidth * 2.5f, m_FrameHeight * 2.5f};
 }
 
-void Spike::TakeDamage(float damage, UIManager& uiManager)
+void Spike::TakeDamage(float elapsedSec, float damage, UIManager& uiManager)
 {
 }
 

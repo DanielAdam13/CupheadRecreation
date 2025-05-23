@@ -87,6 +87,8 @@ private:
 	float m_ShootAngle;
 
 	bool m_IsGrounded;
+	bool m_CanFall;
+
 	bool m_IsHit;
 	bool m_AnimatingHit;
 	const float m_InvincibilityDuration;

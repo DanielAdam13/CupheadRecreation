@@ -90,7 +90,7 @@ Rectf BigChomper::GetBounds() const
 	return Rectf(m_Positon.x - frameWidth / 2, m_Positon.y - frameHeight / 2, frameWidth, frameHeight);
 }
 
-void BigChomper::TakeDamage(float damage, UIManager& uiManager)
+void BigChomper::TakeDamage(float elapsedSec, float damage, UIManager& uiManager)
 {
 }
 

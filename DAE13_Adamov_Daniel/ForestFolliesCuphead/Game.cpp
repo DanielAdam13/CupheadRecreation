@@ -41,7 +41,8 @@ Game::Game(const Window& window)
 	m_BravoAnnouncementTexture{ new Texture("UI/Bravo_Sprite.png") }, // + 200+ mb !!!!!!!!!!!!!!!!!!???
 	m_PauseScreen{ new Texture("UI/Pause_Screen.bmp") }, // 20 mb
 	m_DeathCardScreen{ new Texture("UI/Death_Screen_UI.png") },
-	m_UIManager{ m_HealthSprite, m_CardsSprite, m_IntroAnnouncementTexture, m_DeathAnnouncementTexture, m_BravoAnnouncementTexture, m_PauseScreen, m_DeathCardScreen },
+	m_ProgressMan{ new Texture("UI/RedMen.png") },
+	m_UIManager{ m_HealthSprite, m_CardsSprite, m_IntroAnnouncementTexture, m_DeathAnnouncementTexture, m_BravoAnnouncementTexture, m_PauseScreen, m_DeathCardScreen, m_ProgressMan },
 	m_PeaShooterSprite{ new Texture("Projectile_Loop.png") },
 	m_PeaSpecialSprite{ new Texture("Projectile_Special_Loop.png") },
 	m_PeaDeathVFX{ new Texture("PeaShot_Death.png") },
@@ -59,6 +60,9 @@ Game::Game(const Window& window)
 	m_MushroomCloud{ new Texture("Run'N'Gun/Mushroom/Sprite_Mushroom_Cloud.png") },
 	m_AcornIdle{ new Texture("Run'N'Gun/Acorn/Sprite_Acorn_Fly.png") },
 	m_AcornDrop{ new Texture("Run'N'Gun/Acorn/Sprite_Acorn_Drop.png") },
+	m_DaisyRun{ new Texture("Run'N'Gun/Daisy/Sprite_Daisy_Run.png") },
+	m_DaisyJump{ new Texture("Run'N'Gun/Daisy/Sprite_Daisy_Jump.png") },
+	m_DaisyTurn{ new Texture("Run'N'Gun/Daisy/Sprite_Daisy_Turn.png") },
 	m_ForesFolliestSoundtrack{ new SoundStream("Audio/Forest Follies.mp3") },
 	m_IntroAnnouncementAudio{ new SoundEffect("Audio/Intro.mp3") },
 	m_BravoAnnouncementAudio{ new SoundEffect("Audio/Bravo.wav") },
@@ -139,10 +143,14 @@ void Game::ProcessKeyDownEvent( const SDL_KeyboardEvent & e )
 		m_Cuphead.StartDash();
 		break;
 	case SDLK_z:
-		if (m_CurrentGameState == GameState::pause || m_CurrentGameState == GameState::death)
+		if (m_CurrentGameState == GameState::death)
 		{
 			m_ForesFolliestSoundtrack->Stop();
 			RestartLevel();
+		}
+		else if (m_CurrentGameState == GameState::pause)
+		{
+			m_CurrentGameState = GameState::gameplay;
 		}
 		else m_Cuphead.ToggleParryState();
 		break;
@@ -160,6 +168,10 @@ void Game::ProcessKeyDownEvent( const SDL_KeyboardEvent & e )
 		break;
 	case SDLK_m:
 		m_ForesFolliestSoundtrack->Stop(); // mute
+		break;
+	case SDLK_r:
+		m_ForesFolliestSoundtrack->Stop();
+		RestartLevel();
 		break;
 	}
 }
@@ -248,13 +260,13 @@ void Game::InitalizeEnemies()
 		Vector2f{ 10200.f, -(m_ChomperSprite->GetHeight() / 4) * 1.5f }, Vector2f{ 10200.f, 550.f }, 600.f, m_ChomperBiteSFX1, m_ChomperBiteSFX2));
 
 	m_EnemyManager.AddEnemy(new Mushroom(m_MushroomIdle, m_MushroomBoil, m_MushroomAttack, m_MushroomPop, m_MushroomDeath, m_MushroomCloud,
-		Vector2f{ 11150.f, 440.f }, m_MushroomShootSFX1, m_MushroomShootSFX2,
+		Vector2f{ 11150.f, 450.f }, m_MushroomShootSFX1, m_MushroomShootSFX2,
 		1, 1, m_Camera.GetCuurentCameraBounds().width / 2.5f));
 
 	m_EnemyManager.AddEnemy(new Tulip(m_TulipIdle, m_TulipAttack, m_TulipSeed, m_TulipSeedExplosion, Vector2f{ 11450.f, 330.f }, m_TulipShootSFX, m_TulipSeedSFX, 5, 4, GetViewPort().width * 0.7f));
 }
 
-void Game::ManagePlayerProjectiles()
+void Game::ManagePlayerProjectiles(float elapsedSec)
 {
 	for (int j{}; j < m_EnemyManager.GetVectorSize(); ++j)
 	{
@@ -266,11 +278,11 @@ void Game::ManagePlayerProjectiles()
 				{
 					if (utils::IsOverlapping(m_EnemyManager[j]->GetBounds(), m_PlayerBulletManager[i]->GetHitbox()))
 					{
-						m_EnemyManager[j]->TakeDamage(m_PlayerBulletManager[i]->Damage(), m_UIManager);
+						m_EnemyManager[j]->TakeDamage(elapsedSec, m_PlayerBulletManager[i]->Damage(), m_UIManager);
 
-						if (m_PlayerBulletManager[i]->Damage() - 0.8f > 0.001f)
+						if (m_PlayerBulletManager[i]->Damage() - 1.2f > 0.001f)
 						{
-							m_VFXManager.AddEffect(new Effect(m_PlayerBulletManager[i]->GetHitbox().center, m_PeaDeathVFX, 6, 1, 0.3f));
+							m_VFXManager.AddEffect(new Effect(m_PlayerBulletManager[i]->GetHitbox().center, m_PeaDeathVFX, 6, 1, 0.5f));
 							m_PlayerBulletManager.RemoveProjectile(i);
 						}
 					}
@@ -330,9 +342,9 @@ void Game::DrawScaledObjects() const
 	m_EnemyBulletManager.DrawActiveBullets();
 
 	m_EnemyManager.DrawEnemies(m_Camera.GetCuurentCameraBounds());
-	m_UIManager.Draw(m_Camera.GetCuurentCameraBounds());
 
 	m_VFXManager.DrawEffects();
+	m_UIManager.Draw(m_Camera.GetCuurentCameraBounds());
 
 	glPopMatrix();
 }
@@ -375,9 +387,9 @@ void Game::SpawnAcorns(float elapsedSec)
 
 void Game::RestartLevel()
 {
+	m_Cuphead.ResetPlayer(Vector2f{ GetViewPort().width / 2, GetViewPort().height * 6.5f / 36.f });
 	m_EnemyManager.DeleteAllEnemies();
 	Game::InitalizeEnemies();
-	m_Cuphead.ResetPlayer(Vector2f{ GetViewPort().width / 2, GetViewPort().height * 6.5f / 36.f });
 	m_ShouldSpawnAcorns = false;
 	m_UIManager.ResetUI();
 	m_CurrentGameState = GameState::intro;
@@ -402,7 +414,7 @@ void Game::HandleGameStateLogic(float elapsedSec)
 		}
 		break;
 	case Game::GameState::gameplay:
-		if (m_Cuphead.GetPosition().x >= 12000)
+		if (m_Cuphead.GetPosition().x >= 12000.f)
 		{
 			m_CurrentGameState = GameState::win;
 		}
@@ -410,11 +422,11 @@ void Game::HandleGameStateLogic(float elapsedSec)
 	case Game::GameState::death:
 		if (!m_ShouldDecreaseVolume)
 		{
-			m_ForesFolliestSoundtrack->SetVolume(50);
+			m_ForesFolliestSoundtrack->SetVolume(40);
 			m_GameplayAccuSec += elapsedSec;
 			if (m_GameplayAccuSec >= 1.f)
 			{
-				m_ForesFolliestSoundtrack->SetVolume(20);
+				m_ForesFolliestSoundtrack->SetVolume(10);
 				m_ShouldDecreaseVolume = true;
 			}
 		}
@@ -498,7 +510,7 @@ void Game::UpdateForestFolliesLevel(float elapsedSec)
 		m_PlayerBulletManager.AnimateActiveBullets(elapsedSec);
 
 		// delete player bullets if they collide with enemy and deal damage
-		ManagePlayerProjectiles();
+		ManagePlayerProjectiles(elapsedSec);
 
 		ManageTakingDamageCuphead();
 
@@ -564,6 +576,8 @@ void Game::DeleteTextures()
 	m_PauseScreen = nullptr;
 	delete m_DeathCardScreen;
 	m_DeathCardScreen = nullptr;
+	delete m_ProgressMan;
+	m_ProgressMan = nullptr;
 
 	delete m_PeaShooterSprite;
 	m_PeaShooterSprite = nullptr;
@@ -597,8 +611,16 @@ void Game::DeleteTextures()
 	m_MushroomDeath = nullptr;
 	delete m_MushroomCloud;
 	m_MushroomCloud = nullptr;
+
 	delete m_AcornIdle;
 	m_AcornIdle = nullptr;
 	delete m_AcornDrop;
 	m_AcornDrop = nullptr;
+
+	delete m_DaisyRun;
+	m_DaisyRun = nullptr;
+	delete m_DaisyJump;
+	m_DaisyJump = nullptr;
+	delete m_DaisyTurn;
+	m_DaisyTurn = nullptr;
 }

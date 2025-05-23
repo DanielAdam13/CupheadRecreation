@@ -24,6 +24,7 @@ Cuphead::Cuphead(const Vector2f& position, bool playIntro, int hp, const Texture
 	m_FrameToResetAnimation{ 0 },
 	m_ShootAngle{ 0.f },
 	m_IsGrounded{ false },
+	m_CanFall{ false },
 	m_IsHit{ false },
 	m_AnimatingHit{ false },
 	m_InvincibilityDuration{ 3.5f },
@@ -175,12 +176,15 @@ void Cuphead::ProcessKeys(const Uint8* pStates, UIManager& uiManager)
 			else if(!m_FiringSpecial)
 			{
 				// determines the whole rotation logic + enables dashing in one direction
-				UpdateFacingDirection(pStates);
 				
 				const float movementSpeed{ 400.f };
 
+				if (pStates[SDL_SCANCODE_DOWN] && pStates[SDL_SCANCODE_Z])
+				{
+					m_CanFall = true;
+				}
 				// change movement and shooting state, statring with COMBINATIONS
-				if (pStates[SDL_SCANCODE_Z])
+				else if (pStates[SDL_SCANCODE_Z])
 				{
 					// parry
 					if (m_CupheadMovementState == Movement::parry)
@@ -212,6 +216,20 @@ void Cuphead::ProcessKeys(const Uint8* pStates, UIManager& uiManager)
 						if (pStates[SDL_SCANCODE_RIGHT])
 						{
 							m_Velocity.x = movementSpeed * 0.75f;
+						}
+
+						if (pStates[SDL_SCANCODE_X])
+						{
+							if (m_FacingAngle == 0.f)
+							{
+								m_CupheadShootingState = Shoot::shootRight;
+								m_ShootAngle = 0.f;
+							}
+							else if (m_FacingAngle == 180.f)
+							{
+								m_CupheadShootingState = Shoot::shootLeft;
+								m_ShootAngle = 180.f;
+							}
 						}
 
 						if (m_IsGrounded)
@@ -612,6 +630,9 @@ void Cuphead::ProcessKeys(const Uint8* pStates, UIManager& uiManager)
 					}
 				}
 			}
+
+			// determines the current rotation of the sprites
+			UpdateFacingDirection(pStates);
 		}
 	}
 	
@@ -850,6 +871,18 @@ void Cuphead::HandleRaycast(float elapsedSec, const std::vector<std::vector<Vect
 	{
 		m_IsGrounded = false;
 
+		static float fallingAcc{ 0.f };
+
+		if (m_CanFall)
+		{
+			fallingAcc += elapsedSec;
+			if (fallingAcc >= 0.2f)
+			{
+				m_CanFall = false;
+				fallingAcc -= 0.2f;
+			}
+		}
+
 		Vector2f firstPointY{ m_Position.x, m_Position.y + GetBounds().height / 5 };
 		Vector2f secondPointY{ m_Position.x, m_Position.y - 1.f };
 
@@ -860,17 +893,21 @@ void Cuphead::HandleRaycast(float elapsedSec, const std::vector<std::vector<Vect
 			// GROUND collision
 			if (utils::Raycast(vertices[i], firstPointY, secondPointY, hitInfoY))
 			{
-				if (m_Velocity.y <= 0.f) // platform check
+				if (!m_CanFall || (m_CanFall && vertices[i].size() != 2))
 				{
-					if (!m_KeyPressed)
+					if (m_Velocity.y <= 0.f) // platform check
 					{
-						m_Velocity = Vector2f{ 0.f, 0.f };
-					}
+						if (!m_KeyPressed)
+						{
+							m_Velocity = Vector2f{ 0.f, 0.f };
+						}
 
-					m_Position.y = hitInfoY.intersectPoint.y;
-					m_IsGrounded = true;
+						m_Position.y = hitInfoY.intersectPoint.y;
+						m_IsGrounded = true;
+					}
 				}
 			}
+
 			if (!m_IsGrounded)
 			{
 				m_Velocity += Vector2f{ 0, -9.8f * 20 } * elapsedSec; // if the gravity is only -9.8f, it flies off
@@ -997,9 +1034,8 @@ void Cuphead::CreateProjectiles(float elapsedSec, BulletManager& bulletManager, 
 			m_SpecialPeaSFX1->Play(0);
 
 			bulletManager.AddProjectile(new PeaShooter(m_TextureSpecialPeaShooter,
-				Vector2f{ GetBounds().left + GetBounds().width / 2, GetBounds().bottom + GetBounds().height * 0.4f }, {}, m_ShootAngle, 900.f, 0.8f, 4, 2));
+				Vector2f{ GetBounds().left + GetBounds().width / 2, GetBounds().bottom + GetBounds().height * 0.4f }, {}, m_ShootAngle, 900.f, 1.2f, 4, 2));
 			m_SpecialAllowed = false;
-
 		}
 	}
 
@@ -1093,8 +1129,7 @@ void Cuphead::ResetPlayer(const Vector2f& pos)
 	m_CupheadMovementState = Movement::idle;
 	m_CupheadShootingState = Shoot::notShooting;
 	m_Animator.Reset(0);
-
-	// I'm not resetting the hit animation on purpose = )
+	m_IsHit = false;
 }
 
 Vector2f Cuphead::GetPosition() const
@@ -1139,7 +1174,8 @@ void Cuphead::UpdateFacingDirection(const Uint8* pStates)
 	{
 		m_FacingAngle = 0.f ;
 	}
-	else if (pStates[SDL_SCANCODE_LEFT])
+
+	if (pStates[SDL_SCANCODE_LEFT])
 	{
 		m_FacingAngle = 180.f;
 	}
@@ -1180,6 +1216,7 @@ void Cuphead::SetDeath()
 
 		if (!canPlayDeath)
 		{
+			m_CrackSFX->StopAll();
 			m_DeathSFX->Play(0);
 			canPlayDeath = true;
 		}

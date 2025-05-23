@@ -56,6 +56,7 @@ void Acorn::Update(float elapsedSec, BulletManager& bulletManager, Cuphead& cuph
 
 	if (m_Hp <= 0 || m_Positon.y <= cuphead.GetPosition().y - m_CurrentFrameWidth * 4)
 	{
+		m_IdleSFX->SetVolume(0);
 		m_DeathMarker = true;
 	}
 
@@ -65,7 +66,7 @@ void Acorn::Update(float elapsedSec, BulletManager& bulletManager, Cuphead& cuph
 		if (std::abs(m_Positon.x - cuphead.GetPosition().x) <= 10.f)
 		{
 			m_CurrentState = AcornState::drop;
-			m_IdleSFX->StopAll();
+			m_IdleSFX->SetVolume(0);
 			m_DropSFX->SetVolume(50);
 			m_DropSFX->Play(0);
 		}
@@ -102,12 +103,16 @@ Rectf Acorn::GetBounds() const
 	return Rectf(m_Positon.x - m_CurrentFrameWidth * 0.75f / 2, m_Positon.y - m_CurrentFrameHeight * 0.75f / 2, m_CurrentFrameWidth * 0.75f, m_CurrentFrameHeight * 0.75f);
 }
 
-void Acorn::TakeDamage(float damage, UIManager& uiManager)
+void Acorn::TakeDamage(float elapsedSec, float damage, UIManager& uiManager)
 {
-	m_Hp -= damage;
-	if (damage != 0.8f)
+	if (damage != 1.2f)
 	{
+		m_Hp -= damage;
 		uiManager.ChangeCards();
+	}
+	else
+	{
+		m_Hp -= damage * 100 * elapsedSec;
 	}
 }
 

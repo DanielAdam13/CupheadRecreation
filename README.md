@@ -50,15 +50,13 @@
 ![Game image](/images_&_spritesheets/Flower_Screenshot.png?raw=true "Flower Boss")
 
 Here's why:
-* Cuphead is a beloved game of mine.
+* Cuphead is a game with great style that looks appealing.
 * I figured Cuphead would be a great game to recreate since it uses camera, has a cool character controller and has a lot of potential with enemy and projectile classes, all having different interactions.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
 ## My version
-
-This section gives a clear and detailed overview of which parts of the original game I planned to make.
 
 ### The minimum I will most certainly develop:
 * I will make a "Run'N'Gun" level that has correct collision and showcases its resepctful enemies with all their in-game behaviour and sounds.
@@ -72,6 +70,7 @@ This section gives a clear and detailed overview of which parts of the original 
 
 ### What I plan to create if I have enough time left:
 * I would start working on the Flower Boss level.
+* Running flower enemy in Run'N'Gun.
 * I would make a level manager that starts and ends a specific level whenever it has to.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -84,7 +83,7 @@ Detailed instructions on how to run your game project are in this section.
 ### Prerequisites
 
 This is an example of how to list things you need to use the software and how to install them.
-* Visual Studio 2022
+* Visual Studio 2022, download through Visual Studio Installer.
 
 ### How to run the project
 
@@ -98,14 +97,20 @@ Explain which project (version) must be run.
 <!-- HOW TO PLAY -->
 ## How to play
 
-Use this space to show useful examples of how a game can be played. 
-Additional screenshots and demos work well in this space. 
+Goal : Reach the end of the level without dying.
+Optional : Collect the coins and kill enemies.
 
 ### Controls
-* Arrow keys for movement.
-* Z for jump, SHIFT for dash.
-* X for shooting normal projectiles and V for using the special attack.
-* C for locking while shooting.
+* ARROW KEYS for movement and aiming
+* X for shooting normal projectiles and V for using the special attack
+* Z to jump
+* SHIFT to dash
+* C to lock while shooting
+
+For UI:
+* ESC to pause / unpause
+* Z to accept
+
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -161,7 +166,7 @@ Project Link: [https://github.com/HowestDAE/dae13-DanielAdam13.git](https://gith
 Use this space to list resources you find helpful and would like to give credit to. 
 
 * [Sprites source](https://www.spriters-resource.com/pc_computer/cupheaddontdealwiththedevil/)
-* ..
+* Asset studio
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

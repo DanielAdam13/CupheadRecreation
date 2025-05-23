@@ -12,8 +12,8 @@ int SDL_main(int argv, char** args)
 
 	StartHeapControl();
 
-	//Game* pGame{ new Game{ Window{ "Flower Bossfight - Adamov Daniel - 1DAE13", 1280.f , 720.f } } };
-	Game* pGame{ new Game{ Window{ "Flower Bossfight - Adamov Daniel - 1DAE13", 1600.f , 900.f } } };
+	Game* pGame{ new Game{ Window{ "Flower Bossfight - Adamov Daniel - 1DAE13", 1280.f , 720.f } } };
+	//Game* pGame{ new Game{ Window{ "Flower Bossfight - Adamov Daniel - 1DAE13", 1600.f , 900.f } } };
 	pGame->Run();
 	delete pGame;
 

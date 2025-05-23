@@ -21,10 +21,9 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{3e27e450-1331-4b68-acfd-6352e9080359}</ProjectGuid>
-    <RootNamespace>FlowerBossCuphead</RootNamespace>
+    <ProjectGuid>{7be86d65-844d-4bee-bebb-fbe6e14244e7}</ProjectGuid>
+    <RootNamespace>ForestFolliesCuphead</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>FlowerBossCuphead</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -164,8 +163,8 @@ xcopy "$(SolutionDir)Resources\*.*" "$(TargetDir)" /y /d /s</Command>
     <ClCompile Include="BulletManager.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Cuphead.cpp" />
+    <ClCompile Include="Daisy.cpp" />
     <ClCompile Include="Effect.cpp" />
-    <ClCompile Include="VisualEffectManager.cpp" />
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="EnemyManager.cpp" />
     <ClCompile Include="Explosion.cpp" />
@@ -180,6 +179,7 @@ xcopy "$(SolutionDir)Resources\*.*" "$(TargetDir)" /y /d /s</Command>
     <ClCompile Include="Tulip.cpp" />
     <ClCompile Include="TulipSeed.cpp" />
     <ClCompile Include="UIManager.cpp" />
+    <ClCompile Include="VisualEffectManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Acorn.h" />
@@ -188,8 +188,8 @@ xcopy "$(SolutionDir)Resources\*.*" "$(TargetDir)" /y /d /s</Command>
     <ClInclude Include="BulletManager.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Cuphead.h" />
+    <ClInclude Include="Daisy.h" />
     <ClInclude Include="Effect.h" />
-    <ClInclude Include="VisualEffectManager.h" />
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="EnemyManager.h" />
     <ClInclude Include="Explosion.h" />
@@ -203,6 +203,7 @@ xcopy "$(SolutionDir)Resources\*.*" "$(TargetDir)" /y /d /s</Command>
     <ClInclude Include="Tulip.h" />
     <ClInclude Include="TulipSeed.h" />
     <ClInclude Include="UIManager.h" />
+    <ClInclude Include="VisualEffectManager.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
