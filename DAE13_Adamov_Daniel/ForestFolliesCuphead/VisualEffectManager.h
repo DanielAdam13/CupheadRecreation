@@ -7,7 +7,7 @@ class VisualEffectManager final
 public:
 	explicit VisualEffectManager();
 	VisualEffectManager(const VisualEffectManager& effectManager) = delete;
-	VisualEffectManager operator=(const VisualEffectManager&) = delete;
+	VisualEffectManager operator=(const VisualEffectManager& rhs) = delete;
 	VisualEffectManager(VisualEffectManager&& effectManager) = delete;
 	VisualEffectManager& operator=(VisualEffectManager&& rhs) = delete;
 	~VisualEffectManager() noexcept;

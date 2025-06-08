@@ -13,7 +13,7 @@ class EnemyManager final
 public:
 	explicit EnemyManager(const Texture* enemyDeathVFX);
 	EnemyManager(const EnemyManager& enemyManager) = delete;
-	EnemyManager& operator=(const EnemyManager&) = delete;
+	EnemyManager& operator=(const EnemyManager& rhs) = delete;
 	EnemyManager(EnemyManager&& enemyManager) = delete;
 	EnemyManager& operator=(EnemyManager&& rhs) = delete;
 	~EnemyManager() noexcept;
@@ -29,7 +29,7 @@ public:
 	size_t GetVectorSize() const;
 
 private:
-	std::vector<Enemy*> m_EnemiesVector;
+	std::vector<Enemy*> m_EnemyVector;
 
 	const Texture* m_EnemyDeathSpriteVFX;
 };

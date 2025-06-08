@@ -8,6 +8,7 @@ class Texture;
 #include "BulletManager.h"
 #include "VisualEffectManager.h"
 #include "UIManager.h"
+#include "CoinManager.h"
 class SoundStream;
 class SoundEffect;
 
@@ -47,10 +48,15 @@ private:
 	Vector2f m_TransformedPlayerPos;
 
 	const Texture* m_EnemyDeathVFXSprite;
+
+	const Texture* m_CoinTexture;
+	const SoundEffect* m_CoinPickupSFX;
+
 	EnemyManager m_EnemyManager;
 	BulletManager m_PlayerBulletManager;
 	BulletManager m_EnemyBulletManager;
 	VisualEffectManager m_VFXManager;
+	CoinManager m_CoinManager;
 
 	enum class GameState
 	{
@@ -96,9 +102,9 @@ private:
 	const Texture* m_AcornIdle;
 	const Texture* m_AcornDrop;
 
-	const Texture* m_DaisyRun;
+	/*const Texture* m_DaisyRun;
 	const Texture* m_DaisyJump;
-	const Texture* m_DaisyTurn;
+	const Texture* m_DaisyTurn;*/
 
 	SoundStream* m_ForesFolliestSoundtrack;
 	SoundEffect* m_IntroAnnouncementAudio;
@@ -113,6 +119,7 @@ private:
 	const SoundEffect* m_ChomperBiteSFX1;
 	const SoundEffect* m_ChomperBiteSFX2;
 	
+	
 	Cuphead m_Cuphead;
 
 	// FUNCTIONS
@@ -120,7 +127,8 @@ private:
 	void Cleanup( );
 	void ClearBackground( ) const;
 
-	void InitalizeEnemies();
+	void InitializeEnemies();
+	void InitializeCoins();
 
 	void ManagePlayerProjectiles(float elapsedSec);
 	void ManageTakingDamageCuphead();
@@ -128,11 +136,12 @@ private:
 	void DrawScaledObjects() const;
 
 	void SpawnAcorns(float elapsedSec);
+
 	void RestartLevel();
 	
 	void HandleGameStateLogic(float elapsedSec);
 	void UpdateForestFolliesLevel(float elapsedSec);
 
-	void DeleteSound();
+	void DeleteSounds();
 	void DeleteTextures();
 };

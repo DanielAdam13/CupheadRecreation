@@ -27,18 +27,18 @@ Game::Game(const Window& window)
 	m_ScaleY{ GetViewPort().height / m_ForestBackground1->GetHeight() * 1.29f },
 	m_Camera{ GetViewPort().width, GetViewPort().height, m_ScaleX, m_ScaleY },
 	m_TransformedPlayerPos{},
-	m_EnemyDeathVFXSprite{ new Texture("VFX_1.png") },
 	m_EnemyManager{ m_EnemyDeathVFXSprite },
 	m_PlayerBulletManager{},
 	m_EnemyBulletManager{},
 	m_VFXManager{},
+	m_CoinManager{ m_CoinTexture, m_CoinPickupSFX },
 	m_CurrentGameState{ GameState::intro },
 	m_ShouldSpawnAcorns{ false },
 	m_HealthSprite{ new Texture("UI/Health_Stages.png") },
 	m_CardsSprite{ new Texture("UI/Cards_Stages.png") },
 	m_IntroAnnouncementTexture{ new Texture("UI/Stages_Intro.png") }, // + ~60 mb memory
 	m_DeathAnnouncementTexture{ new Texture("UI/YouDied_Stages.png") }, // + ~45 mb memory
-	m_BravoAnnouncementTexture{ new Texture("UI/Bravo_Sprite.png") }, // + 200+ mb !!!!!!!!!!!!!!!!!!???
+	m_BravoAnnouncementTexture{ new Texture("UI/Bravo_Sprite.png") }, // + 200+ mb !!!???
 	m_PauseScreen{ new Texture("UI/Pause_Screen.bmp") }, // 20 mb
 	m_DeathCardScreen{ new Texture("UI/Death_Screen_UI.png") },
 	m_ProgressMan{ new Texture("UI/RedMen.png") },
@@ -60,9 +60,11 @@ Game::Game(const Window& window)
 	m_MushroomCloud{ new Texture("Run'N'Gun/Mushroom/Sprite_Mushroom_Cloud.png") },
 	m_AcornIdle{ new Texture("Run'N'Gun/Acorn/Sprite_Acorn_Fly.png") },
 	m_AcornDrop{ new Texture("Run'N'Gun/Acorn/Sprite_Acorn_Drop.png") },
-	m_DaisyRun{ new Texture("Run'N'Gun/Daisy/Sprite_Daisy_Run.png") },
+	/*m_DaisyRun{ new Texture("Run'N'Gun/Daisy/Sprite_Daisy_Run.png") },
 	m_DaisyJump{ new Texture("Run'N'Gun/Daisy/Sprite_Daisy_Jump.png") },
-	m_DaisyTurn{ new Texture("Run'N'Gun/Daisy/Sprite_Daisy_Turn.png") },
+	m_DaisyTurn{ new Texture("Run'N'Gun/Daisy/Sprite_Daisy_Turn.png") },*/
+	m_EnemyDeathVFXSprite{ new Texture("VFX_1.png") },
+	m_CoinTexture{ new Texture("Coin_Stages.png") },
 	m_ForesFolliestSoundtrack{ new SoundStream("Audio/Forest Follies.mp3") },
 	m_IntroAnnouncementAudio{ new SoundEffect("Audio/Intro.mp3") },
 	m_BravoAnnouncementAudio{ new SoundEffect("Audio/Bravo.wav") },
@@ -75,7 +77,8 @@ Game::Game(const Window& window)
 	m_AcornIdleSFX{ new SoundEffect("Audio/Enemies/Acorn Idle.wav") },
 	m_AcornFallSFX{ new SoundEffect("Audio/Enemies/Acorn Fall.wav") },
 	m_ChomperBiteSFX1{ new SoundEffect("Audio/Enemies/Chomper Bite 1.wav") },
-	m_ChomperBiteSFX2{ new SoundEffect("Audio/Enemies/Chomper Bite 2.wav") }
+	m_ChomperBiteSFX2{ new SoundEffect("Audio/Enemies/Chomper Bite 2.wav") },
+	m_CoinPickupSFX{ new SoundEffect("Audio/Coin_Pickup.wav") }
 {
 	Initialize(); 
 }
@@ -87,7 +90,8 @@ Game::~Game( )
 
 void Game::Initialize( )
 {
-	InitalizeEnemies();
+	InitializeEnemies();
+	InitializeCoins();
 
 	SVGParser::GetVerticesFromSvgFile("ForestFollies_Background_Finished_Smaller_3.svg", m_Vertices);
 
@@ -107,12 +111,7 @@ void Game::Cleanup()
 	}
 	m_Vertices.clear();
 
-	DeleteSound();
-
-	delete m_EnemyDeathVFXSprite;
-	m_EnemyDeathVFXSprite = nullptr;
-	delete m_PeaDeathVFX;
-	m_PeaDeathVFX = nullptr;
+	DeleteSounds();
 }
 
 void Game::Update( float elapsedSec )
@@ -170,8 +169,11 @@ void Game::ProcessKeyDownEvent( const SDL_KeyboardEvent & e )
 		m_ForesFolliestSoundtrack->Stop(); // mute
 		break;
 	case SDLK_r:
-		m_ForesFolliestSoundtrack->Stop();
-		RestartLevel();
+		if (m_CurrentGameState != GameState::intro)
+		{
+			m_ForesFolliestSoundtrack->Stop();
+			RestartLevel();
+		}
 		break;
 	}
 }
@@ -227,10 +229,10 @@ void Game::ClearBackground( ) const
 	glClear( GL_COLOR_BUFFER_BIT );
 }
 
-void Game::InitalizeEnemies()
+void Game::InitializeEnemies()
 {
-	m_EnemyManager.AddEnemy(new BigChomper(m_ChomperSprite, Vector2f{ 1700.f, -(m_ChomperSprite->GetHeight() / 4) / 2 },
-		Vector2f{ 1700.f, -(m_ChomperSprite->GetHeight() / 4) * 1.5f }, Vector2f{ 1700.f, 500.f }, 600.f, m_ChomperBiteSFX1, m_ChomperBiteSFX2));
+	/*m_EnemyManager.AddEnemy(new BigChomper(m_ChomperSprite, Vector2f{ 1700.f, -(m_ChomperSprite->GetHeight() / 4) / 2 },
+		Vector2f{ 1700.f, -(m_ChomperSprite->GetHeight() / 4) * 1.5f }, Vector2f{ 1700.f, 500.f }, 600.f, m_ChomperBiteSFX1, m_ChomperBiteSFX2));*/
 
 	m_EnemyManager.AddEnemy(new Mushroom(m_MushroomIdle, m_MushroomBoil, m_MushroomAttack, m_MushroomPop, m_MushroomDeath, m_MushroomCloud,
 		Vector2f{ 2800.f, 130.f }, m_MushroomShootSFX1, m_MushroomShootSFX2,
@@ -246,6 +248,8 @@ void Game::InitalizeEnemies()
 
 	m_EnemyManager.AddEnemy(new Spike(m_SpikeSprite, Vector2f{ 5700.f, 650.f }, Vector2f{ 5700.f, 550.f }, Vector2f{ 5700.f, 750.f }, 250.f));
 
+	m_EnemyManager.AddEnemy(new Tulip(m_TulipIdle, m_TulipAttack, m_TulipSeed, m_TulipSeedExplosion, Vector2f{ 6500.f, 430.f }, m_TulipShootSFX, m_TulipSeedSFX, 5, 4, GetViewPort().width * 0.7f));
+
 	m_EnemyManager.AddEnemy(new BigChomper(m_ChomperSprite, Vector2f{ 7000.f, -(m_ChomperSprite->GetHeight() / 4) / 2 },
 		Vector2f{ 7000.f, -(m_ChomperSprite->GetHeight() / 4) * 1.5f }, Vector2f{ 7000.f, 550.f }, 600.f, m_ChomperBiteSFX1, m_ChomperBiteSFX2));
 
@@ -256,6 +260,8 @@ void Game::InitalizeEnemies()
 
 	m_EnemyManager.AddEnemy(new Tulip(m_TulipIdle, m_TulipAttack, m_TulipSeed, m_TulipSeedExplosion, Vector2f{ 9000.f, 90.f }, m_TulipShootSFX, m_TulipSeedSFX, 5, 4, GetViewPort().width * 0.7f));
 
+	m_EnemyManager.AddEnemy(new Spike(m_SpikeSprite, Vector2f{ 10190.f, 580.f }, Vector2f{ 10190.f, 480.f }, Vector2f{ 10190.f, 680.f }, 250.f));
+
 	m_EnemyManager.AddEnemy(new BigChomper(m_ChomperSprite, Vector2f{ 10200.f, (m_ChomperSprite->GetHeight() / 4) / 2 },
 		Vector2f{ 10200.f, -(m_ChomperSprite->GetHeight() / 4) * 1.5f }, Vector2f{ 10200.f, 550.f }, 600.f, m_ChomperBiteSFX1, m_ChomperBiteSFX2));
 
@@ -264,6 +270,13 @@ void Game::InitalizeEnemies()
 		1, 1, m_Camera.GetCuurentCameraBounds().width / 2.5f));
 
 	m_EnemyManager.AddEnemy(new Tulip(m_TulipIdle, m_TulipAttack, m_TulipSeed, m_TulipSeedExplosion, Vector2f{ 11450.f, 330.f }, m_TulipShootSFX, m_TulipSeedSFX, 5, 4, GetViewPort().width * 0.7f));
+}
+
+void Game::InitializeCoins()
+{
+	m_CoinManager.AddCoin(Vector2f{ 2620.f, 570.f });
+	m_CoinManager.AddCoin(Vector2f{ 6650.f, 670.f });
+	m_CoinManager.AddCoin(Vector2f{ 10190.f, 770.f });
 }
 
 void Game::ManagePlayerProjectiles(float elapsedSec)
@@ -343,9 +356,10 @@ void Game::DrawScaledObjects() const
 
 	m_EnemyManager.DrawEnemies(m_Camera.GetCuurentCameraBounds());
 
+	m_CoinManager.DrawCoins(m_Camera.GetCuurentCameraBounds());
 	m_VFXManager.DrawEffects();
-	m_UIManager.Draw(m_Camera.GetCuurentCameraBounds());
 
+	m_UIManager.Draw(m_Camera.GetCuurentCameraBounds());
 	glPopMatrix();
 }
 
@@ -389,7 +403,9 @@ void Game::RestartLevel()
 {
 	m_Cuphead.ResetPlayer(Vector2f{ GetViewPort().width / 2, GetViewPort().height * 6.5f / 36.f });
 	m_EnemyManager.DeleteAllEnemies();
-	Game::InitalizeEnemies();
+	m_CoinManager.DeleteAllCoins();
+	Game::InitializeEnemies();
+	Game::InitializeCoins();
 	m_ShouldSpawnAcorns = false;
 	m_UIManager.ResetUI();
 	m_CurrentGameState = GameState::intro;
@@ -408,7 +424,7 @@ void Game::HandleGameStateLogic(float elapsedSec)
 		if (m_GameplayAccuSec >= 2.8f)
 		{
 			m_CurrentGameState = GameState::gameplay;
-			m_ForesFolliestSoundtrack->SetVolume(80);
+			m_ForesFolliestSoundtrack->SetVolume(60);
 			m_ForesFolliestSoundtrack->Play(m_CurrentGameState == GameState::gameplay);
 			m_GameplayAccuSec -= 2.8f;
 		}
@@ -422,7 +438,7 @@ void Game::HandleGameStateLogic(float elapsedSec)
 	case Game::GameState::death:
 		if (!m_ShouldDecreaseVolume)
 		{
-			m_ForesFolliestSoundtrack->SetVolume(40);
+			m_ForesFolliestSoundtrack->SetVolume(30);
 			m_GameplayAccuSec += elapsedSec;
 			if (m_GameplayAccuSec >= 1.f)
 			{
@@ -432,7 +448,14 @@ void Game::HandleGameStateLogic(float elapsedSec)
 		}
 		break;
 	case GameState::win:
-		static bool m_ShouldPlayBravoAudio{ true };
+		static bool canPlayBravoAudio{ true };
+
+		if (canPlayBravoAudio)
+		{
+			m_BravoAnnouncementAudio->Play(0);
+			canPlayBravoAudio = false;
+		}
+
 		if (m_ForesFolliestSoundtrack->GetVolume() != 0)
 		{
 			m_GameplayAccuSec += elapsedSec;
@@ -442,13 +465,8 @@ void Game::HandleGameStateLogic(float elapsedSec)
 				m_ForesFolliestSoundtrack->SetVolume(m_ForesFolliestSoundtrack->GetVolume() - 2);
 				m_GameplayAccuSec -= 0.08f;
 			}
-
-			if (m_ShouldPlayBravoAudio)
-			{
-				m_BravoAnnouncementAudio->Play(0);
-				m_ShouldPlayBravoAudio = false;
-			}
 		}
+		
 		else
 		{
 			m_ForesFolliestSoundtrack->Stop();
@@ -457,6 +475,7 @@ void Game::HandleGameStateLogic(float elapsedSec)
 			if (m_GameplayAccuSec >= 3.f)
 			{
 				RestartLevel();
+				canPlayBravoAudio = true;
 				m_GameplayAccuSec -= 3.f;
 			}
 		}
@@ -476,7 +495,7 @@ void Game::UpdateForestFolliesLevel(float elapsedSec)
 		// update enemies and enemy bullets if player is alive
 		if (m_Cuphead.GetHealth() > 0)
 		{
-			m_ForesFolliestSoundtrack->SetVolume(100);
+			m_ForesFolliestSoundtrack->SetVolume(60);
 			SpawnAcorns(elapsedSec);
 
 			// update enemies and pushes projectiles to enemy BulletManager
@@ -498,6 +517,8 @@ void Game::UpdateForestFolliesLevel(float elapsedSec)
 
 		// animate enemy bullets even if player is dead
 		m_EnemyBulletManager.AnimateActiveBullets(elapsedSec);
+
+		m_CoinManager.UpdateCoins(elapsedSec, m_Camera.GetCuurentCameraBounds(), m_Cuphead.GetHitbox());
 
 		// animate enemies even if player is dead
 		m_EnemyManager.AnimateEnemies(elapsedSec, m_Camera.GetCuurentCameraBounds());
@@ -527,7 +548,7 @@ void Game::UpdateForestFolliesLevel(float elapsedSec)
 	m_UIManager.Update(elapsedSec, m_Cuphead.GetHealth(), int(m_CurrentGameState));
 }
 
-void Game::DeleteSound()
+void Game::DeleteSounds()
 {
 	delete m_ForesFolliestSoundtrack;
 	m_ForesFolliestSoundtrack = nullptr;
@@ -552,6 +573,9 @@ void Game::DeleteSound()
 	m_ChomperBiteSFX1 = nullptr;
 	delete m_ChomperBiteSFX2;
 	m_ChomperBiteSFX2 = nullptr;
+
+	delete m_CoinPickupSFX;
+	m_CoinPickupSFX = nullptr;
 }
 
 void Game::DeleteTextures()
@@ -617,10 +641,17 @@ void Game::DeleteTextures()
 	delete m_AcornDrop;
 	m_AcornDrop = nullptr;
 
-	delete m_DaisyRun;
+	/*delete m_DaisyRun;
 	m_DaisyRun = nullptr;
 	delete m_DaisyJump;
 	m_DaisyJump = nullptr;
 	delete m_DaisyTurn;
-	m_DaisyTurn = nullptr;
+	m_DaisyTurn = nullptr;*/
+
+	delete m_EnemyDeathVFXSprite;
+	m_EnemyDeathVFXSprite = nullptr;
+	delete m_PeaDeathVFX;
+	m_PeaDeathVFX = nullptr;
+	delete m_CoinTexture;
+	m_CoinTexture = nullptr;
 }

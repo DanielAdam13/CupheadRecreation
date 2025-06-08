@@ -19,6 +19,11 @@ void Camera::Aim(float levelW, float levelH, const Vector2f& trackCenter)
 	m_CameraPos = Vector2f{trackCenter.x * m_ScaleX - m_ScreenWidth / 2, trackCenter.y * m_ScaleY - m_ScreenHeight / 2};
 	levelW -= 200.f;
 
+	if (trackCenter.x <= 3300.f)
+	{
+		levelH -= 200.f;
+	}
+
 	if (m_CameraPos.x + m_ScreenWidth > levelW)
 	{
 		m_CameraPos.x = levelW - m_ScreenWidth;

@@ -16,7 +16,7 @@ Mushroom::Mushroom(const Texture* idleTexture, const Texture* boiledTexture, con
 	m_CurrentTexture{ boiledTexture },
 	m_CurrentState{ MushroomState::boil },
 	m_LastMushroomState{},
-	m_Hp{ 10 },
+	m_Hp{ 8 },
 	m_TextureIdle{ idleTexture },
 	m_TextureAttack{ attackTexture },
 	m_ShootSFX1{ shoot1 },

@@ -92,6 +92,8 @@ private:
 	bool m_IsHit;
 	bool m_AnimatingHit;
 	const float m_InvincibilityDuration;
+	bool m_ShouldDraw;
+	bool m_CanPlayDeathSFX;
 
 	bool m_ClickedDash;
 	bool m_IsDashing;
@@ -155,6 +157,7 @@ private:
 	void UpdateFacingDirection(const Uint8* pStates);
 
 	void TakeDamage(float elapsedSec);
+	void FlickerWhenHit(float elapsedSec);
 	void SetDeath();
 	
 	void IntializeTextures();

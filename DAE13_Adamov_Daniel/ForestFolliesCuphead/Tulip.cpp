@@ -13,7 +13,7 @@
 Tulip::Tulip(const Texture* idleTexture, const Texture* attackTexture, const Texture* seed, const Texture* explosion, 
 	const Vector2f& pos, const SoundEffect* shoot1, const SoundEffect* shoot2, int colNr, int rowNr, float range)
 	:Mushroom::Mushroom(idleTexture, idleTexture, attackTexture, nullptr, nullptr, nullptr, pos, shoot1, shoot2, colNr, rowNr, range),
-	m_Hp{ 20.f },
+	m_Hp{ 12.f },
 	m_CurrentState{},
 	m_TextureSeed{ seed },
 	m_TextureExplosion{ explosion },

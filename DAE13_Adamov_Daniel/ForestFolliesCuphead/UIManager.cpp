@@ -145,8 +145,8 @@ void UIManager::Draw(const Rectf& cameraBox) const
 
 	if (m_PlayingWinAnnounement)
 	{
-		const Rectf srcRect{ 0.f + (m_Animator.GetCurrentFrameNr() % 3) * m_CurrentFrameWidth,
-			0.f + (m_Animator.GetCurrentFrameNr() / 3) * m_CurrentFrameHeight, m_CurrentFrameWidth, m_CurrentFrameHeight };
+		const Rectf srcRect{ 5.f + (m_Animator.GetCurrentFrameNr() % 3) * m_CurrentFrameWidth,
+			0.f + (m_Animator.GetCurrentFrameNr() / 3) * m_CurrentFrameHeight, m_CurrentFrameWidth - 10.f, m_CurrentFrameHeight };
 		
 		m_CompletionAnnouncementTexture->Draw(cameraBox, srcRect);
 

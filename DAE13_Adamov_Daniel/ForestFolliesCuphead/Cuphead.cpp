@@ -28,6 +28,8 @@ Cuphead::Cuphead(const Vector2f& position, bool playIntro, int hp, const Texture
 	m_IsHit{ false },
 	m_AnimatingHit{ false },
 	m_InvincibilityDuration{ 3.5f },
+	m_ShouldDraw{ true },
+	m_CanPlayDeathSFX{ true },
 	m_ClickedDash{ false },
 	m_IsDashing{ false },
 	m_DashCooldownAcuuSec{ 0.f },
@@ -57,44 +59,26 @@ Cuphead::~Cuphead() noexcept
 
 void Cuphead::Draw() const
 {
-	Rectf srcRect{ 0.f + (m_Animator.GetCurrentFrameNr() % m_CurrentColNr) * m_FrameWidth,
+	if (m_ShouldDraw)
+	{
+		Rectf srcRect{ 0.f + (m_Animator.GetCurrentFrameNr() % m_CurrentColNr) * m_FrameWidth,
 		0.f + (m_Animator.GetCurrentFrameNr() / m_CurrentColNr) * m_FrameHeight, m_FrameWidth, m_FrameHeight };
 
-	// GetBounds is calculated by the mid point of each texture
-	glPushMatrix();
+		// GetBounds is calculated by the mid point of each texture
+		glPushMatrix();
 		glTranslatef(m_Position.x, m_Position.y, 0); // This reduces the texture quality A LOT for some reason !!!
 		glRotatef(m_FacingAngle, 0, 1, 0);
 		m_CurrentTexture->Draw(Vector2f{ -GetBounds().width / 2, 0.f }, srcRect);
-		
-	glPopMatrix();
+
+		glPopMatrix();
+	}
+	
 
 	// Hitbox
 	/*utils::SetColor(Color4f{ 1, 0, 0, 1 });
 	utils::DrawRect(GetBounds());
 	utils::DrawEllipse(GetHitbox().center, GetHitbox().radius, GetHitbox().radius);
 	utils::FillEllipse(m_Position, 5.f, 5.f);*/
-
-	if (m_IsHit && m_IsAlive)
-	{
-		static float step{ 0.02f };
-		static float alpha{ 0.f };
-
-		utils::SetColor(Color4f{ 0.7f, 0.7f, 0.7f, alpha });
-		utils::FillRect(GetBounds());
-
-		if (alpha > 0.5f)
-		{
-			alpha = 0.5f;
-			step = -step;
-		}
-		else if (alpha < 0.f)
-		{
-			alpha = 0.f;
-			step = -step;
-		}
-
-		alpha += step;
-	}
 }
 
 void Cuphead::Update(float elapsedSec, const Uint8* pStates, const std::vector<std::vector<Vector2f>>& vertices, BulletManager& bulletManager, UIManager& uiManager)
@@ -119,6 +103,8 @@ void Cuphead::Update(float elapsedSec, const Uint8* pStates, const std::vector<s
 
 	// handles invincibility when hit
 	TakeDamage(elapsedSec);
+
+	
 }
 
 void Cuphead::ProcessKeys(const Uint8* pStates, UIManager& uiManager)
@@ -1130,6 +1116,7 @@ void Cuphead::ResetPlayer(const Vector2f& pos)
 	m_CupheadShootingState = Shoot::notShooting;
 	m_Animator.Reset(0);
 	m_IsHit = false;
+	m_CanPlayDeathSFX = true;
 }
 
 Vector2f Cuphead::GetPosition() const
@@ -1144,7 +1131,7 @@ Rectf Cuphead::GetBounds() const
 
 Circlef Cuphead::GetHitbox() const
 {
-	if (!m_IsAlive || m_IsHit)
+	if (!m_IsAlive)
 	{
 		return Circlef();
 	}
@@ -1192,9 +1179,11 @@ void Cuphead::TakeDamage(float elapsedSec)
 		m_Velocity.y = 1000.f;
 	}
 
+	static float invAccuSec{ 0.f };
+
 	if (m_IsHit)
 	{
-		static float invAccuSec{ 0.f };
+		
 		invAccuSec += elapsedSec;
 
 		if (invAccuSec >= m_InvincibilityDuration)
@@ -1204,21 +1193,48 @@ void Cuphead::TakeDamage(float elapsedSec)
 		}
 		m_CupheadShootingState = Shoot::notShooting;
 	}
+	else
+	{
+		if (invAccuSec != 0.f)
+		{
+			invAccuSec = 0.f;
+		}
+	}
+
+	FlickerWhenHit(elapsedSec);
+}
+
+void Cuphead::FlickerWhenHit(float elapsedSec)
+{
+	if (m_IsHit && m_IsAlive)
+	{
+		static float flickerAcc{ 0.f };
+		flickerAcc += elapsedSec;
+
+		if (flickerAcc >= 0.13f)
+		{
+			m_ShouldDraw = !m_ShouldDraw;
+			flickerAcc -= 0.13f;
+		}
+	}
+	else
+	{
+		m_ShouldDraw = true;
+	}
 }
 
 void Cuphead::SetDeath()
 {
-	static bool canPlayDeath{ false };
 	if (m_HP <= 0)
 	{
 		m_IsAlive = false;
 		m_CupheadShootingState = Shoot::notShooting;
 
-		if (!canPlayDeath)
+		if (m_CanPlayDeathSFX)
 		{
 			m_CrackSFX->StopAll();
 			m_DeathSFX->Play(0);
-			canPlayDeath = true;
+			m_CanPlayDeathSFX = false;
 		}
 	}
 }
