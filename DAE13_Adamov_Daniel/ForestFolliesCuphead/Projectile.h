@@ -2,6 +2,7 @@
 class Texture;
 #include "Animator.h"
 #include <vector>
+#include <memory>
 class BulletManager;
 class Cuphead;
 class UIManager;
@@ -28,7 +29,7 @@ protected:
 	const float m_Damage;
 	Animator m_Animator;
 
-	const Texture* m_Texture;
+	const Texture* m_Texture;  // reference to unique_ptr
 	const float m_Speed;
 
 	virtual Rectf GetBounds() const = 0;

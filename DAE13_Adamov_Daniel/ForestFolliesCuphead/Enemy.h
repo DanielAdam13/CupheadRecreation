@@ -4,6 +4,8 @@ class BulletManager;
 class Cuphead;
 class UIManager;
 
+#include <memory>
+
 class Enemy abstract // The enemy abstract class
 {
 public:

@@ -8,10 +8,10 @@
 
 int CoinManager::coinsTaken{ 0 };
 
-CoinManager::CoinManager(const Texture* coinTexture, const SoundEffect* coinPickupSFX)
+CoinManager::CoinManager(const std::unique_ptr<Texture>& coinTexture, const std::unique_ptr<SoundEffect>& coinPickupSFX)
     :m_CoinVector{},
-    m_CoinTexture{ coinTexture },
-    m_CoinPickupSFX{ coinPickupSFX }
+    m_CoinTexture{ coinTexture.get() },
+    m_CoinPickupSFX{ coinPickupSFX.get() }
 {
     m_CoinVector.reserve(5);
 }

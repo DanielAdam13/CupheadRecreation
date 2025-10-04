@@ -11,7 +11,7 @@
 #include "SoundEffect.h"
 
 Mushroom::Mushroom(const Texture* idleTexture, const Texture* boiledTexture, const Texture* attackTexture, const Texture* popTexture, const Texture* deathTexture,
-	const Texture* cloudTexture, const Vector2f& pos, const SoundEffect* shoot1, const SoundEffect* shoot2, int colNr, int rowNr, float range)
+	const std::unique_ptr<Texture>& cloudTexture, const Vector2f& pos, const SoundEffect* shoot1, const SoundEffect* shoot2, int colNr, int rowNr, float range)
 	:Enemy(pos),
 	m_CurrentTexture{ boiledTexture },
 	m_CurrentState{ MushroomState::boil },
@@ -29,7 +29,7 @@ Mushroom::Mushroom(const Texture* idleTexture, const Texture* boiledTexture, con
 	m_TextureBoiled{ boiledTexture },
 	m_TexturePop{ popTexture },
 	m_TextureDeath{ deathTexture },
-	m_TextureCloud{ cloudTexture },
+	m_TextureCloud{ cloudTexture.get()},
 	m_FacingAngle{ 0.f },
 	m_AccuSec{ 0.f },
 	m_AllowedAttack{ true },

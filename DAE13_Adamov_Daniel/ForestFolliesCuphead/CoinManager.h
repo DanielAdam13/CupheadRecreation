@@ -4,10 +4,12 @@ class Coin;
 class Texture;
 class SoundEffect;
 
+#include <memory>
+
 class CoinManager final
 {
 public:
-	explicit CoinManager(const Texture* coinSprite, const SoundEffect* coinPickupSFX);
+	explicit CoinManager(const std::unique_ptr<Texture>& coinSprite, const std::unique_ptr<SoundEffect>& coinPickupSFX);
 	CoinManager(const CoinManager& coinManager) = delete;
 	CoinManager& operator=(const CoinManager& rhs) = delete;
 	CoinManager(CoinManager&& coinManager) = delete;
@@ -28,10 +30,10 @@ public:
 private:
 	std::vector<Coin*> m_CoinVector;
 
-	const Texture* m_CoinTexture;
+	const Texture* m_CoinTexture; // reference to unique_ptr
 
 	static int coinsTaken;
 
-	const SoundEffect* m_CoinPickupSFX;
+	const SoundEffect* m_CoinPickupSFX; // reference to unique_ptr
 };
 

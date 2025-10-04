@@ -19,8 +19,8 @@
 Game::Game(const Window& window)
 	:BaseGame{ window },
 	m_Vertices{},
-	m_ForestBackground1{ new Texture("ForestFollies_Background_First_Smaller.png") },
-	m_ForestBackground2{ new Texture("ForestFollies_Background_Second_Smaller.png") },
+	m_ForestBackground1{ std::make_unique<Texture>("ForestFollies_Background_First_Smaller.png") },
+	m_ForestBackground2{ std::make_unique<Texture>("ForestFollies_Background_Second_Smaller.png") },
 	m_LevelWidthWorld{ GetViewPort().width * 9.95f },
 	m_LevelHeightWorld{ GetViewPort().height * 1.29f },
 	m_ScaleX{ GetViewPort().width / (m_ForestBackground1->GetWidth() + m_ForestBackground2->GetWidth()) * 9.95f },
@@ -43,31 +43,31 @@ Game::Game(const Window& window)
 	m_DeathCardScreen{ new Texture("UI/Death_Screen_UI.png") },
 	m_ProgressMan{ new Texture("UI/RedMen.png") },
 	m_UIManager{ m_HealthSprite, m_CardsSprite, m_IntroAnnouncementTexture, m_DeathAnnouncementTexture, m_BravoAnnouncementTexture, m_PauseScreen, m_DeathCardScreen, m_ProgressMan },
-	m_PeaShooterSprite{ new Texture("Projectile_Loop.png") },
-	m_PeaSpecialSprite{ new Texture("Projectile_Special_Loop.png") },
+	m_PeaShooterSprite{ std::make_unique<Texture>("Projectile_Loop.png") },
+	m_PeaSpecialSprite{ std::make_unique<Texture>("Projectile_Special_Loop.png") },
 	m_PeaDeathVFX{ new Texture("PeaShot_Death.png") },
 	m_SpikeSprite{ new Texture("Run'N'Gun/Sprite_Spike.png") },
 	m_ChomperSprite{ new Texture("Run'N'Gun/Sprite_Chomper.png") },
 	m_TulipIdle{ new Texture("Run'N'Gun/Tulip/Sprite_Tulip_Idle.png") },
 	m_TulipAttack{ new Texture("Run'N'Gun/Tulip/Sprite_Tulip_Attack.png") },
-	m_TulipSeed{ new Texture("Run'N'Gun/Tulip/Sprite_Tulip_Seed.png") },
-	m_TulipSeedExplosion{ new Texture("Run'N'Gun/Tulip/Sprite_Tulip_Explosion.png") }, // + ~25 mb memory
+	m_TulipSeed{ std::make_unique<Texture>("Run'N'Gun/Tulip/Sprite_Tulip_Seed.png") },
+	m_TulipSeedExplosion{ std::make_unique<Texture>("Run'N'Gun/Tulip/Sprite_Tulip_Explosion.png") },
 	m_MushroomIdle{ new Texture("Run'N'Gun/Mushroom/Sprite_Mushroom_Idle.png") },
 	m_MushroomAttack{ new Texture("Run'N'Gun/Mushroom/Sprite_Mushroom_Attack.png") },
 	m_MushroomPop{ new Texture("Run'N'Gun/Mushroom/Sprite_Mushroom_Pop.png") },
 	m_MushroomBoil{ new Texture("Run'N'Gun/Mushroom/Sprite_Mushroom_Boil.png") },
 	m_MushroomDeath{ new Texture("Run'N'Gun/Mushroom/Sprite_Mushroom_Death.png") },
-	m_MushroomCloud{ new Texture("Run'N'Gun/Mushroom/Sprite_Mushroom_Cloud.png") },
+	m_MushroomCloud{ std::make_unique<Texture>("Run'N'Gun/Mushroom/Sprite_Mushroom_Cloud.png") },
 	m_AcornIdle{ new Texture("Run'N'Gun/Acorn/Sprite_Acorn_Fly.png") },
 	m_AcornDrop{ new Texture("Run'N'Gun/Acorn/Sprite_Acorn_Drop.png") },
 	/*m_DaisyRun{ new Texture("Run'N'Gun/Daisy/Sprite_Daisy_Run.png") },
 	m_DaisyJump{ new Texture("Run'N'Gun/Daisy/Sprite_Daisy_Jump.png") },
 	m_DaisyTurn{ new Texture("Run'N'Gun/Daisy/Sprite_Daisy_Turn.png") },*/
 	m_EnemyDeathVFXSprite{ new Texture("VFX_1.png") },
-	m_CoinTexture{ new Texture("Coin_Stages.png") },
-	m_ForesFolliestSoundtrack{ new SoundStream("Audio/Forest Follies.mp3") },
-	m_IntroAnnouncementAudio{ new SoundEffect("Audio/Intro.mp3") },
-	m_BravoAnnouncementAudio{ new SoundEffect("Audio/Bravo.wav") },
+	m_CoinTexture{ std::make_unique<Texture>("Coin_Stages.png") },
+	m_ForesFolliestSoundtrack{ std::make_unique<SoundStream>("Audio/Forest Follies.mp3") },
+	m_IntroAnnouncementAudio{ std::make_unique<SoundEffect>("Audio/Intro.mp3") },
+	m_BravoAnnouncementAudio{ std::make_unique<SoundEffect>("Audio/Bravo.wav") },
 	m_Cuphead{ Vector2f{ 640.f, 140.f}, (m_CurrentGameState == GameState::intro), 3,
 	m_PeaShooterSprite, m_PeaSpecialSprite },
 	m_MushroomShootSFX1{ new SoundEffect("Audio/Enemies/Mushroom Shoot 1.wav") },
@@ -78,7 +78,7 @@ Game::Game(const Window& window)
 	m_AcornFallSFX{ new SoundEffect("Audio/Enemies/Acorn Fall.wav") },
 	m_ChomperBiteSFX1{ new SoundEffect("Audio/Enemies/Chomper Bite 1.wav") },
 	m_ChomperBiteSFX2{ new SoundEffect("Audio/Enemies/Chomper Bite 2.wav") },
-	m_CoinPickupSFX{ new SoundEffect("Audio/Coin_Pickup.wav") }
+	m_CoinPickupSFX{ std::make_unique<SoundEffect>("Audio/Coin_Pickup.wav") }
 {
 	Initialize(); 
 }
@@ -550,13 +550,6 @@ void Game::UpdateForestFolliesLevel(float elapsedSec)
 
 void Game::DeleteSounds()
 {
-	delete m_ForesFolliestSoundtrack;
-	m_ForesFolliestSoundtrack = nullptr;
-	delete m_IntroAnnouncementAudio;
-	m_IntroAnnouncementAudio = nullptr;
-	delete m_BravoAnnouncementAudio;
-	m_BravoAnnouncementAudio = nullptr;
-
 	delete m_MushroomShootSFX1;
 	m_MushroomShootSFX1 = nullptr;
 	delete m_MushroomShootSFX2;
@@ -573,19 +566,10 @@ void Game::DeleteSounds()
 	m_ChomperBiteSFX1 = nullptr;
 	delete m_ChomperBiteSFX2;
 	m_ChomperBiteSFX2 = nullptr;
-
-	delete m_CoinPickupSFX;
-	m_CoinPickupSFX = nullptr;
 }
 
 void Game::DeleteTextures()
 {
-	delete m_ForestBackground1;
-	m_ForestBackground1 = nullptr;
-
-	delete m_ForestBackground2;
-	m_ForestBackground2 = nullptr;
-
 	delete m_HealthSprite;
 	m_HealthSprite = nullptr;
 	delete m_CardsSprite;
@@ -603,11 +587,6 @@ void Game::DeleteTextures()
 	delete m_ProgressMan;
 	m_ProgressMan = nullptr;
 
-	delete m_PeaShooterSprite;
-	m_PeaShooterSprite = nullptr;
-	delete m_PeaSpecialSprite;
-	m_PeaSpecialSprite = nullptr;
-
 	delete m_SpikeSprite;
 	m_SpikeSprite = nullptr;
 
@@ -618,10 +597,6 @@ void Game::DeleteTextures()
 	m_TulipAttack = nullptr;
 	delete m_TulipIdle;
 	m_TulipIdle = nullptr;
-	delete m_TulipSeed;
-	m_TulipSeed = nullptr;
-	delete m_TulipSeedExplosion;
-	m_TulipSeedExplosion = nullptr;
 
 	delete m_MushroomIdle;
 	m_MushroomIdle = nullptr;
@@ -633,8 +608,6 @@ void Game::DeleteTextures()
 	m_MushroomBoil = nullptr;
 	delete m_MushroomDeath;
 	m_MushroomDeath = nullptr;
-	delete m_MushroomCloud;
-	m_MushroomCloud = nullptr;
 
 	delete m_AcornIdle;
 	m_AcornIdle = nullptr;
@@ -652,6 +625,4 @@ void Game::DeleteTextures()
 	m_EnemyDeathVFXSprite = nullptr;
 	delete m_PeaDeathVFX;
 	m_PeaDeathVFX = nullptr;
-	delete m_CoinTexture;
-	m_CoinTexture = nullptr;
 }

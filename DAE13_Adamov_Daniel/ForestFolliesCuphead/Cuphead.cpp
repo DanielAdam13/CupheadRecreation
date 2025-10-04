@@ -9,7 +9,7 @@
 #include <cassert>
 #include "SoundEffect.h"
 
-Cuphead::Cuphead(const Vector2f& position, bool playIntro, int hp, const Texture* peaShooter, const Texture* peaSpecial)
+Cuphead::Cuphead(const Vector2f& position, bool playIntro, int hp, const std::unique_ptr<Texture>& peaShooter, const std::unique_ptr<Texture>& peaSpecial)
 	: m_Position{ position },
 	m_HP{ hp },
 	m_IsAlive{ true },
@@ -43,8 +43,8 @@ Cuphead::Cuphead(const Vector2f& position, bool playIntro, int hp, const Texture
 	m_SpecialAllowed{ true },
 	m_FiringSpecial{ false },
 	m_PlaceOfHit{},
-	m_TexturePeaShooter{ peaShooter },
-	m_TextureSpecialPeaShooter{ peaSpecial },
+	m_TexturePeaShooter{ peaShooter.get() },
+	m_TextureSpecialPeaShooter{ peaSpecial.get() },
 	m_Animator{}
 {
 	IntializeTextures();
@@ -53,8 +53,7 @@ Cuphead::Cuphead(const Vector2f& position, bool playIntro, int hp, const Texture
 
 Cuphead::~Cuphead() noexcept
 {
-	DeleteTextures();
-	DeleteSoundEffects();
+	m_CurrentTexture = nullptr;
 }
 
 void Cuphead::Draw() const
@@ -103,7 +102,6 @@ void Cuphead::Update(float elapsedSec, const Uint8* pStates, const std::vector<s
 
 	// handles invincibility when hit
 	TakeDamage(elapsedSec);
-
 	
 }
 
@@ -629,7 +627,7 @@ void Cuphead::AnimateCuphead(float elapsedSec)
 {
 	if (m_PlayingIntro)
 	{
-		m_CurrentTexture = m_TextureIntro;
+		m_CurrentTexture = m_TextureIntro.get();
 		m_CurrentColNr = 7;
 		m_CurrentRowNr = 4;
 
@@ -643,7 +641,7 @@ void Cuphead::AnimateCuphead(float elapsedSec)
 	}
 	else if (!m_IsAlive)
 	{
-		m_CurrentTexture = m_TextureGhost;
+		m_CurrentTexture = m_TextureGhost.get();
 		m_CurrentColNr = 6;
 		m_CurrentRowNr = 4;
 
@@ -651,7 +649,7 @@ void Cuphead::AnimateCuphead(float elapsedSec)
 	}
 	else if (m_AnimatingHit)
 	{
-		m_CurrentTexture = m_TextureHit;
+		m_CurrentTexture = m_TextureHit.get();
 		m_CurrentColNr = 3;
 		m_CurrentRowNr = 2;
 
@@ -669,7 +667,7 @@ void Cuphead::AnimateCuphead(float elapsedSec)
 	}
 	else if (m_FiringSpecial)	
 	{
-		m_CurrentTexture = m_TextureShootSpecial;
+		m_CurrentTexture = m_TextureShootSpecial.get();
 		m_CurrentColNr = 6;
 		m_CurrentRowNr = 5;
 
@@ -682,14 +680,14 @@ void Cuphead::AnimateCuphead(float elapsedSec)
 			// jump animation plays if no button is pressed and in the air
 			if (!m_IsGrounded)
 			{
-				m_CurrentTexture = m_TextureJump;
+				m_CurrentTexture = m_TextureJump.get();
 				m_CurrentColNr = 4;
 				m_CurrentRowNr = 2;
 				m_Animator.PlayAnimation(elapsedSec, m_MaxFrameSec - 0.01f);
 			}
 			else
 			{
-				m_CurrentTexture = m_TextureIdle;
+				m_CurrentTexture = m_TextureIdle.get();
 				m_CurrentColNr = 5;
 				m_CurrentRowNr = 1;
 
@@ -701,7 +699,7 @@ void Cuphead::AnimateCuphead(float elapsedSec)
 			// jumping animation is played if character is moving in the air
 			if (!m_IsGrounded && m_CupheadMovementState != Movement::dash && m_CupheadMovementState != Movement::parry)
 			{
-				m_CurrentTexture = m_TextureJump;
+				m_CurrentTexture = m_TextureJump.get();
 				m_CurrentColNr = 4;
 				m_CurrentRowNr = 2;
 				m_Animator.PlayAnimation(elapsedSec, m_MaxFrameSec - 0.01f);
@@ -711,42 +709,42 @@ void Cuphead::AnimateCuphead(float elapsedSec)
 				switch (m_CupheadMovementState)
 				{
 				case Cuphead::Movement::runLeft:
-					m_CurrentTexture = m_TextureRun;
+					m_CurrentTexture = m_TextureRun.get();
 					m_CurrentColNr = 4;
 					m_CurrentRowNr = 4;
 
 					m_Animator.PlayAnimation(elapsedSec, m_MaxFrameSec, 16);
 					break;
 				case Cuphead::Movement::runRight:
-					m_CurrentTexture = m_TextureRun;
+					m_CurrentTexture = m_TextureRun.get();
 					m_CurrentColNr = 4;
 					m_CurrentRowNr = 4;
 
 					m_Animator.PlayAnimation(elapsedSec, m_MaxFrameSec, 16);
 					break;
 				case Cuphead::Movement::jump: // jumping animation is played when z is pressed
-					m_CurrentTexture = m_TextureJump;
+					m_CurrentTexture = m_TextureJump.get();
 					m_CurrentColNr = 4;
 					m_CurrentRowNr = 2;
 
 					m_Animator.PlayAnimation(elapsedSec, m_MaxFrameSec - 0.01f, 8);
 					break;
 				case Cuphead::Movement::parry:
-					m_CurrentTexture = m_TextureParry;
+					m_CurrentTexture = m_TextureParry.get();
 					m_CurrentColNr = 4;
 					m_CurrentRowNr = 4;
 
 					m_Animator.AnimateBetweenFrames(elapsedSec, 0, 7, m_MaxFrameSec - 0.01f);
 					break;
 				case Cuphead::Movement::dash:
-					m_CurrentTexture = m_TextureDash;
+					m_CurrentTexture = m_TextureDash.get();
 					m_CurrentColNr = 4;
 					m_CurrentRowNr = 2;
 
 					m_Animator.AnimateBetweenFrames(elapsedSec, 2, 6, m_MaxFrameSec);
 					break;
 				case Cuphead::Movement::duck:
-					m_CurrentTexture = m_TextureDuck;
+					m_CurrentTexture = m_TextureDuck.get();
 					m_CurrentColNr = 4;
 					m_CurrentRowNr = 4;
 
@@ -759,7 +757,7 @@ void Cuphead::AnimateCuphead(float elapsedSec)
 		{
 			if (!m_IsGrounded)
 			{
-				m_CurrentTexture = m_TextureJump;
+				m_CurrentTexture = m_TextureJump.get();
 				m_CurrentColNr = 4;
 				m_CurrentRowNr = 2;
 				m_Animator.PlayAnimation(elapsedSec, m_MaxFrameSec, 8);
@@ -768,7 +766,7 @@ void Cuphead::AnimateCuphead(float elapsedSec)
 			{
 				if (m_CupheadShootingState == Shoot::shootDiagonalUpRight)
 				{
-					m_CurrentTexture = m_TextureRunShootDiagonal;
+					m_CurrentTexture = m_TextureRunShootDiagonal.get();
 					m_CurrentColNr = 4;
 					m_CurrentRowNr = 4;
 
@@ -776,7 +774,7 @@ void Cuphead::AnimateCuphead(float elapsedSec)
 				}
 				else if (m_CupheadShootingState == Shoot::shootRight)
 				{
-					m_CurrentTexture = m_TextureRunShootStraight;
+					m_CurrentTexture = m_TextureRunShootStraight.get();
 					m_CurrentColNr = 4;
 					m_CurrentRowNr = 4;
 
@@ -787,7 +785,7 @@ void Cuphead::AnimateCuphead(float elapsedSec)
 			{
 				if (m_CupheadShootingState == Shoot::shootDiagonalUpLeft)
 				{
-					m_CurrentTexture = m_TextureRunShootDiagonal;
+					m_CurrentTexture = m_TextureRunShootDiagonal.get();
 					m_CurrentColNr = 4;
 					m_CurrentRowNr = 4;
 
@@ -795,7 +793,7 @@ void Cuphead::AnimateCuphead(float elapsedSec)
 				}
 				else if (m_CupheadShootingState == Shoot::shootLeft)
 				{
-					m_CurrentTexture = m_TextureRunShootStraight;
+					m_CurrentTexture = m_TextureRunShootStraight.get();
 					m_CurrentColNr = 4;
 					m_CurrentRowNr = 4;
 
@@ -804,7 +802,7 @@ void Cuphead::AnimateCuphead(float elapsedSec)
 			}
 			else 
 			{
-				m_CurrentTexture = m_TextureShoot;
+				m_CurrentTexture = m_TextureShoot.get();
 				m_CurrentColNr = 5;
 				m_CurrentRowNr = 5;
 
@@ -1241,95 +1239,35 @@ void Cuphead::SetDeath()
 
 void Cuphead::IntializeTextures()
 {
-	m_TextureDash = new Texture("Cuphead_Sprites/Cuphead_Dash.png");
-	m_TextureShoot = new Texture("Cuphead_Sprites/Cuphead_Shooting.png");
-	m_TextureShootSpecial = new Texture("Cuphead_Sprites/Special_Attack_Air.png");
-	m_TextureDuck = new Texture("Cuphead_Sprites/Duck.png");
-	m_TextureGhost = new Texture("Cuphead_Sprites/Ghost.png");
-	m_TextureHit = new Texture("Cuphead_Sprites/Hit_Ground.png");
-	m_TextureIdle = new Texture("Cuphead_Sprites/Idle.png");
-	m_TextureIntro = new Texture("Cuphead_Sprites/Intro.png");
-	m_TextureJump = new Texture("Cuphead_Sprites/Jump.png");
-	m_TextureParry = new Texture("Cuphead_Sprites/Parry_Combined.png");
-	m_TextureRun = new Texture("Cuphead_Sprites/Run.png");
-	m_TextureRunShootDiagonal = new Texture("Cuphead_Sprites/Run_Shoot_Diagonal.png");
-	m_TextureRunShootStraight = new Texture("Cuphead_Sprites/Run_Shoot_Straight.png");
+	m_TextureDash = std::make_unique<Texture>("Cuphead_Sprites/Cuphead_Dash.png");
+	m_TextureShoot = std::make_unique<Texture>("Cuphead_Sprites/Cuphead_Shooting.png");
+	m_TextureShootSpecial = std::make_unique<Texture>("Cuphead_Sprites/Special_Attack_Air.png");
+	m_TextureDuck = std::make_unique<Texture>("Cuphead_Sprites/Duck.png");
+	m_TextureGhost = std::make_unique<Texture>("Cuphead_Sprites/Ghost.png");
+	m_TextureHit = std::make_unique<Texture>("Cuphead_Sprites/Hit_Ground.png");
+	m_TextureIdle = std::make_unique<Texture>("Cuphead_Sprites/Idle.png");
+	m_TextureIntro = std::make_unique<Texture>("Cuphead_Sprites/Intro.png");
+	m_TextureJump = std::make_unique<Texture>("Cuphead_Sprites/Jump.png");
+	m_TextureParry = std::make_unique<Texture>("Cuphead_Sprites/Parry_Combined.png");
+	m_TextureRun = std::make_unique<Texture>("Cuphead_Sprites/Run.png");
+	m_TextureRunShootDiagonal = std::make_unique<Texture>("Cuphead_Sprites/Run_Shoot_Diagonal.png");
+	m_TextureRunShootStraight = std::make_unique<Texture>("Cuphead_Sprites/Run_Shoot_Straight.png");
 }
 
 void Cuphead::InitializeSoundEffects()
 {
-	m_DashSFX = new SoundEffect("Audio/Cuphead_Player/Dash SFX.wav");
-	m_JumpSFX = new SoundEffect("Audio/Cuphead_Player/Jump SFX.wav");
-	m_ParrySFX = new SoundEffect("Audio/Cuphead_Player/Parry SFX.wav");
-	m_SlapSFX = new SoundEffect("Audio/Cuphead_Player/Slap SFX.wav");
-	m_DeathSFX = new SoundEffect("Audio/Cuphead_Player/Death SFX.mp3");
-	m_CrackSFX = new SoundEffect("Audio/Cuphead_Player/Crack SFX.wav");
-	m_HitSFX1 = new SoundEffect("Audio/Cuphead_Player/Hit 1 SFX.wav");
-	m_HitSFX2 = new SoundEffect("Audio/Cuphead_Player/Hit 2 SFX.wav");
+	m_DashSFX = std::make_unique<SoundEffect>("Audio/Cuphead_Player/Dash SFX.wav");
+	m_JumpSFX = std::make_unique<SoundEffect>("Audio/Cuphead_Player/Jump SFX.wav");
+	m_ParrySFX = std::make_unique<SoundEffect>("Audio/Cuphead_Player/Parry SFX.wav");
+	m_SlapSFX = std::make_unique<SoundEffect>("Audio/Cuphead_Player/Slap SFX.wav");
+	m_DeathSFX = std::make_unique<SoundEffect>("Audio/Cuphead_Player/Death SFX.mp3");
+	m_CrackSFX = std::make_unique<SoundEffect>("Audio/Cuphead_Player/Crack SFX.wav");
+	m_HitSFX1 = std::make_unique<SoundEffect>("Audio/Cuphead_Player/Hit 1 SFX.wav");
+	m_HitSFX2 = std::make_unique<SoundEffect>("Audio/Cuphead_Player/Hit 2 SFX.wav");
 
-	m_PeaShooterSFX1 = new SoundEffect("Audio/PeaShooter/1.wav");
-	m_PeaShooterSFX2 = new SoundEffect("Audio/PeaShooter/3.wav");
-	m_PeaShooterSFX3 = new SoundEffect("Audio/PeaShooter/6.wav");
+	m_PeaShooterSFX1 = std::make_unique<SoundEffect>("Audio/PeaShooter/1.wav");
+	m_PeaShooterSFX2 = std::make_unique<SoundEffect>("Audio/PeaShooter/3.wav");
+	m_PeaShooterSFX3 = std::make_unique<SoundEffect>("Audio/PeaShooter/6.wav");
 
-	m_SpecialPeaSFX1 = new SoundEffect("Audio/PeaShooter/Special 1 SFX.wav");
-}
-
-void Cuphead::DeleteTextures()
-{
-	delete m_TextureDash;
-	m_TextureDash = nullptr;
-	delete m_TextureShoot;
-	m_TextureShoot = nullptr;
-	delete m_TextureShootSpecial;
-	m_TextureShootSpecial = nullptr;
-	delete m_TextureDuck;
-	m_TextureDuck = nullptr;
-	delete m_TextureGhost;
-	m_TextureGhost = nullptr;
-	delete m_TextureHit;
-	m_TextureHit = nullptr;
-	delete m_TextureIdle;
-	m_TextureIdle = nullptr;
-	delete m_TextureIntro;
-	m_TextureIntro = nullptr;
-	delete m_TextureJump;
-	m_TextureJump = nullptr;
-	delete m_TextureParry;
-	m_TextureParry = nullptr;
-	delete m_TextureRun;
-	m_TextureRun = nullptr;
-	delete m_TextureRunShootDiagonal;
-	m_TextureRunShootDiagonal = nullptr;
-	delete m_TextureRunShootStraight;
-	m_TextureRunShootStraight = nullptr;
-}
-
-void Cuphead::DeleteSoundEffects()
-{
-	delete m_DashSFX;
-	m_DashSFX = nullptr;
-	delete m_JumpSFX;
-	m_JumpSFX = nullptr;
-	delete m_ParrySFX;
-	m_ParrySFX = nullptr;
-	delete m_SlapSFX;
-	m_SlapSFX = nullptr;
-	delete m_DeathSFX;
-	m_DeathSFX = nullptr;
-	delete m_CrackSFX;
-	m_CrackSFX = nullptr;
-	delete m_HitSFX1;
-	m_HitSFX1 = nullptr;
-	delete m_HitSFX2;
-	m_HitSFX2 = nullptr;
-
-	delete m_PeaShooterSFX1;
-	m_PeaShooterSFX1 = nullptr;
-	delete m_PeaShooterSFX2;
-	m_PeaShooterSFX1 = nullptr;
-	delete m_PeaShooterSFX3;
-	m_PeaShooterSFX1 = nullptr;
-
-	delete m_SpecialPeaSFX1;
-	m_SpecialPeaSFX1 = nullptr;
+	m_SpecialPeaSFX1 = std::make_unique<SoundEffect>("Audio/PeaShooter/Special 1 SFX.wav");
 }

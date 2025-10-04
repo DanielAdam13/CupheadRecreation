@@ -10,13 +10,13 @@
 #include <cassert>
 #include "SoundEffect.h"
 
-Tulip::Tulip(const Texture* idleTexture, const Texture* attackTexture, const Texture* seed, const Texture* explosion, 
+Tulip::Tulip(const Texture* idleTexture, const Texture* attackTexture, const std::unique_ptr<Texture>& seed, const std::unique_ptr<Texture>& explosion,
 	const Vector2f& pos, const SoundEffect* shoot1, const SoundEffect* shoot2, int colNr, int rowNr, float range)
 	:Mushroom::Mushroom(idleTexture, idleTexture, attackTexture, nullptr, nullptr, nullptr, pos, shoot1, shoot2, colNr, rowNr, range),
 	m_Hp{ 12.f },
 	m_CurrentState{},
-	m_TextureSeed{ seed },
-	m_TextureExplosion{ explosion },
+	m_TextureSeed{ seed.get() },
+	m_TextureExplosion{ explosion.get() },
 	m_AnimAccuSec{ 0.f },
 	m_AttackFinished{ false },
 	m_CooldownAccuSec{ 0.f }

@@ -1,6 +1,7 @@
 #pragma once
 #include "Animator.h"
 #include <vector>
+#include <memory>
 class Texture;
 class BulletManager;
 class UIManager;
@@ -9,7 +10,7 @@ class SoundEffect;
 class Cuphead final // Character controller
 {
 public:
-	explicit Cuphead(const Vector2f& position, bool playIntro, int hp, const Texture* peaShooter, const Texture* peaSpecial);
+	explicit Cuphead(const Vector2f& position, bool playIntro, int hp, const std::unique_ptr<Texture>& peaShooter, const std::unique_ptr<Texture>& peaSpecial);
 	Cuphead(const Cuphead& character) = delete;
 	Cuphead& operator=(const Cuphead& rhs) = delete;
 	Cuphead(Cuphead&& character) = delete;
@@ -113,36 +114,36 @@ private:
 
 	Vector2f m_PlaceOfHit;
 
-	const Texture* m_TexturePeaShooter;
-	const Texture* m_TextureSpecialPeaShooter;
+	const Texture* m_TexturePeaShooter; // reference to unique_ptr
+	const Texture* m_TextureSpecialPeaShooter; // reference to unique_ptr
+	
+	std::unique_ptr<Texture> m_TextureDash;
+	std::unique_ptr<Texture> m_TextureShoot;
+	std::unique_ptr<Texture> m_TextureShootSpecial;
+	std::unique_ptr<Texture> m_TextureDuck;
+	std::unique_ptr<Texture> m_TextureGhost;
+	std::unique_ptr<Texture> m_TextureHit;
+	std::unique_ptr<Texture> m_TextureIdle;
+	std::unique_ptr<Texture> m_TextureIntro;
+	std::unique_ptr<Texture> m_TextureJump;
+	std::unique_ptr<Texture> m_TextureParry;
+	std::unique_ptr<Texture> m_TextureRun;
+	std::unique_ptr<Texture> m_TextureRunShootDiagonal;
+	std::unique_ptr<Texture> m_TextureRunShootStraight;
 
-	Texture* m_TextureDash;
-	Texture* m_TextureShoot;
-	Texture* m_TextureShootSpecial;
-	Texture* m_TextureDuck;
-	Texture* m_TextureGhost;
-	Texture* m_TextureHit;
-	Texture* m_TextureIdle;
-	Texture* m_TextureIntro;
-	Texture* m_TextureJump;
-	Texture* m_TextureParry;
-	Texture* m_TextureRun;
-	Texture* m_TextureRunShootDiagonal;
-	Texture* m_TextureRunShootStraight;
+	std::unique_ptr<SoundEffect> m_DashSFX;
+	std::unique_ptr<SoundEffect> m_JumpSFX;
+	std::unique_ptr<SoundEffect> m_ParrySFX;
+	std::unique_ptr<SoundEffect> m_SlapSFX;
+	std::unique_ptr<SoundEffect> m_DeathSFX;
+	std::unique_ptr<SoundEffect> m_CrackSFX;
+	std::unique_ptr<SoundEffect> m_HitSFX1;
+	std::unique_ptr<SoundEffect> m_HitSFX2;
 
-	SoundEffect* m_DashSFX;
-	SoundEffect* m_JumpSFX;
-	SoundEffect* m_ParrySFX;
-	SoundEffect* m_SlapSFX;
-	SoundEffect* m_DeathSFX;
-	SoundEffect* m_CrackSFX;
-	SoundEffect* m_HitSFX1;
-	SoundEffect* m_HitSFX2;
-
-	SoundEffect* m_PeaShooterSFX1;
-	SoundEffect* m_PeaShooterSFX2;
-	SoundEffect* m_PeaShooterSFX3;
-	SoundEffect* m_SpecialPeaSFX1;
+	std::unique_ptr<SoundEffect> m_PeaShooterSFX1;
+	std::unique_ptr<SoundEffect> m_PeaShooterSFX2;
+	std::unique_ptr<SoundEffect> m_PeaShooterSFX3;
+	std::unique_ptr<SoundEffect> m_SpecialPeaSFX1;
 
 	Animator m_Animator;
 
@@ -162,7 +163,5 @@ private:
 	
 	void IntializeTextures();
 	void InitializeSoundEffects();
-	void DeleteTextures();
-	void DeleteSoundEffects();
 };
 

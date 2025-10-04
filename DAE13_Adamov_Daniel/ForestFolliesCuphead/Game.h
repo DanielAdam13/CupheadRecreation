@@ -1,6 +1,9 @@
 #pragma once
 #include "BaseGame.h"
 #include <vector>
+
+#include<memory>
+
 #include "Cuphead.h"
 class Texture;
 #include "Camera.h"
@@ -36,8 +39,8 @@ public:
 private:
 	// VARIABLES
 	std::vector<std::vector<Vector2f>> m_Vertices;
-	Texture* m_ForestBackground1;
-	Texture* m_ForestBackground2;
+	std::unique_ptr<Texture> m_ForestBackground1;
+	std::unique_ptr<Texture> m_ForestBackground2;
 
 	const float m_LevelWidthWorld;
 	const float m_LevelHeightWorld;
@@ -49,8 +52,8 @@ private:
 
 	const Texture* m_EnemyDeathVFXSprite;
 
-	const Texture* m_CoinTexture;
-	const SoundEffect* m_CoinPickupSFX;
+	const std::unique_ptr<Texture> m_CoinTexture;
+	const std::unique_ptr<SoundEffect> m_CoinPickupSFX;
 
 	EnemyManager m_EnemyManager;
 	BulletManager m_PlayerBulletManager;
@@ -80,8 +83,8 @@ private:
 	const Texture* m_ProgressMan;
 	UIManager m_UIManager;
 	
-	const Texture* m_PeaShooterSprite;
-	const Texture* m_PeaSpecialSprite;
+	const std::unique_ptr<Texture> m_PeaShooterSprite;
+	const std::unique_ptr<Texture> m_PeaSpecialSprite;
 	const Texture* m_PeaDeathVFX;
 
 	const Texture* m_SpikeSprite;
@@ -89,15 +92,15 @@ private:
 
 	const Texture* m_TulipIdle;
 	const Texture* m_TulipAttack;
-	const Texture* m_TulipSeed;
-	const Texture* m_TulipSeedExplosion;
+	const std::unique_ptr<Texture> m_TulipSeed;
+	const std::unique_ptr<Texture> m_TulipSeedExplosion;
 
 	const Texture* m_MushroomIdle;
 	const Texture* m_MushroomAttack;
 	const Texture* m_MushroomPop;
 	const Texture* m_MushroomBoil;
 	const Texture* m_MushroomDeath;
-	const Texture* m_MushroomCloud;
+	const std::unique_ptr<Texture> m_MushroomCloud;
 
 	const Texture* m_AcornIdle;
 	const Texture* m_AcornDrop;
@@ -106,9 +109,9 @@ private:
 	const Texture* m_DaisyJump;
 	const Texture* m_DaisyTurn;*/
 
-	SoundStream* m_ForesFolliestSoundtrack;
-	SoundEffect* m_IntroAnnouncementAudio;
-	const SoundEffect* m_BravoAnnouncementAudio;
+	std::unique_ptr<SoundStream> m_ForesFolliestSoundtrack;
+	std::unique_ptr<SoundEffect> m_IntroAnnouncementAudio;
+	const std::unique_ptr<SoundEffect> m_BravoAnnouncementAudio;
 
 	const SoundEffect* m_MushroomShootSFX1;
 	const SoundEffect* m_MushroomShootSFX2;

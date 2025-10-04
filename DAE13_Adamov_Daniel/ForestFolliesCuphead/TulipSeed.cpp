@@ -5,7 +5,7 @@
 #include "BulletManager.h"
 #include "Explosion.h"
 
-TulipSeed::TulipSeed(const Texture* sprite, const Texture* explosion, const Vector2f& spawnPos, const Vector2f& playerPos, 
+TulipSeed::TulipSeed(const Texture* sprite, const Texture* explosion, const Vector2f& spawnPos, const Vector2f& playerPos,
 	const SoundEffect* explosionSFX, float directionAngle, float speed, float damage)
 	:Projectile::Projectile(sprite, spawnPos, playerPos, directionAngle, speed, damage),
 	m_ExplosionTexture{ explosion },

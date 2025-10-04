@@ -7,7 +7,7 @@ class Mushroom : public Enemy // The most complex AI in this cuphead level, spaw
 {
 public:
 	explicit Mushroom(const Texture* idleTexture, const Texture* boiledTexture, const Texture* attackTexture, const Texture* popTexture, const Texture* deathTexture, 
-		const Texture* cloudTexture, const Vector2f& pos, const SoundEffect* shoot1, const SoundEffect* shoot2, int colNr = 1, int rowNr = 1, float range = 400.f);
+		const std::unique_ptr<Texture>& cloudTexture, const Vector2f& pos, const SoundEffect* shoot1, const SoundEffect* shoot2, int colNr = 1, int rowNr = 1, float range = 400.f);
 
 	virtual void Draw() const override;
 	virtual void Update(float elapsedSec, BulletManager& bulletManager, Cuphead& cuphead, UIManager& uiManager) override;
@@ -56,6 +56,7 @@ private:
 	const Texture* m_TextureBoiled;
 	const Texture* m_TexturePop;
 	const Texture* m_TextureDeath;
+
 	const Texture* m_TextureCloud;
 
 	float m_FacingAngle;
