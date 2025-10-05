@@ -6,7 +6,8 @@ class SoundEffect;
 class Acorn final : public Enemy // Enemy derived class that falls down from above
 {
 public:
-	explicit Acorn(const Texture* idle, const Texture* drop, const Vector2f& pos, const Vector2f& direction, SoundEffect* idleSFX, SoundEffect* fallSFX);
+	explicit Acorn(const std::unique_ptr<Texture>& idle, const std::unique_ptr<Texture>& drop, const Vector2f& pos, const Vector2f& direction,
+		std::unique_ptr<SoundEffect>& idleSFX, std::unique_ptr<SoundEffect>& fallSFX);
 
 	virtual void Draw() const override;
 	virtual void Update(float elapsedSec, BulletManager& bulletManager, Cuphead& cuphead, UIManager& uiManager) override;

@@ -5,14 +5,14 @@
 #include "SoundEffect.h"
 
 
-BigChomper::BigChomper(const Texture* spriteTexture, const Vector2f& pos, const Vector2f& lowestPoint, const Vector2f& highestPoint, 
-	float speed, const SoundEffect* biteSFX1, const SoundEffect* biteSFX2)
+BigChomper::BigChomper(const std::unique_ptr<Texture>& spriteTexture, const Vector2f& pos, const Vector2f& lowestPoint, const Vector2f& highestPoint,
+	float speed, const std::unique_ptr<SoundEffect>& biteSFX1, const std::unique_ptr<SoundEffect>& biteSFX2)
 	:Spike(spriteTexture, pos, lowestPoint, highestPoint, speed),
 	m_SpriteRowNr{ 4 },
 	m_SpriteColNr{ 5 },
 	m_ShouldBite{ false },
-	m_BiteSFX1{ biteSFX1 },
-	m_BiteSFX2{ biteSFX2 }
+	m_BiteSFX1{ biteSFX1.get() },
+	m_BiteSFX2{ biteSFX2.get() }
 {
 }
 

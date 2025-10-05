@@ -5,12 +5,12 @@
 #include "Cuphead.h"
 #include "UIManager.h"
 
-Spike::Spike(const Texture* spriteTexture, const Vector2f& pos, const Vector2f& lowestPoint, const Vector2f& highestPoint, float speed)
+Spike::Spike(const std::unique_ptr<Texture>& spriteTexture, const Vector2f& pos, const Vector2f& lowestPoint, const Vector2f& highestPoint, float speed)
 	:Enemy(pos),
 	m_LowestPoint{ lowestPoint },
 	m_HighestPoint{ highestPoint },
 	m_Speed{ speed },
-	m_Texture{ spriteTexture },
+	m_Texture{ spriteTexture.get() },
 	m_SpriteRowNr{ 2 },
 	m_SpriteColNr{ 5 },
 	m_FrameWidth{ spriteTexture->GetWidth() / m_SpriteColNr },

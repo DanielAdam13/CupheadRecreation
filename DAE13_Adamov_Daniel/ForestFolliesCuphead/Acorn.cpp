@@ -7,21 +7,22 @@
 #include <cassert>
 #include "SoundEffect.h"
 
-Acorn::Acorn(const Texture* idle, const Texture* drop, const Vector2f& pos, const Vector2f& direction, SoundEffect* idleSFX, SoundEffect* fallSFX)
+Acorn::Acorn(const std::unique_ptr<Texture>& idle, const std::unique_ptr<Texture>& drop, const Vector2f& pos, const Vector2f& direction, 
+	std::unique_ptr<SoundEffect>& idleSFX, std::unique_ptr<SoundEffect>& fallSFX)
 	:Enemy::Enemy(pos),
 	m_Hp{ 5 },
 	m_CurrentState{ AcornState::idle },
-	m_TextureIdle{ idle },
-	m_TextureDrop{ drop },
-	m_CurrentTexture{ idle },
+	m_TextureIdle{ idle.get() },
+	m_TextureDrop{ drop.get() },
+	m_CurrentTexture{ idle.get() },
 	m_CurrentColNr{ 5 },
 	m_CurrentRowNr{ 3 },
 	m_CurrentFrameWidth{ m_CurrentTexture->GetWidth() / m_CurrentColNr },
 	m_CurrentFrameHeight{ m_CurrentTexture->GetHeight() / m_CurrentRowNr },
 	m_Direction{ direction },
 	m_FacingAngle{},
-	m_IdleSFX{ idleSFX },
-	m_DropSFX{ fallSFX }
+	m_IdleSFX{ idleSFX.get() },
+	m_DropSFX{ fallSFX.get() }
 {
 	if (direction.x < 0)
 	{

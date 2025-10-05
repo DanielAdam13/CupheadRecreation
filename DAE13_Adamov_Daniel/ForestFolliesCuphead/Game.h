@@ -50,7 +50,7 @@ private:
 	Camera m_Camera;
 	Vector2f m_TransformedPlayerPos;
 
-	const Texture* m_EnemyDeathVFXSprite;
+	const std::unique_ptr<Texture> m_EnemyDeathVFXSprite;
 
 	const std::unique_ptr<Texture> m_CoinTexture;
 	const std::unique_ptr<SoundEffect> m_CoinPickupSFX;
@@ -73,54 +73,50 @@ private:
 
 	bool m_ShouldSpawnAcorns;
 
-	const Texture* m_HealthSprite;
-	const Texture* m_CardsSprite;
-	const Texture* m_IntroAnnouncementTexture;
-	const Texture* m_DeathAnnouncementTexture;
-	const Texture* m_BravoAnnouncementTexture;
-	const Texture* m_PauseScreen;
-	const Texture* m_DeathCardScreen;
-	const Texture* m_ProgressMan;
+	const std::unique_ptr<Texture> m_HealthSprite;
+	const std::unique_ptr<Texture> m_CardsSprite;
+	const std::unique_ptr<Texture> m_IntroAnnouncementTexture;
+	const std::unique_ptr<Texture> m_DeathAnnouncementTexture;
+	const std::unique_ptr<Texture> m_BravoAnnouncementTexture;
+	const std::unique_ptr<Texture> m_PauseScreen;
+	const std::unique_ptr<Texture> m_DeathCardScreen;
+	const std::unique_ptr<Texture> m_ProgressMan;
 	UIManager m_UIManager;
 	
 	const std::unique_ptr<Texture> m_PeaShooterSprite;
 	const std::unique_ptr<Texture> m_PeaSpecialSprite;
-	const Texture* m_PeaDeathVFX;
+	const std::unique_ptr<Texture> m_PeaDeathVFX;
 
-	const Texture* m_SpikeSprite;
-	const Texture* m_ChomperSprite;
+	const std::unique_ptr<Texture> m_SpikeSprite;
+	const std::unique_ptr<Texture> m_ChomperSprite;
 
-	const Texture* m_TulipIdle;
-	const Texture* m_TulipAttack;
+	const std::unique_ptr<Texture> m_TulipIdle;
+	const std::unique_ptr<Texture> m_TulipAttack;
 	const std::unique_ptr<Texture> m_TulipSeed;
 	const std::unique_ptr<Texture> m_TulipSeedExplosion;
 
-	const Texture* m_MushroomIdle;
-	const Texture* m_MushroomAttack;
-	const Texture* m_MushroomPop;
-	const Texture* m_MushroomBoil;
-	const Texture* m_MushroomDeath;
+	const std::unique_ptr<Texture> m_MushroomIdle;
+	const std::unique_ptr<Texture> m_MushroomAttack;
+	const std::unique_ptr<Texture> m_MushroomPop;
+	const std::unique_ptr<Texture> m_MushroomBoil;
+	const std::unique_ptr<Texture> m_MushroomDeath;
 	const std::unique_ptr<Texture> m_MushroomCloud;
 
-	const Texture* m_AcornIdle;
-	const Texture* m_AcornDrop;
-
-	/*const Texture* m_DaisyRun;
-	const Texture* m_DaisyJump;
-	const Texture* m_DaisyTurn;*/
+	const std::unique_ptr<Texture> m_AcornIdle;
+	const std::unique_ptr<Texture> m_AcornDrop;
 
 	std::unique_ptr<SoundStream> m_ForesFolliestSoundtrack;
 	std::unique_ptr<SoundEffect> m_IntroAnnouncementAudio;
 	const std::unique_ptr<SoundEffect> m_BravoAnnouncementAudio;
 
-	const SoundEffect* m_MushroomShootSFX1;
-	const SoundEffect* m_MushroomShootSFX2;
-	const SoundEffect* m_TulipShootSFX;
-	const SoundEffect* m_TulipSeedSFX;
-	SoundEffect* m_AcornIdleSFX;
-	SoundEffect* m_AcornFallSFX;
-	const SoundEffect* m_ChomperBiteSFX1;
-	const SoundEffect* m_ChomperBiteSFX2;
+	const std::unique_ptr<SoundEffect> m_MushroomShootSFX1;
+	const std::unique_ptr<SoundEffect> m_MushroomShootSFX2;
+	const std::unique_ptr<SoundEffect> m_TulipShootSFX;
+	const std::unique_ptr<SoundEffect> m_TulipSeedSFX;
+	std::unique_ptr<SoundEffect> m_AcornIdleSFX;
+	std::unique_ptr<SoundEffect> m_AcornFallSFX;
+	const std::unique_ptr<SoundEffect> m_ChomperBiteSFX1;
+	const std::unique_ptr<SoundEffect> m_ChomperBiteSFX2;
 	
 	
 	Cuphead m_Cuphead;
@@ -144,7 +140,4 @@ private:
 	
 	void HandleGameStateLogic(float elapsedSec);
 	void UpdateForestFolliesLevel(float elapsedSec);
-
-	void DeleteSounds();
-	void DeleteTextures();
 };

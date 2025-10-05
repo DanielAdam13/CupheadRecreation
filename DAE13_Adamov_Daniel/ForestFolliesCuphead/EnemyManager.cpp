@@ -6,9 +6,9 @@
 #include "VisualEffectManager.h"
 #include "Effect.h"
 
-EnemyManager::EnemyManager(const Texture* enemyDeathVFX)
+EnemyManager::EnemyManager(const std::unique_ptr<Texture>& enemyDeathVFX)
 	: m_EnemyVector{ nullptr },
-	m_EnemyDeathSpriteVFX{ enemyDeathVFX }
+	m_EnemyDeathSpriteVFX{ enemyDeathVFX.get() }
 {
 	m_EnemyVector.reserve(20);
 }

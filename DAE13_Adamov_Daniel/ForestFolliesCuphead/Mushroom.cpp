@@ -10,15 +10,17 @@
 #include <iostream>
 #include "SoundEffect.h"
 
-Mushroom::Mushroom(const Texture* idleTexture, const Texture* boiledTexture, const Texture* attackTexture, const Texture* popTexture, const Texture* deathTexture,
-	const std::unique_ptr<Texture>& cloudTexture, const Vector2f& pos, const SoundEffect* shoot1, const SoundEffect* shoot2, int colNr, int rowNr, float range)
+Mushroom::Mushroom(const std::unique_ptr<Texture>& idleTexture, const std::unique_ptr<Texture>& boiledTexture, const std::unique_ptr<Texture>& attackTexture, 
+	const std::unique_ptr<Texture>& popTexture, const std::unique_ptr<Texture>& deathTexture,
+	const std::unique_ptr<Texture>& cloudTexture, const Vector2f& pos, const SoundEffect* shoot1, const SoundEffect* shoot2,
+	int colNr, int rowNr, float range)
 	:Enemy(pos),
-	m_CurrentTexture{ boiledTexture },
+	m_CurrentTexture{ boiledTexture.get() },
 	m_CurrentState{ MushroomState::boil },
 	m_LastMushroomState{},
 	m_Hp{ 8 },
-	m_TextureIdle{ idleTexture },
-	m_TextureAttack{ attackTexture },
+	m_TextureIdle{ idleTexture.get() },
+	m_TextureAttack{ attackTexture.get() },
 	m_ShootSFX1{ shoot1 },
 	m_ShootSFX2{ shoot2 },
 	m_CurrentSpriteColNr{ colNr },
@@ -26,9 +28,9 @@ Mushroom::Mushroom(const Texture* idleTexture, const Texture* boiledTexture, con
 	m_CurrentFrameWidth{ m_CurrentTexture->GetWidth() / m_CurrentSpriteColNr },
 	m_CurrentFrameHeight{ m_CurrentTexture->GetHeight() / m_CurrentSpriteRowNr },
 	m_Range{ range },
-	m_TextureBoiled{ boiledTexture },
-	m_TexturePop{ popTexture },
-	m_TextureDeath{ deathTexture },
+	m_TextureBoiled{ boiledTexture.get() },
+	m_TexturePop{ popTexture.get() },
+	m_TextureDeath{ deathTexture.get() },
 	m_TextureCloud{ cloudTexture.get()},
 	m_FacingAngle{ 0.f },
 	m_AccuSec{ 0.f },

@@ -5,7 +5,7 @@ class Texture;
 class Spike : public Enemy // Simple enemy derived class that plays as an obsticle and can be parried
 {
 public:
-	explicit Spike(const Texture* spriteTexture, const Vector2f& pos, const Vector2f& lowestPoint, const Vector2f& highestPoint, float speed);
+	explicit Spike(const std::unique_ptr<Texture>& spriteTexture, const Vector2f& pos, const Vector2f& lowestPoint, const Vector2f& highestPoint, float speed);
 
 	virtual void Draw() const override;
 	virtual void Update(float elapsedSec, BulletManager& bulletManager, Cuphead& cuphead, UIManager& uiManager) override;

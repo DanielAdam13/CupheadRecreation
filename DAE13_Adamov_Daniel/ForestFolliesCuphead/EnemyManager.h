@@ -7,11 +7,12 @@ class UIManager;
 class VisualEffectManager;
 
 class Texture;
+#include <memory>
 
 class EnemyManager final
 {
 public:
-	explicit EnemyManager(const Texture* enemyDeathVFX);
+	explicit EnemyManager(const std::unique_ptr<Texture>& enemyDeathVFX);
 	EnemyManager(const EnemyManager& enemyManager) = delete;
 	EnemyManager& operator=(const EnemyManager& rhs) = delete;
 	EnemyManager(EnemyManager&& enemyManager) = delete;

@@ -1,6 +1,7 @@
 #pragma once
 class Texture;
 #include "Animator.h"
+#include <memory>
 
 class Effect final
 {

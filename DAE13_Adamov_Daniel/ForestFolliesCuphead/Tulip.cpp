@@ -10,9 +10,11 @@
 #include <cassert>
 #include "SoundEffect.h"
 
-Tulip::Tulip(const Texture* idleTexture, const Texture* attackTexture, const std::unique_ptr<Texture>& seed, const std::unique_ptr<Texture>& explosion,
-	const Vector2f& pos, const SoundEffect* shoot1, const SoundEffect* shoot2, int colNr, int rowNr, float range)
-	:Mushroom::Mushroom(idleTexture, idleTexture, attackTexture, nullptr, nullptr, nullptr, pos, shoot1, shoot2, colNr, rowNr, range),
+Tulip::Tulip(const std::unique_ptr<Texture>& idleTexture, const std::unique_ptr<Texture>& attackTexture,
+	const std::unique_ptr<Texture>& seed, const std::unique_ptr<Texture>& explosion,
+	const Vector2f& pos, const std::unique_ptr<SoundEffect>& shoot1, const std::unique_ptr<SoundEffect>& shoot2,
+	int colNr, int rowNr, float range)
+	:Mushroom::Mushroom(idleTexture, idleTexture, attackTexture, nullptr, nullptr, nullptr, pos, shoot1.get(), shoot2.get(), colNr, rowNr, range),
 	m_Hp{ 12.f },
 	m_CurrentState{},
 	m_TextureSeed{ seed.get() },
@@ -21,7 +23,7 @@ Tulip::Tulip(const Texture* idleTexture, const Texture* attackTexture, const std
 	m_AttackFinished{ false },
 	m_CooldownAccuSec{ 0.f }
 {
-	m_CurrentTexture = idleTexture;
+	m_CurrentTexture = idleTexture.get();
 	m_CurrentSpriteColNr = colNr;
 	m_CurrentSpriteRowNr = rowNr;
 	m_CurrentFrameWidth = m_CurrentTexture->GetWidth() / m_CurrentSpriteColNr;
