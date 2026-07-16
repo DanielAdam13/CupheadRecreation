@@ -49,7 +49,7 @@
 This project was made in the first year of my University Game Development studies. This means that it is not perfected but it is still worth showing because of all the techniques I used 
 and the challenges I encountered.
 
-![Game image](/images_&_spritesheets/Run'n'Gun_Screenshot.png?raw=true "Run'n'Gun level")
+![Game image](/images_&_spritesheets/CupheadScreenshot.png?raw=true "Run'n'Gun level")
 
 
 Here's why:
